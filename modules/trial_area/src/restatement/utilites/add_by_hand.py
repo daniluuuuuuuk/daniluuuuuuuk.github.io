@@ -17,7 +17,7 @@ class AddByHand(QtWidgets.QDialog, uic.loadUiType(BasicDir().get_basic_dir("ui/a
         self.name_species = Settings(group='Selected_species', key='species').read_setting()
         self.rb_dmrs = []
         self.rb_spc = []
-        self.output_data = {'num_ind': 1, 'num_fuel': 0, 'num_biodiversity': 0, 'device_sign': 'hand'}
+        self.output_data = {'num_ind': 1, 'num_fuel': 0, 'num_half_ind': 0, 'device_sign': 'hand'}
 
         """Диаметры"""
         for i_dmr in range(len(self.dmrs)):
@@ -53,12 +53,12 @@ class AddByHand(QtWidgets.QDialog, uic.loadUiType(BasicDir().get_basic_dir("ui/a
                 row += 1
         """Смотрю прошлую техническую годность"""
         try:
-            if self.last_data['num_ind'] != 0 or self.last_data['num_biodiversity'] != 0 or self.last_data['num_fuel'] != 0:
+            if self.last_data['num_ind'] != 0 or self.last_data['num_half_ind'] != 0 or self.last_data['num_fuel'] != 0:
                 if self.last_data['num_ind'] > 0:
                     self.radioButton_34.setChecked(True)
                 if self.last_data['num_fuel'] > 0:
                     self.radioButton_35.setChecked(True)
-                if self.last_data['num_biodiversity'] > 0:
+                if self.last_data['num_half_ind'] > 0:
                     self.radioButton_36.setChecked(True)
         except KeyError:
             None
@@ -73,15 +73,15 @@ class AddByHand(QtWidgets.QDialog, uic.loadUiType(BasicDir().get_basic_dir("ui/a
         if self.radioButton_34.isChecked():
             self.output_data['num_ind'] = int(self.label_2.text())
             self.output_data['num_fuel'] = 0
-            self.output_data['num_biodiversity'] = 0
+            self.output_data['num_half_ind'] = 0
         if self.radioButton_35.isChecked():
             self.output_data['num_ind'] = 0
             self.output_data['num_fuel'] = int(self.label_2.text())
-            self.output_data['num_biodiversity'] = 0
+            self.output_data['num_half_ind'] = 0
         if self.radioButton_36.isChecked():
             self.output_data['num_ind'] = 0
             self.output_data['num_fuel'] = 0
-            self.output_data['num_biodiversity'] = int(self.label_2.text())
+            self.output_data['num_half_ind'] = int(self.label_2.text())
         if len(self.output_data) == 6:
             self.accept()
         else:

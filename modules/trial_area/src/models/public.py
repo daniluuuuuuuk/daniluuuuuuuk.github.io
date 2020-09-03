@@ -8,7 +8,7 @@ class BaseModel(Database):
         schema = 'public'
 
 
-class Cutting_area(BaseModel):
+class Area(BaseModel):
     geom = TextField(column_name='geom', null=False)
     uuid = CharField(column_name='uid')
     num_forestry = IntegerField(column_name='num_lch', help_text='Номер лесничества')
@@ -26,4 +26,4 @@ class Cutting_area(BaseModel):
 
     class Meta:
         primary_key = False
-        table_name = 'Лесосеки'
+        table_name = 'area'

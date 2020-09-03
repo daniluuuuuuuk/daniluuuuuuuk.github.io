@@ -116,7 +116,7 @@
           <item alignment="Qt::AlignLeft">
            <widget class="QRadioButton" name="radioButton_36">
             <property name="text">
-             <string>Биоразнообразие</string>
+             <string>Сухостойные</string>
             </property>
            </widget>
           </item>

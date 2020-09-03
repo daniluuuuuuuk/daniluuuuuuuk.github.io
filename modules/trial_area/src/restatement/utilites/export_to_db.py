@@ -1,5 +1,5 @@
 from PyQt5 import QtCore
-from ....src.models.ta_fund import *
+from ....src.models.restatement import Trees
 from ....src.models.nri import *
 
 
@@ -31,20 +31,20 @@ class DBData(QtCore.QThread):
                     else:
                         output_data['num_fuel'] = 0
                     if self.table.item(row, column+2):
-                        output_data['num_biodiversity'] = int(self.table.item(row, column+2).text())
+                        output_data['num_half_ind'] = int(self.table.item(row, column+2).text())
                     else:
-                        output_data['num_biodiversity'] = 0
-                    if output_data['num_ind'] == 0 and output_data['num_fuel'] == 0 and output_data['num_biodiversity'] == 0:
+                        output_data['num_half_ind'] = 0
+                    if output_data['num_ind'] == 0 and output_data['num_fuel'] == 0 and output_data['num_half_ind'] == 0:
                         None
                     else:
                         output_data['dmr'] = int(row*4)
                         try:
-                            Ta_fund_enum.create(offset_uuid=self.uuid,
+                            Trees.create(offset_uuid=self.uuid,
                                                 code_species=output_data['species'],
                                                 dmr=output_data['dmr'],
                                                 num_ind=output_data['num_ind'],
                                                 num_fuel=output_data['num_fuel'],
-                                                num_biodiversity=output_data['num_biodiversity'])
+                                                num_half_ind=output_data['num_half_ind'])
                         except:
                             self.signal_status.emit({'head': 'Ошибка',
                                                      'body': 'Ошибка записи в БД.\nДанные не сохранены'})

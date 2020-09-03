@@ -13,9 +13,10 @@ from .src.restatement.utilites import add_by_caliper
 from .src.restatement.utilites import export_to_db
 from .src.restatement.utilites import calculate_amount
 from .src.restatement.utilites import export_to_json
+from .src.restatement.utilites import export_to_xls
 from .src.restatement.utilites import import_from_json
 
-from .src.models.ta_fund import *
+from .src.models.restatement import Trees
 from .src.models.nri import *
 
 
@@ -31,15 +32,15 @@ class Restatement(restatement_main_window.MainWindow):
             "dmr": 0,
             "num_ind": 0,
             "num_fuel": 0,
-            "num_biodiversity": 0,
+            "num_half_ind": 0,
             "device_sign": "None",
             "row": 0,
             "column": 0,
         }
         try:
-            Ta_fund_enum.select().where(Ta_fund_enum.offset_uuid == self.uuid).get()
+            Trees.select().where(Trees.offset_uuid == self.uuid).get()
             self.import_from_db()
-        except:
+        except Trees.DoesNotExist:
             None
         self.species_positions = {}  # позиции пород в таблице
 
@@ -53,7 +54,7 @@ class Restatement(restatement_main_window.MainWindow):
                     if data["dmr"] == 0:
                         data["num_fuel"] = 1
                     if data["dmr"] >= 65:
-                        data["num_biodiversity"] = 1
+                        data["num_half_ind"] = 1
                     data["num_ind"] = -1
 
                     data["dmr"] = self.last_data["dmr"]
@@ -92,15 +93,15 @@ class Restatement(restatement_main_window.MainWindow):
         except:
             old_num_fuel = 0
         try:
-            old_num_biodiversity = int(
+            old_num_half_ind = int(
                 self.tableWidget.item(data["row"], data["column"] + 3).text()
             )
         except:
-            old_num_biodiversity = 0
+            old_num_half_ind = 0
         """Прибавляю новые данные"""
         num_ind = data["num_ind"] + old_num_ind
         num_fuel = data["num_fuel"] + old_num_fuel
-        num_biodiversity = data["num_biodiversity"] + old_num_biodiversity
+        num_half_ind = data["num_half_ind"] + old_num_half_ind
 
         if num_ind > 0:
             self.tableWidget.setItem(
@@ -122,11 +123,11 @@ class Restatement(restatement_main_window.MainWindow):
                 QtCore.Qt.AlignHCenter
             )
 
-        if num_biodiversity > 0:
+        if num_half_ind > 0:
             self.tableWidget.setItem(
                 data["row"],
                 data["column"] + 3,
-                QtWidgets.QTableWidgetItem(str(num_biodiversity)),
+                QtWidgets.QTableWidgetItem(str(num_half_ind)),
             )
             self.tableWidget.item(data["row"], data["column"] + 3).setTextAlignment(
                 QtCore.Qt.AlignHCenter
@@ -141,7 +142,7 @@ class Restatement(restatement_main_window.MainWindow):
             self.tableWidget.item(data["row"], data["column"] + 2).setBackground(
                 QtGui.QColor("#c1f593")
             )
-        if num_biodiversity != old_num_biodiversity:
+        if num_half_ind != old_num_half_ind:
             self.tableWidget.item(data["row"], data["column"] + 3).setBackground(
                 QtGui.QColor("#c1f593")
             )
@@ -177,7 +178,7 @@ class Restatement(restatement_main_window.MainWindow):
             1, data["column"] + 2, QtWidgets.QTableWidgetItem("Дрова")
         )
         self.tableWidget.setItem(
-            1, data["column"] + 3, QtWidgets.QTableWidgetItem("Био.")
+            1, data["column"] + 3, QtWidgets.QTableWidgetItem("Сух.")
         )
 
     def default_color(self):
@@ -335,7 +336,7 @@ class Restatement(restatement_main_window.MainWindow):
 
     def save_to_db(self):
         try:
-            Ta_fund_enum.select().where(Ta_fund_enum.offset_uuid == self.uuid).get()
+            Trees.select().where(Trees.offset_uuid == self.uuid).get()
             q = QtWidgets.QMessageBox.warning(
                 self,
                 "Внимание",
@@ -345,8 +346,8 @@ class Restatement(restatement_main_window.MainWindow):
             )
             if q == 16384:  # если нажали Yes
                 try:  # пробую удалять записи с данным UUID
-                    Ta_fund_enum.delete().where(
-                        Ta_fund_enum.offset_uuid == self.uuid
+                    Trees.delete().where(
+                        Trees.offset_uuid == self.uuid
                     ).execute()
                 except Exception as error:
                     self.crit_message(
@@ -393,7 +394,7 @@ class Restatement(restatement_main_window.MainWindow):
                 )
 
         else:
-            self.crit_message("Отсутсвуют данные сохранения.", "", "")
+            self.crit_message("Отсутсвуют данные экспорта.", "", "")
 
     def import_from_json(self):
         if self.tableWidget.columnCount() > 1:
@@ -462,11 +463,29 @@ class Restatement(restatement_main_window.MainWindow):
                     QtCore.Qt.QueuedConnection,
                 )
 
+    def export_to_xls(self):
+        if self.tableWidget.columnCount() > 1:
+            export_file = QtWidgets.QFileDialog.getSaveFileName(
+                caption="Сохранение файла",
+                directory=os.path.expanduser("~") + "/Documents/" + self.uuid + ".xlsx",
+                filter="Excel (*.xlsx)",
+            )
+            if export_file[0]:
+                self.object_export_to_xls = export_to_xls.Data(table=self.tableWidget, export_file=export_file[0])
+                self.object_export_to_xls.start()
+                self.object_export_to_xls.signal_status.connect(
+                    lambda x: self.crit_message(x["body"], "", ""),
+                    QtCore.Qt.QueuedConnection,
+                )
+
+        else:
+            self.crit_message("Отсутсвуют данные экспорта.", "", "")
+
     def crit_message(self, error, info, detailed_text):
         dlg = QtWidgets.QMessageBox(self)
         dlg.setIcon(QtWidgets.QMessageBox.Warning)
         dlg.setWindowModality(QtCore.Qt.WindowModal)
-        dlg.setWindowTitle('ПО "Отвод". Перечёт деревьев.')
+        dlg.setWindowTitle('ПО "Пробы". Перечёт деревьев.')
         dlg.setText(error)
         dlg.setInformativeText(str(info))
         dlg.setDetailedText(str(detailed_text))

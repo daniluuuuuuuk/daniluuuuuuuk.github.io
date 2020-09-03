@@ -29,7 +29,7 @@ class Caliper(QtCore.QThread):
                         'dmr': c[1],  # Категория диаметров
                         'num_ind': 1,  # Техническая годность приходит по дефолту Деловая
                         'num_fuel': 0,
-                        'num_biodiversity': 0,
+                        'num_half_ind': 0,
                         'device_sign': 'caliper'
                         }
                 self.signal_output_data.emit(data)  # Отправляю эти данные в основной поток для заполнения таблицы

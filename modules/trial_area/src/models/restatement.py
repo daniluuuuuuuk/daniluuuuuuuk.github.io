@@ -11,6 +11,7 @@ class BaseModel(Database):
 
 
 class Trees(BaseModel):
+    """Хранится записи о деревьях всех перечёток"""
     id_enum = AutoField(null=False, primary_key=True)
     offset_uuid = UUIDField(null=False)
     code_species = ForeignKeyField(Species, column_name="code_species", null=False)

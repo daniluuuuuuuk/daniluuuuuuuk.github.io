@@ -8,8 +8,7 @@ from .modules.otvod.OtvodModule import OtvodController
 from .modules.otvod.tools.MapTools import RectangleMapTool
 from .tools import CuttingAreaPeeker as peeker
 from qgis.gui import QgsMapToolZoom
-from .modules.mdol.restatements import Restatement
-from .modules.mdol.evaluation import Evaluation
+from .modules.trial_area.restatements import Restatement
 
 
 class QgsLes:

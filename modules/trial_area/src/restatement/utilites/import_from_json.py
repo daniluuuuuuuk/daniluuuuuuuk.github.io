@@ -25,7 +25,7 @@ class Data(QtCore.QThread):
                                                     'dmr': int(record['dmr']),
                                                     'num_ind': int(record['num_ind']),
                                                     'num_fuel': int(record['num_fuel']),
-                                                    'num_biodiversity': int(record['num_biodiversity']),
+                                                    'num_half_ind': int(record['num_half_ind']),
                                                     'device_sign': 'json'})
 
             self.siganl_calculate_amount.emit(1)  # отправляю сигнал на подсчёт суммы

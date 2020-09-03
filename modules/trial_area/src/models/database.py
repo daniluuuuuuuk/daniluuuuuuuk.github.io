@@ -7,6 +7,6 @@ class Database(Model):
             host="192.168.12.28",
             user="postgres",
             password="loo98Yt5",
-            database="ais_lesoseka",
+            database="trial_area",
             port=5432,
         )

@@ -31,14 +31,14 @@ class Data(QtCore.QThread):
                             num_fuel = 0
 
                         if self.table.item(row, column+2):
-                            num_biodiversity = int(self.table.item(row, column+2).text())
+                            num_half_ind = int(self.table.item(row, column+2).text())
                         else:
-                            num_biodiversity = 0
-                        if num_ind != 0 or num_fuel != 0 or num_biodiversity != 0:
+                            num_half_ind = 0
+                        if num_ind != 0 or num_fuel != 0 or num_half_ind != 0:
                             output_data['restatement'][species].append({'dmr': dmr,
                                                                         'num_ind': num_ind,
                                                                         'num_fuel': num_fuel,
-                                                                        'num_biodiversity': num_biodiversity})
+                                                                        'num_half_ind': num_half_ind})
 
             with open(self.export_file, 'w') as file:
                 json.dump(output_data, file, indent=1, ensure_ascii=False)

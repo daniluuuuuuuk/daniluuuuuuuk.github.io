@@ -26,6 +26,7 @@ class MainWindow(QtWidgets.QMainWindow, uic.loadUiType(BasicDir().get_basic_dir(
         self.pushButton_5.clicked.connect(self.add_one_tree)
         self.pushButton_6.clicked.connect(self.export_to_json)
         self.pushButton_7.clicked.connect(self.import_from_json)
+        self.pushButton_8.clicked.connect(self.export_to_xls)
 
         """Атрибуты таблицы"""
         self.tableWidget.horizontalHeader().setDefaultSectionSize(80)  # Стандартный ширина столбцов
