@@ -13,11 +13,11 @@ class Data(QtCore.QThread):
 
     def run(self):
         try:
-            output_data = {'uuid_area': self.uuid, 'restatement': {}}
+            output_data = {'uuid_area': self.uuid, 'business': {}}
             for column in range(1, self.table.columnCount()):
                 if column % 3 == 1:
                     species = self.table.item(0, column).text()
-                    output_data['restatement'].update({species: []})
+                    output_data['business'].update({species: []})
                     for row in range(2, self.table.rowCount()-1):
                         dmr = self.table.item(row, 0).text()
                         """Если ячейка пустая - пишу ноль"""
@@ -35,7 +35,7 @@ class Data(QtCore.QThread):
                         else:
                             num_half_ind = 0
                         if num_ind != 0 or num_fuel != 0 or num_half_ind != 0:
-                            output_data['restatement'][species].append({'dmr': dmr,
+                            output_data['business'][species].append({'dmr': dmr,
                                                                         'num_ind': num_ind,
                                                                         'num_fuel': num_fuel,
                                                                         'num_half_ind': num_half_ind})

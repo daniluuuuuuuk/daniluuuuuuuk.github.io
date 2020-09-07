@@ -376,17 +376,17 @@ class OtvodController:
     #             dictAttr = {}
 
     #             sw = LesosekaInfo()
-    #             ui = sw.ui
-    #             ui.date.setDateTime(QDateTime.currentDateTime())
+    #             gui = sw.gui
+    #             gui.date.setDateTime(QDateTime.currentDateTime())
     #             dialogResult = sw.exec()
     #             if dialogResult == QDialog.Accepted:
-    #                 dictAttr["num"] = ui.num.text()
-    #                 # dictAttr["useType"] = ui.useType.text()
-    #                 # dictAttr["cuttingType"] = ui.cuttingType.text()
-    #                 # dictAttr["plot"] = ui.plot.text()
-    #                 dictAttr["fio"] = ui.fio.text()
-    #                 dictAttr["date"] = ui.date.text()
-    #                 dictAttr["info"] = ui.info.toPlainText()
+    #                 dictAttr["num"] = gui.num.text()
+    #                 # dictAttr["useType"] = gui.useType.text()
+    #                 # dictAttr["cuttingType"] = gui.cuttingType.text()
+    #                 # dictAttr["plot"] = gui.plot.text()
+    #                 dictAttr["fio"] = gui.fio.text()
+    #                 dictAttr["date"] = gui.date.text()
+    #                 dictAttr["info"] = gui.info.toPlainText()
     #             else:
     #                 return
                                     
@@ -535,7 +535,7 @@ class LesosekaInfo(QDialog):
             self.ui.leshos.addItem(result[0][0])
             self.ui.lesnich.addItems(result[1])
             self.lhNumber = result[2]
-            # self.ui.num_lch.setText(result[0][1][0])
+            # self.gui.num_lch.setText(result[0][1][0])
 
         worker = ForestObjWorker()
 

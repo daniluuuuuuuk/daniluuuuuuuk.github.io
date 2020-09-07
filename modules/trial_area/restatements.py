@@ -2,21 +2,15 @@
 import os
 import serial
 import traceback
+import uuid
+from decimal import Decimal, ROUND_HALF_UP
 from PyQt5 import QtWidgets, QtCore, QtGui
 
-from .src.restatement import restatement_main_window
+from .src.business import restatement_main_window, add_by_caliper, export_to_db, export_to_json, import_from_db, \
+    import_from_json, calculate_amount, export_to_xls, add_by_hand, area_property_main_window
 from .src.config import Settings
 
-from .src.restatement.utilites import add_by_hand
-from .src.restatement.utilites import import_from_db
-from .src.restatement.utilites import add_by_caliper
-from .src.restatement.utilites import export_to_db
-from .src.restatement.utilites import calculate_amount
-from .src.restatement.utilites import export_to_json
-from .src.restatement.utilites import export_to_xls
-from .src.restatement.utilites import import_from_json
-
-from .src.models.restatement import Trees
+from .src.models.restatement import Trees, Areas
 from .src.models.nri import *
 
 
@@ -38,7 +32,7 @@ class Restatement(restatement_main_window.MainWindow):
             "column": 0,
         }
         try:
-            Trees.select().where(Trees.offset_uuid == self.uuid).get()
+            Areas.select().where(Areas.area_uuid == self.uuid).get()
             self.import_from_db()
         except Trees.DoesNotExist:
             None
@@ -148,6 +142,14 @@ class Restatement(restatement_main_window.MainWindow):
             )
 
         self.last_data = data
+
+    def add_data_att(self, att_data):
+        self.att_data = att_data
+        self.label_4.setText(att_data['enterprise'])
+        self.label_6.setText(att_data['forestry'])
+        self.label_7.setText(att_data['compartment'])
+        self.label_8.setText(att_data['sub_compartment'])
+        self.label_10.setText(att_data['area_square'])
 
     def add_table_new_species(self, data):
         self.tableWidget.insertColumn(data["column"] + 1)
@@ -330,13 +332,16 @@ class Restatement(restatement_main_window.MainWindow):
         self.object_import_from_db.signal_output_data.connect(
             self.add_table_item, QtCore.Qt.QueuedConnection
         )
+        self.object_import_from_db.signal_att_data.connect(
+            self.add_data_att, QtCore.Qt.QueuedConnection
+        )
         self.object_import_from_db.siganl_calculate_amount.connect(
             self.calculate_amount, QtCore.Qt.QueuedConnection
         )
 
     def save_to_db(self):
         try:
-            Trees.select().where(Trees.offset_uuid == self.uuid).get()
+            Trees.select().where(Trees.area_uuid == self.uuid).get()
             q = QtWidgets.QMessageBox.warning(
                 self,
                 "Внимание",
@@ -347,7 +352,7 @@ class Restatement(restatement_main_window.MainWindow):
             if q == 16384:  # если нажали Yes
                 try:  # пробую удалять записи с данным UUID
                     Trees.delete().where(
-                        Trees.offset_uuid == self.uuid
+                        Trees.area_uuid == self.uuid
                     ).execute()
                 except Exception as error:
                     self.crit_message(
@@ -471,7 +476,9 @@ class Restatement(restatement_main_window.MainWindow):
                 filter="Excel (*.xlsx)",
             )
             if export_file[0]:
-                self.object_export_to_xls = export_to_xls.Data(table=self.tableWidget, export_file=export_file[0])
+                self.object_export_to_xls = export_to_xls.Data(table=self.tableWidget,
+                                                               export_file=export_file[0],
+                                                               att_data=self.att_data)
                 self.object_export_to_xls.start()
                 self.object_export_to_xls.signal_status.connect(
                     lambda x: self.crit_message(x["body"], "", ""),
@@ -498,3 +505,61 @@ class Restatement(restatement_main_window.MainWindow):
             self.connection.close()
         except:
             None
+
+
+class AreaProperty(area_property_main_window.MainWindow):
+    """Начальное окно с выбором лесхоза и тд"""
+    def __init__(self):
+        super().__init__()
+
+    def get_data_gui(self):
+        self.label.setStyleSheet(f"color: none;")
+        self.label_2.setStyleSheet(f"color: none;")
+        self.label_3.setStyleSheet(f"color: none;")
+        self.label_4.setStyleSheet(f"color: none;")
+        self.label_5.setStyleSheet(f"color: none;")
+        self.label_6.setStyleSheet(f"color: none;")
+
+        if self.comboBox.currentText() == '':
+            self.label.setStyleSheet(f"color: red;")
+            return False
+        if self.comboBox_2.currentText() == '':
+            self.label_2.setStyleSheet(f"color: red;")
+            return False
+        if self.comboBox_3.currentText() == '':
+            self.label_3.setStyleSheet(f"color: red;")
+            return False
+        if self.spinBox.value() <= 0:
+            self.label_4.setStyleSheet(f"color: red;")
+            return False
+        if self.spinBox_2.value() <= 0:
+            self.label_5.setStyleSheet(f"color: red;")
+            return False
+        if self.doubleSpinBox.value() <= 0:
+            self.label_6.setStyleSheet(f"color: red;")
+            return False
+
+        att_data = {
+            "gplho": self.comboBox.currentData(),
+            "enterprise": self.comboBox_2.currentData(),
+            "forestry": self.comboBox_3.currentData(),
+            "compartment": str(self.spinBox.value()),
+            "sub_compartment": str(self.spinBox_2.value()),
+            "area_square": str(Decimal(self.doubleSpinBox.value()).quantize(Decimal("1.00"), ROUND_HALF_UP))
+        }
+
+        return att_data
+
+    def create_area(self):
+        """Создаю сущность пробной площади"""
+        att_data = self.get_data_gui()
+        if att_data:
+            att_data['area_uuid'] = str(uuid.uuid1())
+
+            area = Areas.create(**att_data)
+            area.save()
+            self.close()
+            self.w = Restatement(uuid=att_data['area_uuid'])
+            self.w.show()
+            return True
+        return False

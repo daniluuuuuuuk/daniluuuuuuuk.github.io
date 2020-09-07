@@ -1,15 +1,15 @@
 from PyQt5 import QtWidgets,QtCore, uic
 
-from ...config import Settings, BasicDir
+from modules.trial_area.src.config import Settings, BasicDir
 
-from ....src.models.nri import Species
+from modules.trial_area.src.models.nri import Species
 
 
-class Select_species(QtWidgets.QDialog, uic.loadUiType(BasicDir().get_basic_dir("ui/select_species.ui"))[0]):
+class Select_species(QtWidgets.QDialog, uic.loadUiType(BasicDir().get_basic_dir("gui/select_species.ui"))[0]):
     def __init__(self, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
         self.setupUi(self)
-        styles = open(BasicDir().get_basic_dir("ui/stylesheets/base.qss"), 'r')
+        styles = open(BasicDir().get_basic_dir("gui/stylesheets/base.qss"), 'r')
         self.styleData = styles.read()
         styles.close()
         self.setStyleSheet(self.styleData)

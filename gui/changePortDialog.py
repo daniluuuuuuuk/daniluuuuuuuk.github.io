@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'c:\OSGeo4W64\apps\qgis\python\plugins\QgsLes\ui\changePortDialog.ui'
+# Form implementation generated from reading gui file 'c:\OSGeo4W64\apps\qgis\python\plugins\QgsLes\gui\changePortDialog.gui'
 #
 # Created by: PyQt5 UI code generator 5.12.1
 #

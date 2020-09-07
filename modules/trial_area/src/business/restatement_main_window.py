@@ -1,15 +1,14 @@
 from PyQt5 import QtWidgets, uic, QtGui, QtCore
-from ..restatement.utilites import select_species
-from ..restatement.utilites import settings_caliper
+from . import select_species, settings_caliper
 from ..config import Settings, BasicDir
 
 
-class MainWindow(QtWidgets.QMainWindow, uic.loadUiType(BasicDir().get_basic_dir("ui/restatement.ui"))[0]):
+class MainWindow(QtWidgets.QMainWindow, uic.loadUiType(BasicDir().get_basic_dir("gui/restatement.ui"))[0]):
     def __init__(self, parent=None):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.setupUi(self)
         """Применяю стиль"""
-        styles = open(BasicDir().get_basic_dir('ui/stylesheets/base.qss'))
+        styles = open(BasicDir().get_basic_dir('gui/stylesheets/base.qss'))
         styleData = styles.read()
         styles.close()
         self.setStyleSheet(styleData)
@@ -37,9 +36,9 @@ class MainWindow(QtWidgets.QMainWindow, uic.loadUiType(BasicDir().get_basic_dir(
         self.tableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)  # можно выделять только одну ячейку
 
         """Атрибуты кнопок"""
-        self.pushButton_5.setIcon(QtGui.QIcon(BasicDir().get_basic_dir("ui/images/plus_60.png")))
+        self.pushButton_5.setIcon(QtGui.QIcon(BasicDir().get_basic_dir("gui/images/plus_60.png")))
         self.pushButton_5.setIconSize(QtCore.QSize(60, 60))
-        self.pushButton_4.setIcon(QtGui.QIcon(BasicDir().get_basic_dir("ui/images/minus_60.png")))
+        self.pushButton_4.setIcon(QtGui.QIcon(BasicDir().get_basic_dir("gui/images/minus_60.png")))
         self.pushButton_4.setIconSize(QtCore.QSize(60, 60))
 
         """Создаю заголовок"""

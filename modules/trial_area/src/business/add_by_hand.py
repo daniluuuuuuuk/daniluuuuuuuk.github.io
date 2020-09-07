@@ -1,12 +1,12 @@
 from PyQt5 import QtWidgets, QtCore, uic
-from ...config import Settings, BasicDir
+from modules.trial_area.src.config import Settings, BasicDir
 
 
-class AddByHand(QtWidgets.QDialog, uic.loadUiType(BasicDir().get_basic_dir("ui/add_by_hand.ui"))[0]):
+class AddByHand(QtWidgets.QDialog, uic.loadUiType(BasicDir().get_basic_dir("gui/add_by_hand.ui"))[0]):
     def __init__(self, last_data, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
         self.setupUi(self)
-        styles = open(BasicDir().get_basic_dir("ui/stylesheets/base.qss"))
+        styles = open(BasicDir().get_basic_dir("gui/stylesheets/base.qss"))
         self.styleData = styles.read()
         styles.close()
         self.setStyleSheet(self.styleData)

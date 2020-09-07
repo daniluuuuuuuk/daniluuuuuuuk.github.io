@@ -4,14 +4,14 @@ import serial.tools.list_ports
 
 from PyQt5 import QtWidgets, uic
 
-from ...config import Settings, BasicDir
+from modules.trial_area.src.config import Settings, BasicDir
 
 
-class Settings_caliper(QtWidgets.QDialog, uic.loadUiType(BasicDir().get_basic_dir("ui/settings_caliper.ui"))[0]):
+class Settings_caliper(QtWidgets.QDialog, uic.loadUiType(BasicDir().get_basic_dir("gui/settings_caliper.ui"))[0]):
     def __init__(self, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
         self.setupUi(self)
-        styles = open(BasicDir().get_basic_dir("ui/stylesheets/base.qss"))
+        styles = open(BasicDir().get_basic_dir("gui/stylesheets/base.qss"))
         self.styleData = styles.read()
         styles.close()
         self.setStyleSheet(self.styleData)

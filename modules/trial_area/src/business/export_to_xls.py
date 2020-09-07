@@ -1,6 +1,6 @@
 from PyQt5 import QtCore
 
-from ...config import BasicDir
+from modules.trial_area.src.config import BasicDir
 
 from openpyxl import load_workbook
 
@@ -12,6 +12,7 @@ class Data(QtCore.QThread):
         QtCore.QThread.__init__(self)
         # self.uuid = args['uuid']
         self.table = args['table']
+        self.att_data = args['att_data']
         self.export_file = args['export_file']
         self.data_mapping = {
             "species": ['B', 'F', 'J', 'N', 'R', 'W', 'AA', 'AE', 'AI', 'AM'],  # Строка 3
@@ -27,9 +28,8 @@ class Data(QtCore.QThread):
                     ]
         }
 
-    def collect_data(self):
-        """Собираю данные из GUI таблицы"""
-
+    def collect_trees_data(self):
+        """Собираю перечётку из GUI таблицы"""
         origin_data = {}
         columns = self.table.columnCount()
         rows = self.table.rowCount()
@@ -66,15 +66,14 @@ class Data(QtCore.QThread):
                             }
         return origin_data
 
-    def run(self):
-        origin_data = self.collect_data()
-        file = BasicDir().get_basic_dir("templates/template_restatement.xlsx")
-        wb = load_workbook(file)
-        ws = wb.active
+    def write_trees_data(self, wb):
+        """Записываю книгу Перечёт"""
+        origin_data = self.collect_trees_data()
+        ws = wb['Перечет']
         species = list(origin_data.keys())
 
         for i in range(len(species)):
-            ws[self.data_mapping['species'][i]+'3'] = species[i]
+            ws[self.data_mapping['species'][i] + '3'] = species[i]
             sp_data = origin_data[species[i]]
             sp_dmrs = list(sp_data.keys())
             for u in range(len(sp_dmrs)):
@@ -86,11 +85,28 @@ class Data(QtCore.QThread):
                 current_dmr_coll_fuel = self.data_mapping['alp'][1]
                 current_dmr_coll_deadwood = self.data_mapping['alp'][2]
 
-                ws[current_dmr_coll_ind+current_dmr_row] = current_dmr_data['num_ind']
-                ws[current_dmr_coll_fuel+current_dmr_row] = current_dmr_data['num_fuel']
-                ws[current_dmr_coll_deadwood+current_dmr_row] = current_dmr_data['num_deadwood']
+                ws[current_dmr_coll_ind + current_dmr_row] = current_dmr_data['num_ind']
+                ws[current_dmr_coll_fuel + current_dmr_row] = current_dmr_data['num_fuel']
+                ws[current_dmr_coll_deadwood + current_dmr_row] = current_dmr_data['num_deadwood']
 
             del self.data_mapping['alp'][0:3]
 
-        wb.save(self.export_file)
+    def write_att_data(self, wb):
+        """Записываю книгу Титульный лист"""
+        ws = wb['Титульный лист']
+        ws['O9'] = self.att_data['gplho']
+        ws['D9'] = self.att_data['enterprise']
+        ws['D10'] = self.att_data['forestry']
+        ws['D11'] = self.att_data['compartment']
+        ws['D12'] = self.att_data['sub_compartment']
+        ws['O11'] = float(self.att_data['area_square'])
+
+    def run(self):
+        file = BasicDir().get_basic_dir("templates/template_restatement.xlsx")
+        workbook = load_workbook(file)
+
+        self.write_trees_data(wb=workbook)
+        self.write_att_data(wb=workbook)
+
+        workbook.save(self.export_file)
         self.signal_status.emit({'head': 'Успешно', 'body': 'Данные успешно экспортированы в\n' + self.export_file})

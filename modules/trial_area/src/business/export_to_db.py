@@ -1,6 +1,6 @@
 from PyQt5 import QtCore
-from ....src.models.restatement import Trees
-from ....src.models.nri import *
+from modules.trial_area.src.models.restatement import Trees
+from modules.trial_area.src.models.nri import *
 
 
 class DBData(QtCore.QThread):
@@ -39,7 +39,7 @@ class DBData(QtCore.QThread):
                     else:
                         output_data['dmr'] = int(row*4)
                         try:
-                            Trees.create(offset_uuid=self.uuid,
+                            Trees.create(area_uuid=self.uuid,
                                                 code_species=output_data['species'],
                                                 dmr=output_data['dmr'],
                                                 num_ind=output_data['num_ind'],
