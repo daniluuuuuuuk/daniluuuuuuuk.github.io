@@ -1,0 +1,28 @@
+; the next section is mandatory
+
+[general]
+name=TrialArea
+email=info@belgosles.by
+author=РУП "Белгослес"
+qgisMinimumVersion=3.0
+description=Создание карточки пробной площади
+about=Модуль пробной площади
+version=0.3
+tracker=http://belgosles.by/
+repository=http://rep.belgosles.by/ais_lesoseka
+; end of mandatory metadata
+
+tags=belarus,belgosles,lesoseka
+
+; these metadata can be empty, they will eventually become mandatory.
+homepage=http://belgosles.by/
+icon=icon.png
+
+; experimental flag (applies to the single version)
+experimental=True
+
+; deprecated flag (applies to the whole plugin and not only to the uploaded version)
+deprecated=False
+
+; if empty, it will be automatically set to major version + .99
+qgisMaximumVersion=3.99

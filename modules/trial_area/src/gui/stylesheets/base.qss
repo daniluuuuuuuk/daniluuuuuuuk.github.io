@@ -1,0 +1,76 @@
+QWidget{
+    font: 15pt;
+}
+
+
+QTableWidget{
+    font: 14pt;
+}
+
+QTableWidget#tableWidget_2{
+    font: 10pt;
+}
+
+QComboBox#comboBox_8 {
+    max-width: 300px;
+    }
+
+QComboBox#comboBox_5 {
+    max-width: 490px;
+    }
+
+QStatusBar {
+    font: 10pt;
+}
+
+QScrollBar:vertical {
+    height: 8px;
+    width: 30px;
+}
+QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
+    border: 20px solid grey;
+    width: 30px;
+    height: 30px;
+    background: white;
+}
+
+QSlider::groove:horizontal {
+    border: 1px solid red;
+    height: 6px;
+    margin: 2px 0;
+    border-radius: 3px;
+}
+QSlider::handle:horizontal {
+    background: #0fc0f5;
+    border: 1px solid #0fc0f5;
+    width: 25px;
+    margin: -10px 0;
+}
+QSlider::add-page:horizontal {
+    background: lightgray;
+}
+QSlider::sub-page:horizontal {
+    background: lightgray;
+}
+
+QCheckBox::indicator{
+    width: 20px;
+    height: 20px;
+}
+
+QRadioButton::indicator::checked{
+    border: 2px solid;
+    border-color: white;
+    border-radius: 10px;
+    background-color: #0fc0f5;
+    width: 20px;
+    height: 20px;
+}
+QRadioButton::indicator::unchecked{
+    border: 1px solid;
+    border-color: black;
+    border-radius: 9px;
+    background-color: white;
+    width: 20px;
+    height: 20px;
+}
