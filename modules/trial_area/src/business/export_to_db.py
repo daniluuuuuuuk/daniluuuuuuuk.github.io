@@ -1,6 +1,6 @@
 from PyQt5 import QtCore
-from modules.trial_area.src.models.restatement import Trees
-from modules.trial_area.src.models.nri import *
+from ..models.restatement import Trees
+from ..models.nri import *
 
 
 class DBData(QtCore.QThread):

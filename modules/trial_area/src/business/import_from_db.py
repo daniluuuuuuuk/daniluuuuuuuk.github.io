@@ -1,7 +1,7 @@
 import time
 from PyQt5 import QtCore
-from modules.trial_area.src.models.nri import Species, Organization
-from modules.trial_area.src.models.restatement import Trees, Areas
+from ..models.nri import Species, Organization
+from ..models.restatement import Trees, Areas
 
 
 class Data(QtCore.QThread):

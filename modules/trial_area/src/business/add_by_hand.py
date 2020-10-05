@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets, QtCore, uic
-from modules.trial_area.src.config import Settings, BasicDir
+from ..config import Settings, BasicDir
 
 
 class AddByHand(QtWidgets.QDialog, uic.loadUiType(BasicDir().get_basic_dir("gui/add_by_hand.ui"))[0]):

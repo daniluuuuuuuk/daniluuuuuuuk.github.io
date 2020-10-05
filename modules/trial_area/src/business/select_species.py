@@ -1,8 +1,8 @@
 from PyQt5 import QtWidgets,QtCore, uic
 
-from modules.trial_area.src.config import Settings, BasicDir
+from ..config import Settings, BasicDir
 
-from modules.trial_area.src.models.nri import Species
+from ..models.nri import Species
 
 
 class Select_species(QtWidgets.QDialog, uic.loadUiType(BasicDir().get_basic_dir("gui/select_species.ui"))[0]):

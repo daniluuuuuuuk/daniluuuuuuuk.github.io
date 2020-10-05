@@ -4,7 +4,7 @@ import serial.tools.list_ports
 
 from PyQt5 import QtWidgets, uic
 
-from modules.trial_area.src.config import Settings, BasicDir
+from ..config import Settings, BasicDir
 
 
 class Settings_caliper(QtWidgets.QDialog, uic.loadUiType(BasicDir().get_basic_dir("gui/settings_caliper.ui"))[0]):

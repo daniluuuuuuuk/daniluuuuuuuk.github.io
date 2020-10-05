@@ -1,6 +1,6 @@
 from PyQt5 import QtCore
 import json
-from modules.trial_area.src.models.nri import Species
+from ..models.nri import Species
 
 
 class Data(QtCore.QThread):
