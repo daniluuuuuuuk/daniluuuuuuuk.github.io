@@ -1,5 +1,3 @@
-
-
 class ButtonController:
 
     def __init__(self, buttons):

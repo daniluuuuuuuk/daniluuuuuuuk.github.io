@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading gui file 'C:\OSGeo4W64\apps\qgis\python\plugins\QgsLes\modules\otvod\gui\otvodSettings.gui'
+# Form implementation generated from reading ui file 'C:\OSGeo4W64\apps\qgis\python\plugins\QgsLes\modules\otvod\ui\otvodSettings.ui'
 #
 # Created by: PyQt5 UI code generator 5.12.1
 #

@@ -1,13 +1,27 @@
+# from qgis.PyQt.QtGui import QIcon
+# from qgis.PyQt.QtWidgets import QAction, QToolBar, QDialog, QMessageBox
+# from .gui import filterActionWidget, settingsDialog
+# from . import Filter, util, res, Settings, PostgisDB
+# from qgis.core import QgsProject
+# from .tools import module_errors as er
+# from .modules.otvod.OtvodModule import OtvodController
+# from .modules.otvod.tools.MapTools import RectangleMapTool
+# from .tools import CuttingAreaPeeker as peeker
+# from qgis.gui import QgsMapToolZoom
+
+import sys
+import traceback
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QToolBar, QDialog, QMessageBox
 from .gui import filterActionWidget, settingsDialog
 from . import Filter, util, res, Settings, PostgisDB
 from qgis.core import QgsProject
 from .tools import module_errors as er
-from .modules.otvod.OtvodModule import OtvodController
-from .modules.otvod.tools.MapTools import RectangleMapTool
+from .modules.otvod.OtvodController import OtvodController
+from .modules.otvod.tools.mapTools.RectangleMapTool import RectangleMapTool
 from .tools import CuttingAreaPeeker as peeker
 from qgis.gui import QgsMapToolZoom
+from qgis.core import QgsMessageLog, Qgis
 from .modules.trial_area.restatements import Restatement
 
 
@@ -44,20 +58,20 @@ class QgsLes:
         )
         self.countAction.triggered.connect(self.countButtonClicked)
 
-        if not PostgisDB.PostGisDB().setConnection():
-            QMessageBox.information(
-                None, er.MODULE_ERROR, er.DATABASE_CONNECTION_ERROR + er.FILTER_DISABLED
-            )
-        else:
-            self.fter = Filter.FilterWidget(self.iface, QgsProject.instance())
-            self.filterAction = self.fter.getFilterWidget()
-            self.qgsLesToolbar.addWidget(self.filterAction)
-            self.filterButtonAction = QAction(
-                QIcon(util.resolvePath("res\\icon3.png")),
-                "Поиск",
-                self.iface.mainWindow(),
-            )
-            self.filterAction.setDefaultAction(self.filterButtonAction)
+        # if not PostgisDB.PostGisDB().setConnection():
+        #     QMessageBox.information(
+        #         None, er.MODULE_ERROR, er.DATABASE_CONNECTION_ERROR + er.FILTER_DISABLED
+        #     )
+        # else:
+        #     self.fter = Filter.FilterWidget(self.iface, QgsProject.instance())
+        #     self.filterAction = self.fter.getFilterWidget()
+        #     self.qgsLesToolbar.addWidget(self.filterAction)
+        #     self.filterButtonAction = QAction(
+        #         QIcon(util.resolvePath("res\\icon3.png")),
+        #         "Поиск",
+        #         self.iface.mainWindow(),
+        #     )
+        #     self.filterAction.setDefaultAction(self.filterButtonAction)
 
         self.settingsAction = QAction(
             QIcon(util.resolvePath("res\\settings.png")),

@@ -4,6 +4,7 @@ from qgis.core import QgsTextBufferSettings, QgsVectorLayerSimpleLabeling, QgsVe
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtCore import QVariant
 
+
 class BindingPointBuilder(QgsPointXY):
 
     def __init__(self, point, canvas):
@@ -16,7 +17,8 @@ class BindingPointBuilder(QgsPointXY):
         pass
 
     def setLayerSymbol(self):
-        symbol = QgsMarkerSymbol.createSimple({'name': 'circle', 'color': '255,0,0,255','outline_color': 'red'})
+        symbol = QgsMarkerSymbol.createSimple(
+            {'name': 'circle', 'color': '255,0,0,255', 'outline_color': 'red'})
         return symbol
 
     def makeFeature(self):
@@ -40,7 +42,7 @@ class BindingPointBuilder(QgsPointXY):
 
         dataProvider.addFeatures([fet])
         self.projectInstance.addMapLayer(vl)
-        
+
         layers = self.canvas.layers()
         layers.insert(0, vl)
         self.canvas.setLayers(layers)
@@ -64,13 +66,15 @@ class AnchorPointBuilder():
         self.symbol = self.setLayerSymbol()
 
     def setLayerSymbol(self):
-        symbol = QgsMarkerSymbol.createSimple({'name': 'circle', 'color': '0,0,0,0','outline_color': '0,0,0,255'})
+        symbol = QgsMarkerSymbol.createSimple(
+            {'name': 'circle', 'color': '0,0,0,0', 'outline_color': '0,0,0,255'})
         return symbol
 
     def getCoordinatesArray(self):
         geom = self.feature.geometry()
         coordinatesString = str(geom.asWkt())
-        pointCoordinates = coordinatesString.replace("MultiPolygon ", "").replace(")))", "").replace("(((", "")
+        pointCoordinates = coordinatesString.replace(
+            "MultiPolygon ", "").replace(")))", "").replace("(((", "")
         return pointCoordinates
 
     def getCoordinatesList(self):
@@ -116,7 +120,7 @@ class AnchorPointBuilder():
             self.canvas.refresh()
 
         self.projectInstance.addMapLayer(vl)
-        
+
         layers = self.canvas.layers()
         layers.insert(0, vl)
         self.canvas.setLayers(layers)
@@ -142,7 +146,7 @@ class CuttingAreaTemp():
         self.symbol = self.setLayerSymbol()
         self.properFields = ["num_lch", "num_kv", "num_vd", "area", "leshos"]
         # self.attributes = self.feature.attributes()
-        self.dictAttr = dictAttr #атрибуты лесосеки
+        self.dictAttr = dictAttr  # атрибуты лесосеки
 
         self.fieldsString = self.fieldsToString(self.feature.fields())
 
@@ -167,13 +171,15 @@ class CuttingAreaTemp():
                     typeName = "string"
                 else:
                     typeName = qvariant
-                string = string + "&field=" + str(field.name()) + ":" + typeName
+                string = string + "&field=" + \
+                    str(field.name()) + ":" + typeName
         for key in self.dictAttr:
             string = string + "&field=" + str(key) + ":string"
         return string
 
     def setLayerSymbol(self):
-        symbol = QgsFillSymbol.createSimple({'color':'255,0,0,100', 'color_border':'0,0,0,255', 'style' : 'dense7'})
+        symbol = QgsFillSymbol.createSimple(
+            {'color': '255,0,0,100', 'color_border': '0,0,0,255', 'style': 'dense7'})
         return symbol
 
     def makeFeature(self):
@@ -189,14 +195,16 @@ class CuttingAreaTemp():
 
         feat = QgsFeature()
 
-        feat.setGeometry(QgsGeometry.fromPolygonXY([[self.point] + self.features]))
+        feat.setGeometry(QgsGeometry.fromPolygonXY(
+            [[self.point] + self.features]))
 
         da = QgsDistanceArea()
         da.setEllipsoid("WGS84")
         trctxt = QgsCoordinateTransformContext()
         da.setSourceCrs(QgsCoordinateReferenceSystem(32635), trctxt)
         tempArea = da.measurePolygon(feat.geometry().asPolygon()[0])
-        area = round(da.convertAreaMeasurement(tempArea, QgsUnitTypes.AreaHectares), 1)
+        area = round(da.convertAreaMeasurement(
+            tempArea, QgsUnitTypes.AreaHectares), 1)
 
         countAttributes = len(self.attributesDictionary)
         feat.initAttributes(countAttributes)
@@ -228,10 +236,12 @@ class CuttingAreaTemp():
 
     def deleteTempLayerIfExists(self):
         try:
-            layer = self.projectInstance.mapLayersByName("Лесосека временный слой")[0]
+            layer = self.projectInstance.mapLayersByName(
+                "Лесосека временный слой")[0]
             self.projectInstance.removeMapLayers([layer.id()])
         except:
             pass
+
 
 class AnchorLineTemp():
 
@@ -246,7 +256,7 @@ class AnchorLineTemp():
         self.symbol = self.setLayerSymbol()
         self.properFields = ["num_lch", "num_kv", "num_vd", "area", "leshos"]
         # self.attributes = self.feature.attributes()
-        self.dictAttr = dictAttr #атрибуты лесосеки
+        self.dictAttr = dictAttr  # атрибуты лесосеки
 
         self.fieldsString = self.fieldsToString(self.feature.fields())
 
@@ -292,7 +302,8 @@ class AnchorLineTemp():
                     typeName = "string"
                 else:
                     typeName = qvariant
-                string = string + "&field=" + str(field.name()) + ":" + typeName
+                string = string + "&field=" + \
+                    str(field.name()) + ":" + typeName
         for key in self.dictAttr:
             string = string + "&field=" + str(key) + ":string"
         return string
@@ -311,7 +322,8 @@ class AnchorLineTemp():
     #     return string
 
     def setLayerSymbol(self):
-        symbol = QgsFillSymbol.createSimple({'color':'255,0,0,100', 'color_border':'0,0,0,255'})
+        symbol = QgsFillSymbol.createSimple(
+            {'color': '255,0,0,100', 'color_border': '0,0,0,255'})
         return symbol
 
     def makeFeature(self):
@@ -331,7 +343,8 @@ class AnchorLineTemp():
             feat[i] = self.attributesDictionary[key]
             i += 1
 
-        feat.setGeometry(QgsGeometry.fromPolylineXY([self.point] + self.features))
+        feat.setGeometry(QgsGeometry.fromPolylineXY(
+            [self.point] + self.features))
 
         (res, outFeats) = layer.dataProvider().addFeatures([feat])
 
@@ -347,7 +360,8 @@ class AnchorLineTemp():
 
     def deleteTempLayerIfExists(self):
         try:
-            layer = self.projectInstance.mapLayersByName("Привязка временный слой")[0]
+            layer = self.projectInstance.mapLayersByName(
+                "Привязка временный слой")[0]
             self.projectInstance.removeMapLayers([layer.id()])
         except:
             pass
@@ -362,7 +376,8 @@ class CuttingAreaBuilder():
         self.symbol = self.setLayerSymbol()
 
     def setLayerSymbol(self):
-        symbol = QgsFillSymbol.createSimple({'color':'0,0,0,0', 'color_border':'0,0,0,255', 'style' : 'dense7'})
+        symbol = QgsFillSymbol.createSimple(
+            {'color': '0,0,0,0', 'color_border': '0,0,0,255', 'style': 'dense7'})
         return symbol
 
     def makeFeature(self):
@@ -382,7 +397,7 @@ class CuttingAreaBuilder():
         vl.commitChanges()
 
         self.projectInstance.addMapLayer(vl)
-        
+
         layers = self.canvas.layers()
         layers.insert(0, vl)
         self.canvas.setLayers(layers)
@@ -395,6 +410,7 @@ class CuttingAreaBuilder():
             # print("Такого слоя нет")
             pass
 
+
 class PointBuilder():
 
     def __init__(self, pointsDict, canvas):
@@ -404,11 +420,12 @@ class PointBuilder():
         self.symbol = self.setLayerSymbol()
 
     def setLayerSymbol(self):
-        symbol = QgsMarkerSymbol.createSimple({'name': 'circle', 'color': '0,0,0,0','outline_color': 'red'})
+        symbol = QgsMarkerSymbol.createSimple(
+            {'name': 'circle', 'color': '0,0,0,0', 'outline_color': 'red'})
         return symbol
 
     def setLayerLabelling(self, layer):
-        layer_settings  = QgsPalLayerSettings()
+        layer_settings = QgsPalLayerSettings()
         text_format = QgsTextFormat()
 
         text_format.setFont(QFont("Arial", 12))
@@ -448,7 +465,7 @@ class PointBuilder():
 
         uri = "point?crs=epsg:32635&field=id:integer&field=type:string"
         vl = QgsVectorLayer(uri, "Пикеты", "memory")
- 
+
         vl.renderer().setSymbol(self.symbol)
         self.setLayerLabelling(vl)
 
@@ -467,7 +484,7 @@ class PointBuilder():
         vl.commitChanges()
 
         self.projectInstance.addMapLayer(vl)
-        
+
         layers = self.canvas.layers()
         layers.insert(0, vl)
         self.canvas.setLayers(layers)

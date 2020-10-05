@@ -11,6 +11,7 @@ from qgis.core import QgsPointXY
 import os
 import decimal
 import time
+from functools import partial
 
 # Только в целях подсказки, нигде не используется:
 class TableType(Enum):
@@ -64,8 +65,8 @@ class DataTable(QTableWidget):
             header.setSectionResizeMode(x, QtWidgets.QHeaderView.Stretch)
 
     def setParams(self, tableType, coordType, inclination, bindingPoint):
-        print("table type in setParams: ", tableType)
-        print("SetParams:", tableType, coordType, inclination, bindingPoint)
+        # print("table type in setParams: ", tableType)
+        # print("SetParams:", tableType, coordType, inclination, bindingPoint)
         self.tabletype = tableType
         self.coordType = coordType
         self.magneticInclination = inclination
@@ -131,6 +132,17 @@ class DataTable(QTableWidget):
             gpsButton.setIcon(QIcon(self.resolve('icons\\pick_from_gps_icon.png')))
             gpsButton.setMaximumSize(QSize(70, 50))
             self.setCellWidget(index, 3, gpsButton)
+            gpsButton.clicked.connect(partial(self.setCoordinateRow, index))
+
+    def setCoordinateRow(self, index):
+        cell = QTableWidgetItem()
+        self.setItem(index, 1, cell)
+        cell2 = QTableWidgetItem()
+        self.setItem(index, 2, cell2)   
+        gpsCoords = GeoOperations.getCoordFromGPS()
+        if gpsCoords:
+            self.item(index, 2).setText(str(round(gpsCoords[0], 10)))
+            self.item(index, 1).setText(str(round(gpsCoords[1], 10)))
     
     def update_row_numbers(self):
         for row in range(0, self.getRowCount()):
@@ -139,7 +151,6 @@ class DataTable(QTableWidget):
             self.item(row, 0).setText(str(str(row) + "-" + str(row + 1)))
             # print("CELL5", self.pointsDict)
         # self.viewport().update()
-
 
     def resolve(self, name, basepath=None):
         if not basepath:
@@ -599,7 +610,7 @@ class DataTableWrapper():
             populateDMSRows()
 
     def populateRumbTable(self, tableList):
-        print(tableList)
+        # print(tableList)
         def populateDDRows():
             row = 0
             for item in tableList:
@@ -676,35 +687,24 @@ class DataTableWrapper():
                 if currentTableType == 1 and newTableType == 2:
                     convertedValues = cvt.convertDDAzimuth2Rumb()
                     self.populateTable(convertedValues)
-                    # self.convertAzimuthToRumbs(tableList)
                 elif currentTableType == 2 and newTableType == 1:
                     convertedValues = cvt.convertDDRumb2Azimuth()
                     self.populateTable(convertedValues)
-                    # self.convertRumbToAzimuth(tableList)
                 elif currentTableType == 0 and newTableType == 1:
                     convertedValues = cvt.convertDDCoord2Azimuth(self.getBindingPointXY(), pointsDict)
                     self.populateTable(convertedValues)
-                    # self.convertCoordsToAzimuth(tableList)
                 elif currentTableType == 0 and newTableType == 2:
                     convertedValues = cvt.convertDDCoord2Rumb(self.getBindingPointXY(), pointsDict)
                     self.populateTable(convertedValues)                    
-                    # self.convertCoordsToRumbs(tableList)
                 elif currentTableType == 1 and newTableType == 0:
                     convertedValues = cvt.convert2DDCoords(pointsDict)
                     self.populateTable(convertedValues)
-                    # self.convertToCoordinates(pointsDict, currentTableType)
                 elif currentTableType == 2 and newTableType == 0:
-                    # self.convertToCoordinates(pointsDict, currentTableType)
                     convertedValues = cvt.convert2DDCoords(pointsDict)
                     self.populateTable(convertedValues)
-                # elif currentTableType == 0 and tableType == 1:
-                #     self.convertToCoordinates(pointsDict, currentTableType)
-                # elif newTableType == 0:
-                #     self.convertToCoordinates(pointsDict, currentTableType)
+
         self.tableModel.setRerender(True)
-        
-    # def currentTableParams(self):
-    #     return self.tableModel.getParams()
+
 
     def copyTableData(self):
         return self.tableModel.getTableAsList()
@@ -718,172 +718,6 @@ class DataTableWrapper():
 
     def getParams(self):
         return self.tableModel.getParams()
-
-    # def convertToCoordinates(self, pointsDict, tableType):
-    #     for row in self.sortDictionary(pointsDict):
-    #         point = GeoOperations.convertToWgs(pointsDict[row][0])
-    #         pointX = point.x()
-    #         pointY = point.y()
-    #         lineType = pointsDict[row][1]
-    #         self.addRow()
-    #         for col in range(0, self.tableModel.columnCount()):
-    #             if col == 1:
-    #                 cell = QTableWidgetItem()
-    #                 self.tableModel.setItem(row, col, cell)
-    #                 self.tableModel.item(row, col).setText(str(pointY))
-    #             elif col == 2:
-    #                 cell = QTableWidgetItem()
-    #                 self.tableModel.setItem(row, col, cell)
-    #                 self.tableModel.item(row, col).setText(str(pointX))
-    #             elif col == 3:
-    #                 pass
-    #             elif col == 4:
-    #                 if tableType == 1:
-    #                     lineWidget = self.tableModel.cellWidget(row, col)
-    #                     index = lineWidget.findText(pointsDict[row][1])
-    #                     lineWidget.setCurrentIndex(index)
-    #                 elif tableType == 2:
-    #                     lineWidget = self.tableModel.cellWidget(row, col)
-    #                     index2 = lineWidget.findText(pointsDict[row][1])
-    #                     lineWidget.setCurrentIndex(index2)
-
-    # def convertAzimuthToRumbs(self, tableList):
-    #     for row in range(0, len(tableList)):
-    #         self.addRow()
-    #         rumb = GeoOperations.azimuthToRumb(tableList[row][1])
-    #         for col in range(0, len(tableList[row])):
-    #             if col == 1:
-    #                 cell = QTableWidgetItem()
-    #                 cell.setText(str(rumb[0][0]))
-    #                 self.tableModel.setItem(row, col, cell)
-    #             elif col == 3:
-    #                 rumbWidget = self.tableModel.cellWidget(row, col)
-    #                 index = rumbWidget.findText(str(rumb[0][1]))
-    #                 rumbWidget.setCurrentIndex(index)
-    #                 lineWidget = self.tableModel.cellWidget(row, col + 1)
-    #                 index2 = lineWidget.findText(tableList[row][col])
-    #                 lineWidget.setCurrentIndex(index2)
-    #             else:
-    #                 cell = QTableWidgetItem()
-    #                 self.tableModel.setItem(row, col, cell)
-    #                 self.tableModel.item(row, col).setText(tableList[row][col])
-
-    # def convertRumbToAzimuth(self, tableList):
-    #     for row in range(0, len(tableList)):
-    #         self.addRow()
-    #         azimuth = GeoOperations.rumbToAzimuth(tableList[row][3], tableList[row][1])
-    #         for col in range(0, len(tableList[row])):
-    #             if col == 1:
-    #                 cell = QTableWidgetItem()
-    #                 cell.setText(str(azimuth))
-    #                 self.tableModel.setItem(row, col, cell)
-    #             elif col == 3:
-    #                 pass
-    #             elif col == 4:
-    #                 lineWidget = self.tableModel.cellWidget(row, col - 1)
-    #                 index2 = lineWidget.findText(tableList[row][col])
-    #                 lineWidget.setCurrentIndex(index2)
-    #             else:
-    #                 cell = QTableWidgetItem()
-    #                 self.tableModel.setItem(row, col, cell)
-    #                 self.tableModel.item(row, col).setText(tableList[row][col])
-
-    # def convertCoordsToAzimuth(self, tableList):
-    #     bp = GeoOperations.convertToWgs(self.tableModel.bindingPoint)
-    #     rowsDict = []
-    #     i = 0
-    #     for x in tableList:
-    #         if i == 0:
-    #             prevPoint = self.tableModel.bindingPoint
-    #             lastPoint = GeoOperations.convertToZone35(QgsPointXY(float(x[2]), float(x[1])))
-    #         else:
-    #             prevData = tableList[i - 1]
-    #             prevPoint = GeoOperations.convertToZone35(QgsPointXY(float(prevData[2]), float(prevData[1])))
-    #             lastPoint = GeoOperations.convertToZone35(QgsPointXY(float(x[2]), float(x[1])))
-    #         azimuth = GeoOperations.calculateAzimuth(prevPoint, lastPoint)
-    #         distance = GeoOperations.calculateDistance(prevPoint, lastPoint)
-    #         rowsDict.append([tableList[i][0], str(azimuth), str(distance), tableList[i][3]])
-    #         i += 1
-
-    #     for row in range(0, len(rowsDict)):
-    #         self.addRow()
-    #         a = decimal.Decimal(rowsDict[row][1]).quantize(decimal.Decimal('.01'))
-    #         d = decimal.Decimal(rowsDict[row][2]).quantize(decimal.Decimal('.01'))
-    #         azimuth = round(a, 1)
-    #         distance = round(d, 1)
-    #         for col in range(0, len(rowsDict[row])):
-    #             if col == 1:
-    #                 cell = QTableWidgetItem()
-    #                 cell.setText(str(azimuth))
-    #                 self.tableModel.setItem(row, col, cell)
-    #             elif col == 2:
-    #                 cell = QTableWidgetItem()
-    #                 cell.setText(str(distance))
-    #                 self.tableModel.setItem(row, col, cell)
-    #             elif col == 3:
-    #                 lineWidget = self.tableModel.cellWidget(row, col)
-    #                 index2 = lineWidget.findText(rowsDict[row][3])
-    #                 lineWidget.setCurrentIndex(index2)
-
-    # def convertCoordsToRumbs(self, tableList):
-
-    #     bp = GeoOperations.convertToWgs(self.tableModel.bindingPoint)
-
-    #     rowsDict = []
-    #     i = 0
-    #     for x in tableList:
-    #         if i == 0:
-    #             prevPoint = self.tableModel.bindingPoint
-    #             lastPoint = GeoOperations.convertToZone35(QgsPointXY(float(x[2]), float(x[1])))
-    #         else:
-    #             prevData = tableList[i - 1]
-    #             prevPoint = GeoOperations.convertToZone35(QgsPointXY(float(prevData[2]), float(prevData[1])))
-    #             lastPoint = GeoOperations.convertToZone35(QgsPointXY(float(x[2]), float(x[1])))
-    #         azimuth = GeoOperations.calculateAzimuth(prevPoint, lastPoint)
-    #         rumb = GeoOperations.azimuthToRumb(azimuth)
-    #         distance = GeoOperations.calculateDistance(prevPoint, lastPoint)
-    #         rowsDict.append([tableList[i][0], rumb[0][0], distance, rumb[0][1], tableList[i][3]])
-    #         i += 1
-
-    #     for row in range(0, len(rowsDict)):
-    #         self.addRow()
-    #         a = decimal.Decimal(rowsDict[row][1]).quantize(decimal.Decimal('.01'))
-    #         d = decimal.Decimal(rowsDict[row][2]).quantize(decimal.Decimal('.01'))
-    #         rumb = round(a, 1)
-    #         distance = round(d, 1)
-    #         for col in range(0, len(rowsDict[row])):
-    #             if col == 1:
-    #                 cell = QTableWidgetItem()
-    #                 cell.setText(str(rumb))
-    #                 self.tableModel.setItem(row, col, cell)
-    #             elif col == 2:
-    #                 cell = QTableWidgetItem()
-    #                 cell.setText(str(distance))
-    #                 self.tableModel.setItem(row, col, cell)
-    #             elif col == 3:
-    #                 rumbWidget = self.tableModel.cellWidget(row, col)
-    #                 index2 = rumbWidget.findText(rowsDict[row][3])
-    #                 rumbWidget.setCurrentIndex(index2)
-    #             elif col == 4:
-    #                 lineWidget = self.tableModel.cellWidget(row, col)
-    #                 index2 = lineWidget.findText(rowsDict[row][4])
-    #                 lineWidget.setCurrentIndex(index2)
-
-    # def setCoordRow(self, rowList):
-    #     row = self.getRowsCount()-1
-    #     point = GeoOperations.convertToWgs(rowList[0])
-
-    #     cellX = QTableWidgetItem()
-    #     cellX.setText(str(point.x()))
-    #     self.tableModel.setItem(row, 2, cellX)
-
-    #     cellY = QTableWidgetItem()
-    #     cellY.setText(str(point.y()))
-    #     self.tableModel.setItem(row, 1, cellY)
-
-    #     lineWidget = self.tableModel.cellWidget(row, 4)
-    #     index = lineWidget.findText(rowList[1])
-    #     lineWidget.setCurrentIndex(index)
 
     def appendTableFromMap(self, tableList):
         for ptTuple in tableList:
