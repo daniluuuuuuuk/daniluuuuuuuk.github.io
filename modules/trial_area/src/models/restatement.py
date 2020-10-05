@@ -20,16 +20,16 @@ class Trees(BaseModel):
     num_fuel = IntegerField()
     num_half_ind = IntegerField()
 
-
-class Areas(BaseModel):
-    """Хранятся данные о пробной площади"""
-    area_uuid = UUIDField(null=False, primary_key=True)
-    gplho = ForeignKeyField(Organization, null=False, column_name='gplho')
-    enterprise = ForeignKeyField(Organization, null=False, column_name='enterprise')
-    forestry = ForeignKeyField(Organization, null=False, column_name='forestry')
-    compartment = IntegerField(null=True)
-    sub_compartment = IntegerField(null=True)
-    area_square = FloatField()
+#
+# class Areas(BaseModel):
+#     """Хранятся данные о пробной площади"""
+#     area_uuid = UUIDField(null=False, primary_key=True)
+#     gplho = ForeignKeyField(Organization, null=False, column_name='gplho')
+#     enterprise = ForeignKeyField(Organization, null=False, column_name='enterprise')
+#     forestry = ForeignKeyField(Organization, null=False, column_name='forestry')
+#     compartment = IntegerField(null=True)
+#     sub_compartment = IntegerField(null=True)
+#     area_square = FloatField()
 
 
 

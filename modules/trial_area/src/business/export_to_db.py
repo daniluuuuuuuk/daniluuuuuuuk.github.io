@@ -45,7 +45,8 @@ class DBData(QtCore.QThread):
                                                 num_ind=output_data['num_ind'],
                                                 num_fuel=output_data['num_fuel'],
                                                 num_half_ind=output_data['num_half_ind'])
-                        except:
+                        except Exception as e:
+                            print(e)
                             self.signal_status.emit({'head': 'Ошибка',
                                                      'body': 'Ошибка записи в БД.\nДанные не сохранены'})
                             return None

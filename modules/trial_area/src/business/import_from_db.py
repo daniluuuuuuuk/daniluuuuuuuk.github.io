@@ -1,7 +1,8 @@
 import time
 from PyQt5 import QtCore
 from ..models.nri import Species, Organization
-from ..models.restatement import Trees, Areas
+from ..models.restatement import Trees
+from ..models.public import Area
 
 
 class Data(QtCore.QThread):
@@ -15,19 +16,46 @@ class Data(QtCore.QThread):
 
     def get_att_area_data(self):
         """Получаю аттрибутивные данные для пробной площади"""
-        area = Areas.select(Areas, Organization).join(Organization, on=(Areas.forestry == Organization.id_organization)).where(Areas.area_uuid==self.uuid).get()
+        area = Area.select().where(Area.uuid == self.uuid).get()
+        gplho, forestry_enterprise, forestry = self.pars_org_id(id_forestry=area.num_forestry, id_forestry_enterprise=area.num_enterprise)
 
         att_data = {
-            "area_uuid": area.area_uuid,
-            "gplho": area.gplho.name_organization,
-            "enterprise": area.enterprise.name_organization,
-            "forestry": area.forestry.name_organization,
+            "area_uuid": area.uuid,
+            "gplho": gplho,
+            "enterprise": forestry_enterprise,
+            "forestry": forestry,
             "compartment": str(area.compartment),
             "sub_compartment": str(area.sub_compartment),
-            "area_square": str(area.area_square)
-
+            "area_square": str(area.area)
         }
         return att_data
+
+    def pars_org_id(self, id_forestry: int, id_forestry_enterprise: int):
+        """Преобразую код лесхоза и код лесничества в названия организаций"""
+        if id_forestry < 10:
+            id_forestry = '0'+str(id_forestry)
+        else:
+            id_forestry = str(id_forestry)
+
+        if id_forestry_enterprise < 100:
+            if id_forestry_enterprise < 10:
+                id_forestry_enterprise = '0'+str(id_forestry_enterprise)
+            id_forestry_enterprise = '0' + str(id_forestry_enterprise)
+        else:
+            id_forestry_enterprise = str(id_forestry_enterprise)
+
+        org_ending = id_forestry_enterprise+id_forestry
+        id_organizations = Organization.select(Organization.code_organization).where(Organization.type_organization.is_null())
+
+        for id in id_organizations:
+            if str(id.code_organization)[5:] == org_ending:
+                forestry_row = Organization.select().where(Organization.code_organization == id.code_organization).get()
+                forestry_name = forestry_row.name_organization
+                forestry_enterprise_row = Organization.select().where(Organization.id_organization == forestry_row.parent_id_organization).get()
+                forestry_enterprise_name = forestry_enterprise_row.name_organization
+                gplho_name = Organization.select().where(Organization.id_organization == forestry_enterprise_row.parent_id_organization).get().name_organization
+
+                return gplho_name, forestry_enterprise_name, forestry_name
 
     def run(self):
         self.signal_att_data.emit(self.get_att_area_data())
