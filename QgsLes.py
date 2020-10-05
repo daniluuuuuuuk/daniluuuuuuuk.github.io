@@ -11,6 +11,7 @@
 
 import sys
 import traceback
+from PyQt5 import QtWidgets
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QToolBar, QDialog, QMessageBox
 from .gui import filterActionWidget, settingsDialog
@@ -22,7 +23,7 @@ from .modules.otvod.tools.mapTools.RectangleMapTool import RectangleMapTool
 from .tools import CuttingAreaPeeker as peeker
 from qgis.gui import QgsMapToolZoom
 from qgis.core import QgsMessageLog, Qgis
-from .modules.trial_area.restatements import Restatement
+from .modules.trial_area.restatements import AreaProperty, Restatement
 
 
 class QgsLes:
@@ -124,6 +125,19 @@ class QgsLes:
                 uid = feature["uid"]
                 self.rst = Restatement(uid)
                 self.rst.show()
+
+            if not feature:
+                uuid = 'a25c8e66-5cb0-4189-a0ae-572876bbf36d'                
+                app = QtWidgets.QApplication(sys.argv)
+                app.setStyle("Fusion")
+                try:
+                    w = Restatement(uuid=uuid)
+                    w.show()
+                    sys.exit(app.exec_())
+                except NameError:
+                    w = AreaProperty()
+                    w.show()
+                sys.exit(app.exec_())
 
             zoomTool = QgsMapToolZoom(self.canvas, False)
             self.canvas.setMapTool(zoomTool)
