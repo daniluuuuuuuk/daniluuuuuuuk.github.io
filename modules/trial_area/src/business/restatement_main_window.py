@@ -40,6 +40,8 @@ class MainWindow(QtWidgets.QMainWindow, uic.loadUiType(BasicDir().get_basic_dir(
         self.pushButton_5.setIconSize(QtCore.QSize(60, 60))
         self.pushButton_4.setIcon(QtGui.QIcon(BasicDir().get_basic_dir("gui/images/minus_60.png")))
         self.pushButton_4.setIconSize(QtCore.QSize(60, 60))
+        self.pushButton_7.hide()  # Спрятал временно работу с JSON
+        self.pushButton_6.hide()  # Спрятал временно работу с JSON
 
         """Создаю заголовок"""
         self.tableWidget.insertRow(0)
