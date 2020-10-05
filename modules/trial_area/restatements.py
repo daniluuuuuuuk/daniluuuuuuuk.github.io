@@ -10,7 +10,8 @@ from .src.business import restatement_main_window, add_by_caliper, export_to_db,
     import_from_json, calculate_amount, export_to_xls, add_by_hand, area_property_main_window
 from .src.config import Settings
 
-from .src.models.restatement import Trees, Areas
+from .src.models.restatement import Trees
+from .src.models.public import Area
 from .src.models.nri import *
 
 
@@ -32,7 +33,7 @@ class Restatement(restatement_main_window.MainWindow):
             "column": 0,
         }
         try:
-            Areas.select().where(Areas.area_uuid == self.uuid).get()
+            Area.select().where(Area.uuid == self.uuid).get()
             self.import_from_db()
         except Trees.DoesNotExist:
             None
@@ -345,7 +346,7 @@ class Restatement(restatement_main_window.MainWindow):
             q = QtWidgets.QMessageBox.warning(
                 self,
                 "Внимание",
-                "Перечётная ведомость уже существует\n"
+                "Пробная площадь уже существует\n"
                 "Вы хотите перезаписать данные?",
                 buttons=QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
             )
@@ -556,7 +557,7 @@ class AreaProperty(area_property_main_window.MainWindow):
         if att_data:
             att_data['area_uuid'] = str(uuid.uuid1())
 
-            area = Areas.create(**att_data)
+            area = Area.create(**att_data)
             area.save()
             self.close()
             self.w = Restatement(uuid=att_data['area_uuid'])

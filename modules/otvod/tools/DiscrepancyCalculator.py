@@ -1,8 +1,8 @@
 import math
-from plugins.QgsLes.modules.otvod.tools.GeoOperations import calculateAzimuthWithPrecision
-from plugins.QgsLes.modules.otvod.tools.GeoOperations import calculateDistanceWithPrecision
+from .GeoOperations import *
+# from .GeoOperations import calculateAzimuthWithPrecision
+# from .GeoOperations import calculateDistanceWithPrecision
 from qgis.core import QgsPointXY
-
 
 """Калькулятор невязки"""
 
