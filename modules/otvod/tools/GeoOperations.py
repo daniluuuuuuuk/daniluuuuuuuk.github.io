@@ -5,6 +5,17 @@ import math
 import decimal
 
 
+def calculateAzimuthWithPrecision(point1, point2, precision):
+    azimuth = point1.azimuth(point2)
+    if azimuth < 0:
+        azimuth += 360
+    return decimal.Decimal(azimuth).quantize(decimal.Decimal(precision))
+
+
+def calculateDistanceWithPrecision(pt1, pt2, precision):
+    distance = math.sqrt(((pt1.x()-pt2.x())**2)+((pt1.y()-pt2.y())**2))
+    return decimal.Decimal(distance).quantize(decimal.Decimal(precision))
+
 def calculateAzimuth(point1, point2):
     azimuth = point1.azimuth(point2)
     if azimuth < 0:
