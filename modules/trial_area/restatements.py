@@ -540,27 +540,41 @@ class AreaProperty(area_property_main_window.MainWindow):
             self.label_6.setStyleSheet(f"color: red;")
             return False
 
-        att_data = {
-            "gplho": self.comboBox.currentData(),
-            "enterprise": self.comboBox_2.currentData(),
-            "forestry": self.comboBox_3.currentData(),
-            "compartment": str(self.spinBox.value()),
-            "sub_compartment": str(self.spinBox_2.value()),
-            "area_square": str(Decimal(self.doubleSpinBox.value()).quantize(Decimal("1.00"), ROUND_HALF_UP))
-        }
+        num_enterprise = int(str(Organization.select(Organization.code_organization).where(
+            Organization.id_organization == self.comboBox_2.currentData()).get().code_organization)[5:8])
+        num_forestry = int(str(Organization.select(Organization.code_organization).where(
+            Organization.id_organization == self.comboBox_3.currentData()).get().code_organization)[-2:])
 
+        att_data = {
+            'geom': None,
+            'uuid': None,
+            'num_forestry': num_forestry,
+            'compartment': str(self.spinBox.value()),
+            'sub_compartment': str(self.spinBox_2.value()),
+            'area': str(Decimal(self.doubleSpinBox.value()).quantize(Decimal("1.00"), ROUND_HALF_UP)),
+            'num_enterprise': num_enterprise,
+            'num_cutting_area': None,
+            'use_type': None,
+            'cutting_type': None,
+            'num_plot': None,
+            'person_name': None,
+            'date_trial': None,
+            'description': None,
+            'num_vds': None,
+            'leshos_text': None,
+            'lesnich_text': None,
+            # "gplho": self.comboBox.currentData(),
+        }
         return att_data
 
     def create_area(self):
         """Создаю сущность пробной площади"""
         att_data = self.get_data_gui()
         if att_data:
-            att_data['area_uuid'] = str(uuid.uuid1())
-
-            area = Area.create(**att_data)
-            area.save()
+            att_data['uuid'] = str(uuid.uuid1())
+            Area.create(**att_data)
             self.close()
-            self.w = Restatement(uuid=att_data['area_uuid'])
+            self.w = Restatement(uuid=att_data['uuid'])
             self.w.show()
             return True
         return False
