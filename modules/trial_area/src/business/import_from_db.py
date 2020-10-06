@@ -56,6 +56,7 @@ class Data(QtCore.QThread):
                 gplho_name = Organization.select().where(Organization.id_organization == forestry_enterprise_row.parent_id_organization).get().name_organization
 
                 return gplho_name, forestry_enterprise_name, forestry_name
+        return 'МЛХ', 'МЛХ', 'МЛХ'  # Совпадений не найдено
 
     def run(self):
         self.signal_att_data.emit(self.get_att_area_data())
