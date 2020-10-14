@@ -1,6 +1,8 @@
 from qgis.PyQt.QtWidgets import QTableWidget, QComboBox, QMessageBox, QTableWidgetItem
 from ...tools import module_errors as er
-from .Converter import Converter
+# from .Converter import Converter
+from .tools.CoordinateConverter import CoordinateConverter
+from .tools.CoordinateFormatConverter import CoordinateFormatConverter
 from PyQt5.QtGui import QIcon
 from PyQt5 import QtWidgets
 from enum import Enum
@@ -94,7 +96,7 @@ class DataTable(QTableWidget):
             self.builder = GeoOperations.parseDMSXYRow
         elif (self.tabletype == 1 and self.coordType == 0):
             rs = ["№", "Угол, °", "Длина линии, м", "Тип"]
-            self.builder = GeoOperations.parseAzimithDDRow
+            self.builder = GeoOperations.parseAzimuthDDRow
         elif (self.tabletype == 1 and self.coordType == 1):
             rs = ["№", "X, °", "X, ′", "X, ″", "Длина, м", "Тип"]
             self.builder = GeoOperations.parseAzimuthDMSRow
@@ -106,8 +108,14 @@ class DataTable(QTableWidget):
             self.builder = GeoOperations.parseRumbDMSRow
         elif (self.tabletype == 3 and self.coordType == 0):
             rs = ["№", "Угол, °", "Длина линии, м", "Тип"]
-            self.builder = GeoOperations.parseAzimithDDRow
+            self.builder = GeoOperations.parseAzimuthDDRow
         elif (self.tabletype == 3 and self.coordType == 1):
+            rs = ["№", "X, °", "X, ′", "X, ″", "Длина, м", "Тип"]
+            self.builder = GeoOperations.parseAzimuthDMSRow
+        elif (self.tabletype == 4 and self.coordType == 0):
+            rs = ["№", "Угол, °", "Длина линии, м", "Тип"]
+            self.builder = GeoOperations.parseAzimuthDDRow
+        elif (self.tabletype == 4 and self.coordType == 1):
             rs = ["№", "X, °", "X, ′", "X, ″", "Длина, м", "Тип"]
             self.builder = GeoOperations.parseAzimuthDMSRow
         else:
@@ -286,11 +294,84 @@ class DataTable(QTableWidget):
     def importJSONData(self, data):
         self.data = data
 
+    def getAngleBuilder(self, row):
+        if self.tabletype == 3:
+            if self.coordType == 0:
+                if (self.cellWidget(row, 3).currentText() == "Привязка" or row == 0):
+                    return GeoOperations.parseAzimuthDDRow
+                else:
+                    if self.cellWidget(row - 1, 3).currentText() == "Привязка":
+                        return GeoOperations.parseAzimuthDDRow
+                    else:
+                        return GeoOperations.parseLeftAngleDDRow
+
+            if self.coordType == 1:
+                if (self.cellWidget(row, 5).currentText() == "Привязка" or row == 0):
+                    return GeoOperations.parseAzimuthDMSRow
+                else:
+                    if self.cellWidget(row - 1, 5).currentText() == "Привязка":
+                        return GeoOperations.parseAzimuthDMSRow
+                    else:
+                        return GeoOperations.parseLeftAngleDMSRow
+
+        elif self.tabletype == 4:
+            if self.coordType == 0:
+                if (self.cellWidget(row, 3).currentText() == "Привязка" or row == 0):
+                    return GeoOperations.parseAzimuthDDRow
+                else:
+                    if self.cellWidget(row - 1, 3).currentText() == "Привязка":
+                        return GeoOperations.parseAzimuthDDRow
+                    else:
+                        return GeoOperations.parseRightAngleDDRow
+
+            if self.coordType == 1:
+                if (self.cellWidget(row, 5).currentText() == "Привязка" or row == 0):
+                    return GeoOperations.parseAzimuthDMSRow
+                else:
+                    if self.cellWidget(row - 1, 5).currentText() == "Привязка":
+                        return GeoOperations.parseAzimuthDMSRow
+                    else:
+                        return GeoOperations.parseRightAngleDMSRow
+
     def cellChangedHandler(self, row, column):
         if self.ensureRowCellsNotEmpty(row) and self.rerenderEnabled:
 
+            angle = False
+
             if self.tabletype == 0:
                 point = self.builder(self, row)
+
+            elif self.tabletype == 3 or self.tabletype == 4:
+                self.builder = self.getAngleBuilder(row)
+                if (self.builder.__name__ == "parseLeftAngleDMSRow" or \
+                        self.builder.__name__ == "parseLeftAngleDDRow" or \
+                        self.builder.__name__ == "parseRightAngleDMSRow" or \
+                        self.builder.__name__ == "parseRightAngleDDRow"):
+                    angle = True
+                if not self.pointsDict:
+                    point = self.builder(
+                        self.bindingPoint, self, row, self.magneticInclination)
+                else:
+                    if angle:
+                        if row == 1:
+                            azimuth = GeoOperations.calculateAzimuth(
+                                self.bindingPoint, self.pointsDict[row-1][0])
+                            point = self.builder(
+                                self.pointsDict[row-1][0], azimuth, self, row, self.magneticInclination)
+                        elif row > 1:
+                            azimuth = GeoOperations.calculateAzimuth(
+                                self.pointsDict[row-2][0], self.pointsDict[row-1][0])
+                            point = self.builder(
+                                self.pointsDict[row-1][0], azimuth, self, row, self.magneticInclination)
+                    else:
+                        if row == 0:
+                            point = self.builder(
+                                self.bindingPoint, self, row, self.magneticInclination)
+                        else:
+                            point = self.builder(
+                                self.pointsDict[row - 1][0],
+                                self, row, self.magneticInclination
+                            )
             else:
                 if not self.pointsDict:
                     point = self.builder(
@@ -304,6 +385,7 @@ class DataTable(QTableWidget):
                             self.pointsDict[row - 1][0],
                             self, row, self.magneticInclination
                         )
+
             # если редактируется имеющаяся точка - удалить ее
             if row in self.pointsDict:
                 del self.pointsDict[row]
@@ -446,7 +528,7 @@ class DataTable(QTableWidget):
             if self.rowCount() < len(self.pointsDict):
                 self.pointsDict.pop(self.getRowCount())
             self.refreshData()
-            print(self.pointsDict)
+            # print(self.pointsDict)
 
             # self.refreshData()
     def getTableAsList(self):
@@ -546,7 +628,7 @@ class DataTableWrapper():
         tableList = self.copyTableData()
         self.tableModel.setParams(
             currentTableType, coordType, self.getMagneticInclination(), self.getBindingPointXY())
-        cvt = Converter(tableList, currentTableType, coordType)
+        cvt = CoordinateFormatConverter(tableList, currentTableType, coordType)
         if coordType == 0:
             convertedTableList = cvt.convertToDD()
         elif coordType == 1:
@@ -691,7 +773,7 @@ class DataTableWrapper():
         self.tableModel.setParams(
             tableType, coordType, magneticInclination, bindingPoint)
         if coordType == 1:
-            cvt = Converter(tableList, currentTableType, coordType)
+            cvt = CoordinateConverter(tableList, currentTableType, coordType)
             if newTableType == 3 or currentTableType == 3:
                 convertedValues = []
             elif currentTableType == 1 and newTableType == 2:
@@ -715,7 +797,7 @@ class DataTableWrapper():
             elif currentTableType == 3:
                 pass
             else:
-                cvt = Converter(tableList, currentTableType, coordType)
+                cvt = CoordinateConverter(tableList, currentTableType, coordType)
                 if currentTableType == 1 and newTableType == 2:
                     convertedValues = cvt.convertDDAzimuth2Rumb()
                     self.populateTable(convertedValues)

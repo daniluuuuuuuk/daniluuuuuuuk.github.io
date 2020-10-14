@@ -103,11 +103,6 @@ class OtvodController:
         self.omw.saveLesoseka_Button.clicked.connect(self.saveCuttingArea)
         self.omw.deleteLesoseka_Button.clicked.connect(self.deleteCuttingArea)
 
-        # self.omw.rotate_left.clicked.connect(
-        #     partial(self.rotateCuttingArea, self.omw.rotate_left))
-        # self.omw.rotate_right.clicked.connect(
-        #     partial(self.rotateCuttingArea, self.omw.rotate_right))
-
         self.omw.x_coord_LineEdit.textChanged.connect(
             self.bindingPointCoordChanged)
         self.omw.y_coord_LineEdit.textChanged.connect(
@@ -171,7 +166,8 @@ class OtvodController:
         radio_group.addButton(self.omw.coord_radio_button)
         radio_group.addButton(self.omw.azimuth_radio_button)
         radio_group.addButton(self.omw.rumb_radio_button)
-        radio_group.addButton(self.omw.angle_radio_button)
+        radio_group.addButton(self.omw.left_angle_radio_button)
+        radio_group.addButton(self.omw.right_angle_radio_button)
         i = 0
         for btn in radio_group.buttons():
             radio_group.setId(btn, i)

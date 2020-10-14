@@ -508,46 +508,6 @@
      <bool>false</bool>
     </property>
    </widget>
-   <widget class="QWidget" name="horizontalLayoutWidget_2">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>390</y>
-      <width>296</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QRadioButton" name="coord_radio_button">
-       <property name="text">
-        <string>Координаты</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="azimuth_radio_button">
-       <property name="text">
-        <string>Азимуты</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="rumb_radio_button">
-       <property name="text">
-        <string>Румбы</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="angle_radio_button">
-       <property name="text">
-        <string>Вн. углы</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
    <widget class="QPushButton" name="lesoseka_from_map_points_button">
     <property name="geometry">
      <rect>
@@ -612,6 +572,53 @@
     <property name="tickInterval">
      <number>100</number>
     </property>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget_3">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>390</y>
+      <width>296</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QRadioButton" name="coord_radio_button">
+       <property name="text">
+        <string>КРД</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="azimuth_radio_button">
+       <property name="text">
+        <string>АЗТ</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="rumb_radio_button">
+       <property name="text">
+        <string>РМБ</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="left_angle_radio_button">
+       <property name="text">
+        <string>ЛВУ</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="right_angle_radio_button">
+       <property name="text">
+        <string>ПВУ</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

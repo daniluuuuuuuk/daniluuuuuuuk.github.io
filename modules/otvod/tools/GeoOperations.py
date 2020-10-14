@@ -16,6 +16,7 @@ def calculateDistanceWithPrecision(pt1, pt2, precision):
     distance = math.sqrt(((pt1.x()-pt2.x())**2)+((pt1.y()-pt2.y())**2))
     return decimal.Decimal(distance).quantize(decimal.Decimal(precision))
 
+
 def calculateAzimuth(point1, point2):
     azimuth = point1.azimuth(point2)
     if azimuth < 0:
@@ -139,7 +140,43 @@ def parseDMSXYRow(table, row):
     return convertToZone35(pointFromDMSXY(float(yd), float(ym), float(ys), float(xd), float(xm), float(xs)))
 
 
-def parseAzimithDDRow(point, table, row, magnIncl):
+def parseLeftAngleDDRow(point, azimuth, table, row, magnIncl):
+    angle = float(table.item(row, 1).text()) + magnIncl
+    az = float(azimuth) - 180 + angle
+    distance = table.item(row, 2).text()
+    return pointFromAzimuthDD(point, float(az), float(distance))
+
+
+def parseRightAngleDDRow(point, azimuth, table, row, magnIncl):
+    angle = float(table.item(row, 1).text()) + magnIncl
+    az = float(azimuth) + 180 - angle
+    distance = table.item(row, 2).text()
+    return pointFromAzimuthDD(point, float(az), float(distance))
+
+
+def parseLeftAngleDMSRow(point, azimuth, table, row, magnIncl):
+    angleD = table.item(row, 1).text()
+    angleM = table.item(row, 2).text()
+    angleS = table.item(row, 3).text()
+    angle = float(convertDMSAngle(angleD, angleM, angleS)) + magnIncl
+    az = float(azimuth) - 180 + angle
+    distance = table.item(row, 4).text()
+    print(angle, az, distance, point)
+    return pointFromAzimuthDD(point, float(az), float(distance))
+
+
+def parseRightAngleDMSRow(point, azimuth, table, row, magnIncl):
+    angleD = table.item(row, 1).text()
+    angleM = table.item(row, 2).text()
+    angleS = table.item(row, 3).text()
+    angle = float(convertDMSAngle(angleD, angleM, angleS)) + magnIncl
+    az = float(azimuth) + 180 - angle
+    distance = table.item(row, 4).text()
+    print(angle, az, distance, point)
+    return pointFromAzimuthDD(point, float(az), float(distance))
+
+
+def parseAzimuthDDRow(point, table, row, magnIncl):
     # rs = ["№", "Угол, °", "Длина линии, м", "Тип"]
     angle = float(table.item(row, 1).text()) + magnIncl
     distance = table.item(row, 2).text()
@@ -178,11 +215,6 @@ def parseRumbDMSRow(point, table, row, magnIncl):
     return pointFromRumbDMS(point, float(xd), float(xm), float(xs), float(distance), rumb, magnIncl)
 
 
-"""Конвертация значения при изменении типа вводимых данных
-
-Returns:
-    [type] -- [description]
-"""
 def rumbToAzimuth(rumb, rumbAngle):
     if str(rumb) == 'СВ':
         angle = float(rumbAngle)
@@ -213,7 +245,8 @@ def azimuthToRumb(az):
         rumbsList.append((angle, "СЗ"))
     return rumbsList
 
+
 def convertToDMS(dd):
-    mnt,sec = divmod(dd*3600,60)
-    deg,mnt = divmod(mnt,60)
-    return [deg,mnt,sec]
+    mnt, sec = divmod(dd*3600, 60)
+    deg, mnt = divmod(mnt, 60)
+    return [deg, mnt, sec]
