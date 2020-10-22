@@ -17,6 +17,8 @@ from qgis.PyQt.QtWidgets import QMessageBox, QDialog, QButtonGroup, QFileDialog,
 from datetime import datetime
 from qgis.PyQt.QtCore import Qt
 from qgis.utils import iface
+from qgis.gui import  QgsMapToolPan
+
 
 
 class OtvodController:
@@ -60,6 +62,10 @@ class OtvodController:
             QIcon(self.resolve('icons\\lesoseka_from_map_points.png')))
         self.omw.importCoordinates.setIcon(
             QIcon(self.resolve('icons\\internet.png')))
+        self.omw.handTool_button.setIcon(
+            QIcon(self.resolve('icons\\hand_tool.png')))
+        self.omw.manageLayers_button.setIcon(
+            QIcon(self.resolve('icons\\layers.png')))
 
         self.omw.otvodSettingsAction.triggered.connect(
             lambda: self.otvodMenuSettings())
@@ -116,6 +122,13 @@ class OtvodController:
         self.canvas = self.canvasWidget.getCanvas()
         self.omw.show()
         self.switch = self.initSwitchButton()
+
+        self.omw.handTool_button.clicked.connect(self.initHandTool)
+        self.panTool = QgsMapToolPan(self.canvas)
+
+
+    def initHandTool(self):
+        self.canvas.setMapTool(self.panTool)
 
     def inclinationValueChanged(self, value):
         self.magneticInclination = value / 10

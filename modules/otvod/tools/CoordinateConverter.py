@@ -159,3 +159,140 @@ class CoordinateConverter:
             lineType = pointsDict[row][1]
             convertedValues.append([str(str(row)+"-"+str(row+1)), str(point.y()), str(point.x()), lineType])
         return convertedValues
+
+    def azimuthToAngle(self, azimuthOne, azimuthTwo, angleType):
+        if (angleType == 3):
+            angle = 180 + float(azimuthTwo) - float(azimuthOne)
+        elif (angleType == 4):
+            angle = float(azimuthOne) + 180 - float(azimuthTwo)
+        if angle < 0:
+            angle += 360
+        elif angle > 360:
+            angle -= 360
+        return angle
+    
+    def getFirstPointOfArea(self, pointsDict):
+        firstPointOfArea = None
+        for row in pointsDict:
+            if row == 0 and pointsDict[row][1] == 'Лесосека':
+                firstPointOfArea = row
+            elif row > 0 and pointsDict[row - 1][1] == 'Привязка' and pointsDict[row][1] == 'Лесосека':
+                firstPointOfArea = row
+        return firstPointOfArea
+
+        """Перевод координат в углы
+        """
+    def convertCoord2Angle(self, bindingPoint, pointsDict, angleType, coordType):
+        convertedValues = []
+        firstPointOfArea = self.getFirstPointOfArea(pointsDict)
+
+        for row in pointsDict:
+            secondPoint = pointsDict[row][0]
+            if row == 0:
+                firstPoint = bindingPoint
+            else:
+                firstPoint = pointsDict[row - 1][0]
+
+            azimuth = GeoOperations.calculateAzimuth(firstPoint, secondPoint)
+            distance = GeoOperations.calculateDistance(firstPoint, secondPoint)
+
+            if (firstPointOfArea == None or row <= firstPointOfArea):
+                if (coordType == 0):
+                    convertedValues.append([str(str(row)+"-"+str(row+1)), str(azimuth), str(distance), pointsDict[row][1]])
+                else:
+                    azRounded = decimal.Decimal(azimuth).quantize(decimal.Decimal('.01'))
+                    distRounded = decimal.Decimal(distance).quantize(decimal.Decimal('.01'))
+                    azDMS = self.decdeg2dms(azRounded, True)
+                    convertedValues.append([str(str(row)+"-"+str(row+1)), str(azDMS[0]), str(azDMS[1]), str(azDMS[2]), str(distRounded), pointsDict[row][1]])
+            else:
+                if row < 2:
+                    previousAzimuth = GeoOperations.calculateAzimuth(bindingPoint, firstPoint)
+                else:
+                    previousAzimuth = GeoOperations.calculateAzimuth(pointsDict[row - 2][0], firstPoint)
+                angle = self.azimuthToAngle(previousAzimuth, azimuth, angleType)
+                if (coordType == 0):                
+                    convertedValues.append([str(str(row)+"-"+str(row+1)), str(angle), str(distance), pointsDict[row][1]])
+                else:
+                    angleRounded = decimal.Decimal(angle).quantize(decimal.Decimal('.01'))
+                    distRounded = decimal.Decimal(distance).quantize(decimal.Decimal('.01'))
+                    angleDMS = self.decdeg2dms(angleRounded, True)
+                    convertedValues.append([str(str(row)+"-"+str(row+1)), str(angleDMS[0]), str(angleDMS[1]), str(angleDMS[2]), str(distRounded), pointsDict[row][1]])
+        return convertedValues
+
+
+    def convertAzimuth2Angle(self, pointsDict, angleType, coordType):
+        firstPointOfArea = self.getFirstPointOfArea(pointsDict)
+        convertedValues = []
+        for i, row in enumerate(self.tableList):
+            if i <= firstPointOfArea:
+                if coordType == 0:
+                    azimuth = row[1]
+                    convertedValues.append([row[0], str(azimuth), str(row[2]), row[3]])
+                else:
+                    azimuth = self.dms2dd(row[1], row[2], row[3], True)
+                    azDMS = self.decdeg2dms(azimuth, True)
+                    convertedValues.append([row[0], str(azDMS[0]), str(azDMS[1]), str(azDMS[2]), row[4], row[5]])
+            else:
+                if coordType == 0:
+                    azimuth = row[1]
+                    azimuthPrevious = self.tableList[i - 1][1]
+                    angle = self.azimuthToAngle(azimuthPrevious, azimuth, angleType)
+                    convertedValues.append([row[0], str(angle), str(row[2]), row[3]])
+                else:
+                    azimuthPrevious = self.dms2dd(self.tableList[i - 1][1], self.tableList[i - 1][2], self.tableList[i - 1][3], True)
+                    azimuth = self.dms2dd(row[1], row[2], row[3], True)
+                    angle = self.azimuthToAngle(azimuthPrevious, azimuth, angleType)
+                    angleDMS = self.decdeg2dms(angle, True)
+                    convertedValues.append([row[0], str(angleDMS[0]), str(angleDMS[1]), str(angleDMS[2]), row[4], row[5]])
+
+        return convertedValues
+                
+    def convertRumb2Angle(self, pointsDict, angleType, coordType):
+        firstPointOfArea = self.getFirstPointOfArea(pointsDict)
+        convertedValues = []
+        for i, row in enumerate(self.tableList):
+            if i <= firstPointOfArea:
+                if coordType == 0:
+                    azimuth = GeoOperations.rumbToAzimuth(row[3], row[1])
+                    convertedValues.append([row[0], str(azimuth), str(row[2]), row[4]])
+                else:
+                    decRumb = self.dms2dd(row[1], row[2], row[3], True)
+                    decAz = GeoOperations.rumbToAzimuth(row[5], decRumb)
+                    dmsAz = self.decdeg2dms(decAz, True)
+                    convertedValues.append([row[0], str(dmsAz[0]), str(dmsAz[1]), str(dmsAz[2]), row[4], row[6]])
+            else:
+                if coordType == 0:
+                    azimuthPrevious = GeoOperations.rumbToAzimuth(self.tableList[i - 1][3], self.tableList[i - 1][1])
+                    azimuth = GeoOperations.rumbToAzimuth(row[3], row[1])
+                    angle = self.azimuthToAngle(azimuthPrevious, azimuth, angleType)
+                    convertedValues.append([row[0], str(angle), str(row[2]), row[4]])
+                else:
+                    decRumbPrevious = self.dms2dd(self.tableList[i - 1][1], self.tableList[i - 1][2], self.tableList[i - 1][3], True)
+                    azimuthPrevious = GeoOperations.rumbToAzimuth(self.tableList[i - 1][5], decRumbPrevious)
+                    decRumb = self.dms2dd(row[1], row[2], row[3], True)
+                    azimuth = GeoOperations.rumbToAzimuth(row[5], decRumb)
+                    angle = self.azimuthToAngle(azimuthPrevious, azimuth, angleType)
+                    angleDMS = self.decdeg2dms(angle, True)
+                    convertedValues.append([row[0], str(angleDMS[0]), str(angleDMS[1]), str(angleDMS[2]), row[4], row[6]])
+        return convertedValues
+
+        
+    def convertAngle2Angle(self, pointsDict, coordType):
+        firstPointOfArea = self.getFirstPointOfArea(pointsDict)
+        convertedValues = []
+        for i, row in enumerate(self.tableList):
+            if i <= firstPointOfArea:
+                if coordType == 0:
+                    convertedValues.append([row[0], row[1], row[2], row[3]])
+                else:
+                    convertedValues.append([row[0], row[1], row[2], row[3], row[4], row[5]])
+            else:
+                if coordType == 0:
+                    angle = 360 - float(row[1])
+                    convertedValues.append([row[0], str(angle), row[2], row[3]])
+                else:
+                    azimuth = self.dms2dd(row[1], row[2], row[3], True)
+                    angleDD = 360 - azimuth
+                    angleDMS = self.decdeg2dms(angleDD, True)
+                    convertedValues.append([row[0], str(angleDMS[0]), str(angleDMS[1]), str(angleDMS[2]), row[4], row[5]])
+        return convertedValues

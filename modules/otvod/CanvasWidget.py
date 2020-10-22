@@ -11,7 +11,7 @@ from . import CuttingArea, TempFeatures
 from qgis.PyQt.QtWidgets import QMessageBox, QDialog
 from qgis.core import QgsCoordinateReferenceSystem, QgsProject, QgsPointXY
 from PyQt5.QtGui import QColor
-from qgis.gui import QgsMapCanvas, QgsMapToolZoom
+from qgis.gui import QgsMapCanvas, QgsMapToolZoom, QgsMapToolPan
 from qgis.PyQt.QtCore import QObject
 
 
@@ -34,9 +34,7 @@ class CanvasWidget(QgsMapCanvas):
         self.cuttingArea = None
         self.btnControl = ButtonController(self.getButtons())
         self.btnControl.lockLesosekaButtons()
-
-    # def lockLesosekaButtons(self):
-    #     self.btnControl.lockLesosekaButtons()
+        self.panTool = QgsMapToolPan(self.canvas)
 
         """Возвращает кнопки управления лесосекой
         """
@@ -120,8 +118,8 @@ class CanvasWidget(QgsMapCanvas):
             self.amt.signal.connect(getResult)
         elif btnState == False:
             self.amt.deactivate()
-            zoomTool = QgsMapToolZoom(self.canvas, False)
-            self.canvas.setMapTool(zoomTool)
+            # zoomTool = QgsMapToolZoom(self.canvas, False)
+            self.canvas.setMapTool(self.panTool)
 
         """Инструмент выноса лесосеки из канваса
         """
@@ -205,8 +203,8 @@ class CanvasWidget(QgsMapCanvas):
         #     self.canvas, bindingPoint, layer, None, dictAttr)
         self.cuttingArea = CuttingArea.CuttingArea(
             self.canvas, bindingPoint, layer, None, self.btnControl)            
-        zoomTool = QgsMapToolZoom(self.canvas, False)
-        self.canvas.setMapTool(zoomTool)
+        # zoomTool = QgsMapToolZoom(self.canvas, False)
+        self.canvas.setMapTool(self.panTool)
         cuttingArea = self.cuttingArea.build()
         # print("""""""""""""""""""""""""""""""""""""", cuttingArea)
         # self.showPointOnCanvas(cuttingArea)
@@ -246,8 +244,8 @@ class CanvasWidget(QgsMapCanvas):
             if btnState == True:
                 btn.setChecked(False)
                 self.ppfm.deactivate()
-                zoomTool = QgsMapToolZoom(self.canvas, False)
-                self.canvas.setMapTool(zoomTool)
+                # zoomTool = QgsMapToolZoom(self.canvas, False)
+                self.canvas.setMapTool(self.panTool)
 
         if btnState == True:
             self.ppfm = PeekPointFromMap(self.canvas)
@@ -255,8 +253,8 @@ class CanvasWidget(QgsMapCanvas):
             self.ppfm.signal.connect(getResult)
 
         elif btnState == False:
-            zoomTool = QgsMapToolZoom(self.canvas, False)
-            self.canvas.setMapTool(zoomTool)
+            # zoomTool = QgsMapToolZoom(self.canvas, False)
+            self.canvas.setMapTool(self.panTool)
 
         """Инструмент выбора выдела на карте и построение его опорных точек
         """
@@ -275,8 +273,8 @@ class CanvasWidget(QgsMapCanvas):
             if btnState == True:
                 btn.setChecked(False)
                 self.ppfm.deactivate()
-                zoomTool = QgsMapToolZoom(self.canvas, False)
-                self.canvas.setMapTool(zoomTool)
+                # zoomTool = QgsMapToolZoom(self.canvas, False)
+                self.canvas.setMapTool(self.panTool)
 
         if btnState == True:
             self.ppfm = PeekStratumFromMap(self.canvas)
@@ -284,8 +282,8 @@ class CanvasWidget(QgsMapCanvas):
             self.ppfm.signal.connect(getResult)
 
         elif btnState == False:
-            zoomTool = QgsMapToolZoom(self.canvas, False)
-            self.canvas.setMapTool(zoomTool)
+            # zoomTool = QgsMapToolZoom(self.canvas, False)
+            self.canvas.setMapTool(self.panTool)
 
     def showPointOnCanvas(self, pointDict):
         # print("Пришла точка", pointDict)

@@ -29,8 +29,8 @@ class CoordinateFormatConverter:
             convertedRow = self.convertDDAzimuth(row)
         elif self.tableType == 2:
             convertedRow = self.convertDDRumb(row)
-        elif self.tableType == 3:
-            pass
+        elif self.tableType == 3 or self.tableType == 4:
+            convertedRow = self.convertDDAzimuth(row)
         return convertedRow
 
     def convertRowToDD(self, row):
@@ -40,8 +40,8 @@ class CoordinateFormatConverter:
             convertedRow = self.convertDMSAzimuth(row)
         elif self.tableType == 2:
             convertedRow = self.convertDMSRumb(row)
-        elif self.tableType == 3:
-            pass
+        elif self.tableType == 3 or self.tableType == 4:
+            convertedRow = self.convertDMSAzimuth(row)
         return convertedRow
 
     def decdeg2dms(self, dd, roundUp):

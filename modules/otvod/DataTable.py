@@ -645,7 +645,9 @@ class DataTableWrapper():
         elif self.tableModel.tabletype == 2:
             self.populateRumbTable(tableList)
         elif self.tableModel.tabletype == 3:
-            pass
+            self.populateAzimuthTable(tableList)
+        elif self.tableModel.tabletype == 4:
+            self.populateAzimuthTable(tableList)
 
     def populateCoordTable(self, tableList):
 
@@ -774,9 +776,10 @@ class DataTableWrapper():
             tableType, coordType, magneticInclination, bindingPoint)
         if coordType == 1:
             cvt = CoordinateConverter(tableList, currentTableType, coordType)
-            if newTableType == 3 or currentTableType == 3:
-                convertedValues = []
-            elif currentTableType == 1 and newTableType == 2:
+            convertedValues = None
+            # if newTableType == 3 or currentTableType == 3:
+            #     convertedValues = []
+            if currentTableType == 1 and newTableType == 2:
                 convertedValues = cvt.convertDMSAz2Rumb()
             elif currentTableType == 2 and newTableType == 1:
                 convertedValues = cvt.convertDMSRumb2Az()
@@ -790,35 +793,92 @@ class DataTableWrapper():
                 convertedValues = cvt.convert2DMSCoords(pointsDict)
             elif currentTableType == 2 and newTableType == 0:
                 convertedValues = cvt.convert2DMSCoords(pointsDict)
-            self.populateTable(convertedValues)
+            elif currentTableType == 3 and newTableType == 0:
+                convertedValues = cvt.convert2DMSCoords(pointsDict)
+            elif currentTableType == 4 and newTableType == 0:
+                convertedValues = cvt.convert2DMSCoords(pointsDict)         
+            elif currentTableType == 3 and newTableType == 1:
+                convertedValues = cvt.convertDMSCoord2Az(
+                    self.getBindingPointXY(), pointsDict)
+            elif currentTableType == 4 and newTableType == 1:
+                convertedValues = cvt.convertDMSCoord2Rumb(
+                    self.getBindingPointXY(), pointsDict)
+            elif currentTableType == 3 and newTableType == 2:
+                convertedValues = cvt.convertDMSCoord2Rumb(
+                    self.getBindingPointXY(), pointsDict)
+            elif currentTableType == 4 and newTableType == 2:
+                convertedValues = cvt.convertDMSCoord2Rumb(
+                    self.getBindingPointXY(), pointsDict)
+
+            elif currentTableType == 0 and newTableType == 3 or \
+                currentTableType == 0 and newTableType == 4:
+                convertedValues = cvt.convertCoord2Angle(self.getBindingPointXY(), pointsDict, newTableType, coordType)
+            elif currentTableType == 1 and newTableType == 3 or \
+                currentTableType == 1 and newTableType == 4:
+                convertedValues = cvt.convertAzimuth2Angle(pointsDict, newTableType, coordType)
+            elif currentTableType == 2 and newTableType == 3 or \
+                currentTableType == 2 and newTableType == 4:
+                convertedValues = cvt.convertRumb2Angle(pointsDict, newTableType, coordType)
+            elif currentTableType == 3 and newTableType == 4:
+                convertedValues = cvt.convertAngle2Angle(pointsDict, coordType)
+            elif currentTableType == 4 and newTableType == 3:
+                convertedValues = cvt.convertAngle2Angle(pointsDict, coordType)
+            if convertedValues:
+                self.populateTable(convertedValues)
         elif coordType == 0:
             if currentTableType == type:
                 pass
-            elif currentTableType == 3:
-                pass
+            # elif currentTableType == 3:
+            #     pass
             else:
                 cvt = CoordinateConverter(tableList, currentTableType, coordType)
+                convertedValues = None
                 if currentTableType == 1 and newTableType == 2:
                     convertedValues = cvt.convertDDAzimuth2Rumb()
-                    self.populateTable(convertedValues)
                 elif currentTableType == 2 and newTableType == 1:
                     convertedValues = cvt.convertDDRumb2Azimuth()
-                    self.populateTable(convertedValues)
                 elif currentTableType == 0 and newTableType == 1:
                     convertedValues = cvt.convertDDCoord2Azimuth(
                         self.getBindingPointXY(), pointsDict)
-                    self.populateTable(convertedValues)
                 elif currentTableType == 0 and newTableType == 2:
                     convertedValues = cvt.convertDDCoord2Rumb(
                         self.getBindingPointXY(), pointsDict)
-                    self.populateTable(convertedValues)
                 elif currentTableType == 1 and newTableType == 0:
                     convertedValues = cvt.convert2DDCoords(pointsDict)
-                    self.populateTable(convertedValues)
                 elif currentTableType == 2 and newTableType == 0:
                     convertedValues = cvt.convert2DDCoords(pointsDict)
-                    self.populateTable(convertedValues)
+                elif currentTableType == 3 and newTableType == 0:
+                    convertedValues = cvt.convert2DDCoords(pointsDict)
+                elif currentTableType == 4 and newTableType == 0:
+                    convertedValues = cvt.convert2DDCoords(pointsDict)
+                elif currentTableType == 3 and newTableType == 1:
+                    convertedValues = cvt.convertDDCoord2Azimuth(
+                        self.getBindingPointXY(), pointsDict)
+                elif currentTableType == 4 and newTableType == 1:
+                    convertedValues = cvt.convertDDCoord2Azimuth(
+                        self.getBindingPointXY(), pointsDict)
+                elif currentTableType == 3 and newTableType == 2:
+                    convertedValues = cvt.convertDDCoord2Rumb(
+                        self.getBindingPointXY(), pointsDict)
+                elif currentTableType == 4 and newTableType == 2:
+                    convertedValues = cvt.convertDDCoord2Rumb(
+                        self.getBindingPointXY(), pointsDict)                                                
 
+                elif currentTableType == 0 and newTableType == 3 or \
+                    currentTableType == 0 and newTableType == 4:
+                    convertedValues = cvt.convertCoord2Angle(self.getBindingPointXY(), pointsDict, newTableType, coordType)
+                elif currentTableType == 1 and newTableType == 3 or \
+                    currentTableType == 1 and newTableType == 4:
+                    convertedValues = cvt.convertAzimuth2Angle(pointsDict, newTableType, coordType)
+                elif currentTableType == 2 and newTableType == 3 or \
+                    currentTableType == 2 and newTableType == 4:
+                    convertedValues = cvt.convertRumb2Angle(pointsDict, newTableType, coordType)
+                elif currentTableType == 3 and newTableType == 4:
+                    convertedValues = cvt.convertAngle2Angle(pointsDict, coordType)
+                elif currentTableType == 4 and newTableType == 3:
+                    convertedValues = cvt.convertAngle2Angle(pointsDict, coordType)
+                if convertedValues:
+                    self.populateTable(convertedValues)
         self.tableModel.setRerender(True)
 
     def copyTableData(self):
