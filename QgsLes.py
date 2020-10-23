@@ -24,6 +24,7 @@ from .tools import CuttingAreaPeeker as peeker
 from qgis.gui import QgsMapToolZoom
 from qgis.core import QgsMessageLog, Qgis
 from .modules.trial_area.restatements import AreaProperty, Restatement
+from .tools.ProjectInitializer import QgsProjectInitializer
 
 
 class QgsLes:
@@ -82,10 +83,20 @@ class QgsLes:
 
         self.settingsAction.triggered.connect(lambda: Settings.SettingsController())
 
+        self.initProjectAction = QAction(
+            QIcon(util.resolvePath("res\\download.png")), "Инициализировать проект", self.iface.mainWindow()
+        )
+        self.initProjectAction.triggered.connect(self.initProjectClicked)
+
         self.qgsLesToolbar.addAction(self.otvodAction)
         self.qgsLesToolbar.addAction(self.countAction)
         # self.qgsLesToolbar.addAction(self.mdolAction)
         self.qgsLesToolbar.addAction(self.settingsAction)
+        self.qgsLesToolbar.addAction(self.initProjectAction)
+
+
+    def initProjectClicked(self):
+        self.initializer = QgsProjectInitializer()
 
     def unload(self):
         del self.qgsLesToolbar
