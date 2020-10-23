@@ -38,7 +38,7 @@ class CanvasWidget(QgsMapCanvas):
 
         """Возвращает кнопки управления лесосекой
         """
-
+        
     def getButtons(self):
         return [
             self.omw.buildLesoseka_Button,

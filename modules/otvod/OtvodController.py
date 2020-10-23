@@ -18,7 +18,7 @@ from datetime import datetime
 from qgis.PyQt.QtCore import Qt
 from qgis.utils import iface
 from qgis.gui import  QgsMapToolPan
-
+from .LayerManager import LayerManager
 
 
 class OtvodController:
@@ -126,6 +126,10 @@ class OtvodController:
         self.omw.handTool_button.clicked.connect(self.initHandTool)
         self.panTool = QgsMapToolPan(self.canvas)
 
+        self.omw.manageLayers_button.clicked.connect(self.manageCanvasLayers)
+
+    def manageCanvasLayers(self):
+        manager = LayerManager(self.canvas)
 
     def initHandTool(self):
         self.canvas.setMapTool(self.panTool)
