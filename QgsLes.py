@@ -120,6 +120,7 @@ class QgsLes:
         self.canvas.setMapTool(self.rmt)
 
     def countButtonClicked(self):
+
         def getResult(feature):
             if feature:
                 uid = feature["uid"]
@@ -127,17 +128,20 @@ class QgsLes:
                 self.rst.show()
 
             if not feature:
-                uuid = 'a25c8e66-5cb0-4189-a0ae-572876bbf36d'                
-                app = QtWidgets.QApplication(sys.argv)
-                app.setStyle("Fusion")
-                try:
-                    w = Restatement(uuid=uuid)
-                    w.show()
-                    sys.exit(app.exec_())
-                except NameError:
-                    w = AreaProperty()
-                    w.show()
-                sys.exit(app.exec_())
+                response_window_message = QtWidgets.QMessageBox.warning(
+                    None,
+                    "Внимание",
+                    "Не выбрана пробная площадь.\n"
+                    "Вы хотите создать запись пробной площади без картографической составляющей?",
+                    buttons=QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                )
+                if response_window_message == 16384:  # если нажали Yes
+                    # Вызываю окно первоначальных характеристик
+                    self.rst = AreaProperty()
+                    self.rst.show()
+
+                if response_window_message == 65536:  # Если нажали No
+                    pass
 
             zoomTool = QgsMapToolZoom(self.canvas, False)
             self.canvas.setMapTool(zoomTool)

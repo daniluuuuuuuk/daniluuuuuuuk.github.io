@@ -21,7 +21,7 @@ class Area(BaseModel):
     cutting_type = CharField(column_name='cuttingtyp', help_text='Тип рубки')
     num_plot = CharField(column_name='plot', help_text='Делянка')
     person_name = CharField(column_name='fio', help_text='ФИО работника')
-    date_offset = CharField(column_name='date', help_text='Дата отвода')
+    date_trial = CharField(column_name='date', help_text='Дата отвода')
     description = CharField(column_name='info', help_text='Доп. информация')
     num_vds = CharField(column_name='num_vds')
     leshos_text = CharField(column_name='leshos_text')
