@@ -1,4 +1,3 @@
-# ! setItem(row, column, newItem)
 import os
 import serial
 import traceback
@@ -6,8 +5,18 @@ import uuid
 from decimal import Decimal, ROUND_HALF_UP
 from PyQt5 import QtWidgets, QtCore, QtGui
 
-from .src.business import restatement_main_window, add_by_caliper, export_to_db, export_to_json, import_from_db, \
-    import_from_json, calculate_amount, export_to_xls, add_by_hand, area_property_main_window
+from .src.business import (
+    restatement_main_window,
+    add_by_caliper,
+    export_to_db,
+    export_to_json,
+    import_from_db,
+    import_from_json,
+    calculate_amount,
+    export_to_xls,
+    add_by_hand,
+    area_property_main_window,
+)
 from .src.config import Settings
 
 from .src.models.restatement import Trees
@@ -146,11 +155,11 @@ class Restatement(restatement_main_window.MainWindow):
 
     def add_data_att(self, att_data):
         self.att_data = att_data
-        self.label_4.setText(att_data['enterprise'])
-        self.label_6.setText(att_data['forestry'])
-        self.label_7.setText(att_data['compartment'])
-        self.label_8.setText(att_data['sub_compartment'])
-        self.label_10.setText(att_data['area_square'])
+        self.label_4.setText(att_data["enterprise"])
+        self.label_6.setText(att_data["forestry"])
+        self.label_7.setText(att_data["compartment"])
+        self.label_8.setText(att_data["sub_compartment"])
+        self.label_10.setText(att_data["area_square"])
 
     def add_table_new_species(self, data):
         self.tableWidget.insertColumn(data["column"] + 1)
@@ -346,15 +355,12 @@ class Restatement(restatement_main_window.MainWindow):
             q = QtWidgets.QMessageBox.warning(
                 self,
                 "Внимание",
-                "Пробная площадь уже существует\n"
-                "Вы хотите перезаписать данные?",
+                "Пробная площадь уже существует\n" "Вы хотите перезаписать данные?",
                 buttons=QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
             )
             if q == 16384:  # если нажали Yes
                 try:  # пробую удалять записи с данным UUID
-                    Trees.delete().where(
-                        Trees.area_uuid == self.uuid
-                    ).execute()
+                    Trees.delete().where(Trees.area_uuid == self.uuid).execute()
                 except Exception as error:
                     self.crit_message(
                         "Ошибка записи в БД. Данные не сохранены.",
@@ -477,9 +483,11 @@ class Restatement(restatement_main_window.MainWindow):
                 filter="Excel (*.xlsx)",
             )
             if export_file[0]:
-                self.object_export_to_xls = export_to_xls.Data(table=self.tableWidget,
-                                                               export_file=export_file[0],
-                                                               att_data=self.att_data)
+                self.object_export_to_xls = export_to_xls.Data(
+                    table=self.tableWidget,
+                    export_file=export_file[0],
+                    att_data=self.att_data,
+                )
                 self.object_export_to_xls.start()
                 self.object_export_to_xls.signal_status.connect(
                     lambda x: self.crit_message(x["body"], "", ""),
@@ -510,6 +518,7 @@ class Restatement(restatement_main_window.MainWindow):
 
 class AreaProperty(area_property_main_window.MainWindow):
     """Начальное окно с выбором лесхоза и тд"""
+
     def __init__(self):
         super().__init__()
 
@@ -521,13 +530,13 @@ class AreaProperty(area_property_main_window.MainWindow):
         self.label_5.setStyleSheet(f"color: none;")
         self.label_6.setStyleSheet(f"color: none;")
 
-        if self.comboBox.currentText() == '':
+        if self.comboBox.currentText() == "":
             self.label.setStyleSheet(f"color: red;")
             return False
-        if self.comboBox_2.currentText() == '':
+        if self.comboBox_2.currentText() == "":
             self.label_2.setStyleSheet(f"color: red;")
             return False
-        if self.comboBox_3.currentText() == '':
+        if self.comboBox_3.currentText() == "":
             self.label_3.setStyleSheet(f"color: red;")
             return False
         if self.spinBox.value() <= 0:
@@ -540,29 +549,45 @@ class AreaProperty(area_property_main_window.MainWindow):
             self.label_6.setStyleSheet(f"color: red;")
             return False
 
-        num_enterprise = int(str(Organization.select(Organization.code_organization).where(
-            Organization.id_organization == self.comboBox_2.currentData()).get().code_organization)[5:8])
-        num_forestry = int(str(Organization.select(Organization.code_organization).where(
-            Organization.id_organization == self.comboBox_3.currentData()).get().code_organization)[-2:])
+        num_enterprise = int(
+            str(
+                Organization.select(Organization.code_organization)
+                .where(Organization.id_organization == self.comboBox_2.currentData())
+                .get()
+                .code_organization
+            )[5:8]
+        )
+        num_forestry = int(
+            str(
+                Organization.select(Organization.code_organization)
+                .where(Organization.id_organization == self.comboBox_3.currentData())
+                .get()
+                .code_organization
+            )[-2:]
+        )
 
         att_data = {
-            'geom': None,
-            'uuid': None,
-            'num_forestry': num_forestry,
-            'compartment': str(self.spinBox.value()),
-            'sub_compartment': str(self.spinBox_2.value()),
-            'area': str(Decimal(self.doubleSpinBox.value()).quantize(Decimal("1.00"), ROUND_HALF_UP)),
-            'num_enterprise': num_enterprise,
-            'num_cutting_area': None,
-            'use_type': None,
-            'cutting_type': None,
-            'num_plot': None,
-            'person_name': None,
-            'date_trial': None,
-            'description': None,
-            'num_vds': None,
-            'leshos_text': None,
-            'lesnich_text': None,
+            "geom": None,
+            "uuid": None,
+            "num_forestry": num_forestry,
+            "compartment": str(self.spinBox.value()),
+            "sub_compartment": str(self.spinBox_2.value()),
+            "area": str(
+                Decimal(self.doubleSpinBox.value()).quantize(
+                    Decimal("1.00"), ROUND_HALF_UP
+                )
+            ),
+            "num_enterprise": num_enterprise,
+            "num_cutting_area": None,
+            "use_type": None,
+            "cutting_type": None,
+            "num_plot": None,
+            "person_name": None,
+            "date_trial": None,
+            "description": None,
+            "num_vds": None,
+            "leshos_text": None,
+            "lesnich_text": None,
             # "gplho": self.comboBox.currentData(),
         }
         return att_data
@@ -571,10 +596,10 @@ class AreaProperty(area_property_main_window.MainWindow):
         """Создаю сущность пробной площади"""
         att_data = self.get_data_gui()
         if att_data:
-            att_data['uuid'] = str(uuid.uuid1())
+            att_data["uuid"] = str(uuid.uuid1())
             Area.create(**att_data)
             self.close()
-            self.w = Restatement(uuid=att_data['uuid'])
+            self.w = Restatement(uuid=att_data["uuid"])
             self.w.show()
             return True
         return False
