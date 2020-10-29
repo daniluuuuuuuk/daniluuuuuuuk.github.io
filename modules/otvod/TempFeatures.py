@@ -218,8 +218,6 @@ class CuttingAreaTemp():
                 feat[i] = self.attributesDictionary[key]
             i += 1
 
-        print(self.attributesDictionary, "ATTRDICT")
-
         (res, outFeats) = layer.dataProvider().addFeatures([feat])
 
         layers = self.canvas.layers()

@@ -1,7 +1,7 @@
 import math
 from .GeoOperations import *
-# from .GeoOperations import calculateAzimuthWithPrecision
-# from .GeoOperations import calculateDistanceWithPrecision
+from .GeoOperations import calculateAzimuthWithPrecision
+from .GeoOperations import calculateDistanceWithPrecision
 from qgis.core import QgsPointXY
 
 """Калькулятор невязки"""
