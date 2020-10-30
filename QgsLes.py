@@ -24,6 +24,7 @@ from .tools import CuttingAreaPeeker as peeker
 from qgis.gui import QgsMapToolZoom
 from qgis.core import QgsMessageLog, Qgis
 from .modules.trial_area.restatements import AreaProperty, Restatement
+from .tools.ProjectInitializer import QgsProjectInitializer
 
 
 class QgsLes:
@@ -82,10 +83,20 @@ class QgsLes:
 
         self.settingsAction.triggered.connect(lambda: Settings.SettingsController())
 
+        self.initProjectAction = QAction(
+            QIcon(util.resolvePath("res\\download.png")), "Инициализировать проект", self.iface.mainWindow()
+        )
+        self.initProjectAction.triggered.connect(self.initProjectClicked)
+
         self.qgsLesToolbar.addAction(self.otvodAction)
         self.qgsLesToolbar.addAction(self.countAction)
         # self.qgsLesToolbar.addAction(self.mdolAction)
         self.qgsLesToolbar.addAction(self.settingsAction)
+        self.qgsLesToolbar.addAction(self.initProjectAction)
+
+
+    def initProjectClicked(self):
+        self.initializer = QgsProjectInitializer()
 
     def unload(self):
         del self.qgsLesToolbar
@@ -120,6 +131,7 @@ class QgsLes:
         self.canvas.setMapTool(self.rmt)
 
     def countButtonClicked(self):
+
         def getResult(feature):
             if feature:
                 uid = feature["uid"]
@@ -127,17 +139,20 @@ class QgsLes:
                 self.rst.show()
 
             if not feature:
-                uuid = 'a25c8e66-5cb0-4189-a0ae-572876bbf36d'                
-                app = QtWidgets.QApplication(sys.argv)
-                app.setStyle("Fusion")
-                try:
-                    w = Restatement(uuid=uuid)
-                    w.show()
-                    sys.exit(app.exec_())
-                except NameError:
-                    w = AreaProperty()
-                    w.show()
-                sys.exit(app.exec_())
+                response_window_message = QtWidgets.QMessageBox.warning(
+                    None,
+                    "Внимание",
+                    "Не выбрана пробная площадь.\n"
+                    "Вы хотите создать запись пробной площади без картографической составляющей?",
+                    buttons=QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                )
+                if response_window_message == 16384:  # если нажали Yes
+                    # Вызываю окно первоначальных характеристик
+                    self.rst = AreaProperty()
+                    self.rst.show()
+
+                if response_window_message == 65536:  # Если нажали No
+                    pass
 
             zoomTool = QgsMapToolZoom(self.canvas, False)
             self.canvas.setMapTool(zoomTool)

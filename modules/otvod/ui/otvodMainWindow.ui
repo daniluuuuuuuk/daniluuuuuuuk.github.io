@@ -104,38 +104,6 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QPushButton" name="buildLesoseka_Button">
-    <property name="geometry">
-     <rect>
-      <x>440</x>
-      <y>10</y>
-      <width>21</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Построить лесосеку</string>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="generateReport_Button">
-    <property name="geometry">
-     <rect>
-      <x>560</x>
-      <y>10</y>
-      <width>21</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Сформировать отчет</string>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
    <widget class="QPushButton" name="peekFromGPSPushButton">
     <property name="geometry">
      <rect>
@@ -252,7 +220,7 @@
    <widget class="QPushButton" name="azimuthTool_pushButton">
     <property name="geometry">
      <rect>
-      <x>620</x>
+      <x>530</x>
       <y>10</y>
       <width>21</width>
       <height>21</height>
@@ -294,80 +262,6 @@
      </rect>
     </property>
    </widget>
-   <widget class="QPushButton" name="saveLesoseka_Button">
-    <property name="geometry">
-     <rect>
-      <x>500</x>
-      <y>10</y>
-      <width>21</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Сохранить лесосеку</string>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="deleteLesoseka_Button">
-    <property name="geometry">
-     <rect>
-      <x>530</x>
-      <y>10</y>
-      <width>21</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Удалить лесосеку</string>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="rotate_left">
-    <property name="geometry">
-     <rect>
-      <x>734</x>
-      <y>10</y>
-      <width>20</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>&lt;</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="rotate_right">
-    <property name="geometry">
-     <rect>
-      <x>787</x>
-      <y>10</y>
-      <width>21</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>&gt;</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="rotate_inclination">
-    <property name="geometry">
-     <rect>
-      <x>755</x>
-      <y>10</y>
-      <width>31</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>0</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-   </widget>
    <widget class="QToolButton" name="move_node_up_button">
     <property name="geometry">
      <rect>
@@ -403,7 +297,7 @@
    <widget class="QPushButton" name="peekVydelFromMap_pushButton">
     <property name="geometry">
      <rect>
-      <x>590</x>
+      <x>500</x>
       <y>10</y>
       <width>21</width>
       <height>21</height>
@@ -422,7 +316,7 @@
    <widget class="QPushButton" name="lesoseka_from_map_button">
     <property name="geometry">
      <rect>
-      <x>650</x>
+      <x>560</x>
       <y>10</y>
       <width>21</width>
       <height>21</height>
@@ -436,22 +330,6 @@
     </property>
     <property name="checkable">
      <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="editAttributes_button">
-    <property name="geometry">
-     <rect>
-      <x>470</x>
-      <y>10</y>
-      <width>21</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Редактировать атрибуты</string>
-    </property>
-    <property name="text">
-     <string/>
     </property>
    </widget>
    <widget class="QWidget" name="horizontalLayoutWidget">
@@ -492,7 +370,7 @@
    <widget class="QPushButton" name="importCoordinates">
     <property name="geometry">
      <rect>
-      <x>710</x>
+      <x>620</x>
       <y>10</y>
       <width>21</width>
       <height>21</height>
@@ -508,50 +386,10 @@
      <bool>false</bool>
     </property>
    </widget>
-   <widget class="QWidget" name="horizontalLayoutWidget_2">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>390</y>
-      <width>296</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QRadioButton" name="coord_radio_button">
-       <property name="text">
-        <string>Координаты</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="azimuth_radio_button">
-       <property name="text">
-        <string>Азимуты</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="rumb_radio_button">
-       <property name="text">
-        <string>Румбы</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="angle_radio_button">
-       <property name="text">
-        <string>Вн. углы</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
    <widget class="QPushButton" name="lesoseka_from_map_points_button">
     <property name="geometry">
      <rect>
-      <x>680</x>
+      <x>590</x>
       <y>10</y>
       <width>21</width>
       <height>21</height>
@@ -611,6 +449,165 @@
     </property>
     <property name="tickInterval">
      <number>100</number>
+    </property>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget_3">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>390</y>
+      <width>296</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QRadioButton" name="coord_radio_button">
+       <property name="text">
+        <string>КРД</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="azimuth_radio_button">
+       <property name="text">
+        <string>АЗТ</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="rumb_radio_button">
+       <property name="text">
+        <string>РМБ</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="left_angle_radio_button">
+       <property name="text">
+        <string>ЛВУ</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="right_angle_radio_button">
+       <property name="text">
+        <string>ПВУ</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QPushButton" name="handTool_button">
+    <property name="geometry">
+     <rect>
+      <x>440</x>
+      <y>10</y>
+      <width>21</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Построить лесосеку</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="manageLayers_button">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>10</y>
+      <width>21</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Построить лесосеку</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="generateReport_Button">
+    <property name="geometry">
+     <rect>
+      <x>770</x>
+      <y>10</y>
+      <width>21</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Сформировать отчет</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="buildLesoseka_Button">
+    <property name="geometry">
+     <rect>
+      <x>650</x>
+      <y>10</y>
+      <width>21</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Построить лесосеку</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="editAttributes_button">
+    <property name="geometry">
+     <rect>
+      <x>680</x>
+      <y>10</y>
+      <width>21</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Редактировать атрибуты</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="deleteLesoseka_Button">
+    <property name="geometry">
+     <rect>
+      <x>740</x>
+      <y>10</y>
+      <width>21</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Удалить лесосеку</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="saveLesoseka_Button">
+    <property name="geometry">
+     <rect>
+      <x>710</x>
+      <y>10</y>
+      <width>21</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Сохранить лесосеку</string>
+    </property>
+    <property name="text">
+     <string/>
     </property>
    </widget>
   </widget>
