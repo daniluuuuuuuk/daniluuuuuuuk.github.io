@@ -9,3 +9,10 @@
 Применить Postgis
 pg_restore -h localhost -U postgres -d trial_area file.gz
 Скачать с репозитория ветку master и добавить модуль через Install from zip
+
+---
+
+При пустой таблице area не будет работать
+надо болванку одну туда записать
+
+---
