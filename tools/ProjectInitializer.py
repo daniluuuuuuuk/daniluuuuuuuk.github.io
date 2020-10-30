@@ -14,8 +14,10 @@ class QgsProjectInitializer:
         self.clearCurrentProject()
         self.setCrs()
         self.settings = None
-        self.layerDbNames = {'Gidroline': 'Гидрография линейная', 'Gidropoly': 'Гидрография площадная', 'Kvartaly': 'Кварталы',
-                             'Lesoseki': 'Лесосеки', 'Naspunkts': 'Населенные пункты', 'Privyazka': 'Линия привязки', 'Roads': 'Дороги', 'Vydela': 'Выдела'}
+        self.layerDbNames = {'hidroline': 'Гидрография линейная', 'hidropoly': 'Гидрография площадная', 'compartment': 'Кварталы',
+                             'area': 'Лесосеки', 'settlements': 'Населенные пункты', 'area_line': 'Линия привязки', 'roads': 'Дороги', 'subcompartment': 'Выдела'}        
+        # self.layerDbNames = {'Gidroline': 'Гидрография линейная', 'Gidropoly': 'Гидрография площадная', 'Kvartaly': 'Кварталы',
+        #                      'Lesoseki': 'Лесосеки', 'Naspunkts': 'Населенные пункты', 'Privyazka': 'Линия привязки', 'Roads': 'Дороги', 'Vydela': 'Выдела'}
         # self.layerDbNames = {'Гидрография линейная': 'Гидрография линейная', 'Гидрография площадная': 'Гидрография площадная', 'Кварталы': 'Кварталы',
         #                      'Лесосеки': 'Лесосеки', 'Населенные пункты': 'Населенные пункты', 'Линия привязки': 'Линия привязки', 'Дороги': 'Дороги', 'Выдела': 'Выдела'}
         try:
