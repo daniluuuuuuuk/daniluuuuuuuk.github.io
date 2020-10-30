@@ -17,6 +17,8 @@ from qgis.PyQt.QtWidgets import QMessageBox, QDialog, QButtonGroup, QFileDialog,
 from datetime import datetime
 from qgis.PyQt.QtCore import Qt
 from qgis.utils import iface
+from qgis.gui import  QgsMapToolPan
+from .LayerManager import LayerManager
 
 
 class OtvodController:
@@ -60,6 +62,10 @@ class OtvodController:
             QIcon(self.resolve('icons\\lesoseka_from_map_points.png')))
         self.omw.importCoordinates.setIcon(
             QIcon(self.resolve('icons\\internet.png')))
+        self.omw.handTool_button.setIcon(
+            QIcon(self.resolve('icons\\hand_tool.png')))
+        self.omw.manageLayers_button.setIcon(
+            QIcon(self.resolve('icons\\layers.png')))
 
         self.omw.otvodSettingsAction.triggered.connect(
             lambda: self.otvodMenuSettings())
@@ -103,11 +109,6 @@ class OtvodController:
         self.omw.saveLesoseka_Button.clicked.connect(self.saveCuttingArea)
         self.omw.deleteLesoseka_Button.clicked.connect(self.deleteCuttingArea)
 
-        # self.omw.rotate_left.clicked.connect(
-        #     partial(self.rotateCuttingArea, self.omw.rotate_left))
-        # self.omw.rotate_right.clicked.connect(
-        #     partial(self.rotateCuttingArea, self.omw.rotate_right))
-
         self.omw.x_coord_LineEdit.textChanged.connect(
             self.bindingPointCoordChanged)
         self.omw.y_coord_LineEdit.textChanged.connect(
@@ -121,6 +122,17 @@ class OtvodController:
         self.canvas = self.canvasWidget.getCanvas()
         self.omw.show()
         self.switch = self.initSwitchButton()
+
+        self.omw.handTool_button.clicked.connect(self.initHandTool)
+        self.panTool = QgsMapToolPan(self.canvas)
+
+        self.omw.manageLayers_button.clicked.connect(self.manageCanvasLayers)
+
+    def manageCanvasLayers(self):
+        manager = LayerManager(self.canvas)
+
+    def initHandTool(self):
+        self.canvas.setMapTool(self.panTool)
 
     def inclinationValueChanged(self, value):
         self.magneticInclination = value / 10
@@ -171,7 +183,8 @@ class OtvodController:
         radio_group.addButton(self.omw.coord_radio_button)
         radio_group.addButton(self.omw.azimuth_radio_button)
         radio_group.addButton(self.omw.rumb_radio_button)
-        radio_group.addButton(self.omw.angle_radio_button)
+        radio_group.addButton(self.omw.left_angle_radio_button)
+        radio_group.addButton(self.omw.right_angle_radio_button)
         i = 0
         for btn in radio_group.buttons():
             radio_group.setId(btn, i)
