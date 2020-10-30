@@ -1,6 +1,8 @@
 from qgis.PyQt.QtWidgets import QTableWidget, QComboBox, QMessageBox, QTableWidgetItem
 from ...tools import module_errors as er
-from .Converter import Converter
+# from .Converter import Converter
+from .tools.CoordinateConverter import CoordinateConverter
+from .tools.CoordinateFormatConverter import CoordinateFormatConverter
 from PyQt5.QtGui import QIcon
 from PyQt5 import QtWidgets
 from enum import Enum
@@ -14,17 +16,21 @@ import time
 from functools import partial
 
 # Только в целях подсказки, нигде не используется:
+
+
 class TableType(Enum):
     COORDINATE = 0
     AZIMUTH = 1
     RUMB = 2
 
+
 class CoordType(Enum):
     DECIMAL = 0
     DMS = 1
 
+
 class DataTable(QTableWidget):
-    
+
     signal = pyqtSignal(object)
     # rows_changed_signal = pyqtSignal(object)
 
@@ -74,7 +80,7 @@ class DataTable(QTableWidget):
         if self.rerenderEnabled:
             self.pointsDict.clear()
         self.initColumns()
-    
+
     def getParams(self):
         return [self.tabletype, self.coordType, self.magneticInclination, self.bindingPoint]
 
@@ -90,7 +96,7 @@ class DataTable(QTableWidget):
             self.builder = GeoOperations.parseDMSXYRow
         elif (self.tabletype == 1 and self.coordType == 0):
             rs = ["№", "Угол, °", "Длина линии, м", "Тип"]
-            self.builder = GeoOperations.parseAzimithDDRow
+            self.builder = GeoOperations.parseAzimuthDDRow
         elif (self.tabletype == 1 and self.coordType == 1):
             rs = ["№", "X, °", "X, ′", "X, ″", "Длина, м", "Тип"]
             self.builder = GeoOperations.parseAzimuthDMSRow
@@ -100,6 +106,18 @@ class DataTable(QTableWidget):
         elif (self.tabletype == 2 and self.coordType == 1):
             rs = ["№", "X, °", "X, ′", "X, ″", "Длина, м", "Румб", "Тип"]
             self.builder = GeoOperations.parseRumbDMSRow
+        elif (self.tabletype == 3 and self.coordType == 0):
+            rs = ["№", "Угол, °", "Длина линии, м", "Тип"]
+            self.builder = GeoOperations.parseAzimuthDDRow
+        elif (self.tabletype == 3 and self.coordType == 1):
+            rs = ["№", "X, °", "X, ′", "X, ″", "Длина, м", "Тип"]
+            self.builder = GeoOperations.parseAzimuthDMSRow
+        elif (self.tabletype == 4 and self.coordType == 0):
+            rs = ["№", "Угол, °", "Длина линии, м", "Тип"]
+            self.builder = GeoOperations.parseAzimuthDDRow
+        elif (self.tabletype == 4 and self.coordType == 1):
+            rs = ["№", "X, °", "X, ′", "X, ″", "Длина, м", "Тип"]
+            self.builder = GeoOperations.parseAzimuthDMSRow
         else:
             return ["Неправильная конфигурация столбцов"]
         return rs
@@ -112,9 +130,12 @@ class DataTable(QTableWidget):
 
     def setup_cell_widgets(self, index):
         lineTypeCombobox = QtWidgets.QComboBox()
-        lineTypeCombobox.addItem(QIcon(self.resolve("icons\\line_icon.png")), "Привязка")
-        lineTypeCombobox.addItem(QIcon(self.resolve("icons\\lesoseka_icon.png")), "Лесосека")
-        lineTypeCombobox.currentIndexChanged.connect(self.lineTypeComboboxChanged)
+        lineTypeCombobox.addItem(
+            QIcon(self.resolve("icons\\line_icon.png")), "Привязка")
+        lineTypeCombobox.addItem(
+            QIcon(self.resolve("icons\\lesoseka_icon.png")), "Лесосека")
+        lineTypeCombobox.currentIndexChanged.connect(
+            self.lineTypeComboboxChanged)
         self.setCellWidget(index, len(self.columnNames) - 1, lineTypeCombobox)
         if self.tabletype == 2 and self.coordType == 0:
             rumbCombobox = QtWidgets.QComboBox()
@@ -129,7 +150,8 @@ class DataTable(QTableWidget):
         if self.tabletype == 0 and self.coordType == 0:
             gpsButton = QtWidgets.QPushButton()
             # gpsButton.setText("GPS")
-            gpsButton.setIcon(QIcon(self.resolve('icons\\pick_from_gps_icon.png')))
+            gpsButton.setIcon(
+                QIcon(self.resolve('icons\\pick_from_gps_icon.png')))
             gpsButton.setMaximumSize(QSize(70, 50))
             self.setCellWidget(index, 3, gpsButton)
             gpsButton.clicked.connect(partial(self.setCoordinateRow, index))
@@ -138,12 +160,12 @@ class DataTable(QTableWidget):
         cell = QTableWidgetItem()
         self.setItem(index, 1, cell)
         cell2 = QTableWidgetItem()
-        self.setItem(index, 2, cell2)   
+        self.setItem(index, 2, cell2)
         gpsCoords = GeoOperations.getCoordFromGPS()
         if gpsCoords:
             self.item(index, 2).setText(str(round(gpsCoords[0], 10)))
             self.item(index, 1).setText(str(round(gpsCoords[1], 10)))
-    
+
     def update_row_numbers(self):
         for row in range(0, self.getRowCount()):
             cell = QTableWidgetItem()
@@ -233,11 +255,11 @@ class DataTable(QTableWidget):
         return self.magneticInclination
 
     def getJSONRows(self):
-        rowsList = [{"Table" : {"table_type" : self.tabletype,
-                                "coord_type" : self.coordType,
-                                "magnetic_inclination" : self.magneticInclination,
-                                "BindingPointX" : self.bindingPoint.x(),
-                                "BindingPointY" : self.bindingPoint.y()}}
+        rowsList = [{"Table": {"table_type": self.tabletype,
+                               "coord_type": self.coordType,
+                               "magnetic_inclination": self.magneticInclination,
+                               "BindingPointX": self.bindingPoint.x(),
+                               "BindingPointY": self.bindingPoint.y()}}
                     ]
         for row in range(0, self.rowCount()):
             try:
@@ -245,44 +267,125 @@ class DataTable(QTableWidget):
                 for column in range(0, self.columnCount()):
                     if self.horizontalHeaderItem(column).text() == "Румб":
                         comboboxCellWidget = self.cellWidget(row, column)
-                        rowsDict.update({self.getColumnNames()[column] : str(comboboxCellWidget.currentText())})
+                        rowsDict.update({self.getColumnNames()[column]: str(
+                            comboboxCellWidget.currentText())})
                     elif self.horizontalHeaderItem(column).text() == "Тип":
                         comboboxCellWidget = self.cellWidget(row, column)
-                        rowsDict.update({self.getColumnNames()[column] : str(comboboxCellWidget.currentText())})
+                        rowsDict.update({self.getColumnNames()[column]: str(
+                            comboboxCellWidget.currentText())})
                     elif self.horizontalHeaderItem(column).text() == "GPS":
                         pass
                     else:
-                        rowsDict.update({self.getColumnNames()[column] : self.item(row, column).text()})
+                        rowsDict.update(
+                            {self.getColumnNames()[column]: self.item(row, column).text()})
             except Exception as e:
                 QMessageBox.information(
                     None,
                     er.MODULE_ERROR,
-                    "Ошибка. Отсутствуют значения в" + ": строка " + str(row + 1) + ", колонка " + str(column + 1) + ". Сохранен пустой файл"
-                    )
+                    "Ошибка. Отсутствуют значения в" + ": строка " +
+                    str(row + 1) + ", колонка " +
+                    str(column + 1) + ". Сохранен пустой файл"
+                )
                 rowsList.clear()
                 return rowsList
-            rowsList.append({row : rowsDict})
+            rowsList.append({row: rowsDict})
         return rowsList
 
     def importJSONData(self, data):
         self.data = data
 
+    def getAngleBuilder(self, row):
+        if self.tabletype == 3:
+            if self.coordType == 0:
+                if (self.cellWidget(row, 3).currentText() == "Привязка" or row == 0):
+                    return GeoOperations.parseAzimuthDDRow
+                else:
+                    if self.cellWidget(row - 1, 3).currentText() == "Привязка":
+                        return GeoOperations.parseAzimuthDDRow
+                    else:
+                        return GeoOperations.parseLeftAngleDDRow
+
+            if self.coordType == 1:
+                if (self.cellWidget(row, 5).currentText() == "Привязка" or row == 0):
+                    return GeoOperations.parseAzimuthDMSRow
+                else:
+                    if self.cellWidget(row - 1, 5).currentText() == "Привязка":
+                        return GeoOperations.parseAzimuthDMSRow
+                    else:
+                        return GeoOperations.parseLeftAngleDMSRow
+
+        elif self.tabletype == 4:
+            if self.coordType == 0:
+                if (self.cellWidget(row, 3).currentText() == "Привязка" or row == 0):
+                    return GeoOperations.parseAzimuthDDRow
+                else:
+                    if self.cellWidget(row - 1, 3).currentText() == "Привязка":
+                        return GeoOperations.parseAzimuthDDRow
+                    else:
+                        return GeoOperations.parseRightAngleDDRow
+
+            if self.coordType == 1:
+                if (self.cellWidget(row, 5).currentText() == "Привязка" or row == 0):
+                    return GeoOperations.parseAzimuthDMSRow
+                else:
+                    if self.cellWidget(row - 1, 5).currentText() == "Привязка":
+                        return GeoOperations.parseAzimuthDMSRow
+                    else:
+                        return GeoOperations.parseRightAngleDMSRow
+
     def cellChangedHandler(self, row, column):
         if self.ensureRowCellsNotEmpty(row) and self.rerenderEnabled:
 
+            angle = False
+
             if self.tabletype == 0:
                 point = self.builder(self, row)
+
+            elif self.tabletype == 3 or self.tabletype == 4:
+                self.builder = self.getAngleBuilder(row)
+                if (self.builder.__name__ == "parseLeftAngleDMSRow" or \
+                        self.builder.__name__ == "parseLeftAngleDDRow" or \
+                        self.builder.__name__ == "parseRightAngleDMSRow" or \
+                        self.builder.__name__ == "parseRightAngleDDRow"):
+                    angle = True
+                if not self.pointsDict:
+                    point = self.builder(
+                        self.bindingPoint, self, row, self.magneticInclination)
+                else:
+                    if angle:
+                        if row == 1:
+                            azimuth = GeoOperations.calculateAzimuth(
+                                self.bindingPoint, self.pointsDict[row-1][0])
+                            point = self.builder(
+                                self.pointsDict[row-1][0], azimuth, self, row, self.magneticInclination)
+                        elif row > 1:
+                            azimuth = GeoOperations.calculateAzimuth(
+                                self.pointsDict[row-2][0], self.pointsDict[row-1][0])
+                            point = self.builder(
+                                self.pointsDict[row-1][0], azimuth, self, row, self.magneticInclination)
+                    else:
+                        if row == 0:
+                            point = self.builder(
+                                self.bindingPoint, self, row, self.magneticInclination)
+                        else:
+                            point = self.builder(
+                                self.pointsDict[row - 1][0],
+                                self, row, self.magneticInclination
+                            )
             else:
                 if not self.pointsDict:
-                    point = self.builder(self.bindingPoint, self, row, self.magneticInclination)
+                    point = self.builder(
+                        self.bindingPoint, self, row, self.magneticInclination)
                 else:
                     if row == 0:
-                        point = self.builder(self.bindingPoint, self, row, self.magneticInclination)
+                        point = self.builder(
+                            self.bindingPoint, self, row, self.magneticInclination)
                     else:
                         point = self.builder(
                             self.pointsDict[row - 1][0],
                             self, row, self.magneticInclination
-                            )
+                        )
+
             # если редактируется имеющаяся точка - удалить ее
             if row in self.pointsDict:
                 del self.pointsDict[row]
@@ -351,9 +454,12 @@ class DataTable(QTableWidget):
 
     def set_line_type_widget(self, row, column, index):
         lineTypeCombobox = QtWidgets.QComboBox()
-        lineTypeCombobox.addItem(QIcon(self.resolve("icons\\line_icon.png")), "Привязка")
-        lineTypeCombobox.addItem(QIcon(self.resolve("icons\\lesoseka_icon.png")), "Лесосека")
-        lineTypeCombobox.currentIndexChanged.connect(self.lineTypeComboboxChanged)
+        lineTypeCombobox.addItem(
+            QIcon(self.resolve("icons\\line_icon.png")), "Привязка")
+        lineTypeCombobox.addItem(
+            QIcon(self.resolve("icons\\lesoseka_icon.png")), "Лесосека")
+        lineTypeCombobox.currentIndexChanged.connect(
+            self.lineTypeComboboxChanged)
         self.setCellWidget(row, column, lineTypeCombobox)
         lineTypeCombobox.setCurrentIndex(index)
 
@@ -422,7 +528,7 @@ class DataTable(QTableWidget):
             if self.rowCount() < len(self.pointsDict):
                 self.pointsDict.pop(self.getRowCount())
             self.refreshData()
-            print(self.pointsDict)
+            # print(self.pointsDict)
 
             # self.refreshData()
     def getTableAsList(self):
@@ -443,10 +549,12 @@ class DataTable(QTableWidget):
             tableAsList.append(rowList)
         return tableAsList
 
+
 class DataTableWrapper():
 
     def __init__(self, datatable, coordType, tableType, inclination, bindingPoint):
-        self.tableModel = DataTable(datatable, coordType, tableType, inclination, bindingPoint)
+        self.tableModel = DataTable(
+            datatable, coordType, tableType, inclination, bindingPoint)
         self.tableModel.initColumns()
         self.i = 0
 
@@ -454,7 +562,8 @@ class DataTableWrapper():
         self.datatable = newDatatable
 
     def setParams(self, tableType, coordType, inclination, bindingPoint):
-        self.tableModel.setParams(tableType, coordType, inclination, bindingPoint)
+        self.tableModel.setParams(
+            tableType, coordType, inclination, bindingPoint)
 
     def addRow(self):
         self.tableModel.addRow()
@@ -506,7 +615,8 @@ class DataTableWrapper():
             return self.tableModel.getJSONRows()
         else:
             type_name = table.__class__.__name__
-            raise TypeError(f"Object of type '{type_name}' is not JSON serializable")
+            raise TypeError(
+                f"Object of type '{type_name}' is not JSON serializable")
 
     def loadData(self, data):
         self.tableModel.importJSONData(data)
@@ -516,8 +626,9 @@ class DataTableWrapper():
         currentTableType = self.tableModel.tabletype
         params = self.tableModel.getParams()
         tableList = self.copyTableData()
-        self.tableModel.setParams(currentTableType, coordType, self.getMagneticInclination(), self.getBindingPointXY())
-        cvt = Converter(tableList, currentTableType, coordType)
+        self.tableModel.setParams(
+            currentTableType, coordType, self.getMagneticInclination(), self.getBindingPointXY())
+        cvt = CoordinateFormatConverter(tableList, currentTableType, coordType)
         if coordType == 0:
             convertedTableList = cvt.convertToDD()
         elif coordType == 1:
@@ -534,7 +645,9 @@ class DataTableWrapper():
         elif self.tableModel.tabletype == 2:
             self.populateRumbTable(tableList)
         elif self.tableModel.tabletype == 3:
-            pass
+            self.populateAzimuthTable(tableList)
+        elif self.tableModel.tabletype == 4:
+            self.populateAzimuthTable(tableList)
 
     def populateCoordTable(self, tableList):
 
@@ -552,7 +665,7 @@ class DataTableWrapper():
                         index = lineWidget.findText(item[3])
                         lineWidget.setCurrentIndex(index)
                 row += 1
-        
+
         def populateDMSRows():
             row = 0
             for item in tableList:
@@ -652,59 +765,121 @@ class DataTableWrapper():
         if self.tableModel.coordType == 0:
             populateDDRows()
         elif self.tableModel.coordType == 1:
-            populateDMSRows()        
+            populateDMSRows()
 
     def convertCells(self, currentTableType, newTableType, tableType, coordType, magneticInclination, bindingPoint):
         self.tableModel.setRerender(False)
         tableList = self.copyTableData()
         pointsDict = self.tableModel.getPoints().copy()
         self.deleteRows()
-        self.tableModel.setParams(tableType, coordType, magneticInclination, bindingPoint)
+        self.tableModel.setParams(
+            tableType, coordType, magneticInclination, bindingPoint)
         if coordType == 1:
-            cvt = Converter(tableList, currentTableType, coordType)
-            if newTableType == 3 or currentTableType == 3:
-                convertedValues = []   
-            elif currentTableType == 1 and newTableType == 2:
+            cvt = CoordinateConverter(tableList, currentTableType, coordType)
+            convertedValues = None
+            # if newTableType == 3 or currentTableType == 3:
+            #     convertedValues = []
+            if currentTableType == 1 and newTableType == 2:
                 convertedValues = cvt.convertDMSAz2Rumb()
             elif currentTableType == 2 and newTableType == 1:
                 convertedValues = cvt.convertDMSRumb2Az()
             elif currentTableType == 0 and newTableType == 1:
-                convertedValues = cvt.convertDMSCoord2Az(self.getBindingPointXY(), pointsDict)
+                convertedValues = cvt.convertDMSCoord2Az(
+                    self.getBindingPointXY(), pointsDict)
             elif currentTableType == 0 and newTableType == 2:
-                convertedValues = cvt.convertDMSCoord2Rumb(self.getBindingPointXY(), pointsDict)
+                convertedValues = cvt.convertDMSCoord2Rumb(
+                    self.getBindingPointXY(), pointsDict)
             elif currentTableType == 1 and newTableType == 0:
                 convertedValues = cvt.convert2DMSCoords(pointsDict)
             elif currentTableType == 2 and newTableType == 0:
                 convertedValues = cvt.convert2DMSCoords(pointsDict)
-            self.populateTable(convertedValues)
+            elif currentTableType == 3 and newTableType == 0:
+                convertedValues = cvt.convert2DMSCoords(pointsDict)
+            elif currentTableType == 4 and newTableType == 0:
+                convertedValues = cvt.convert2DMSCoords(pointsDict)         
+            elif currentTableType == 3 and newTableType == 1:
+                convertedValues = cvt.convertDMSCoord2Az(
+                    self.getBindingPointXY(), pointsDict)
+            elif currentTableType == 4 and newTableType == 1:
+                convertedValues = cvt.convertDMSCoord2Rumb(
+                    self.getBindingPointXY(), pointsDict)
+            elif currentTableType == 3 and newTableType == 2:
+                convertedValues = cvt.convertDMSCoord2Rumb(
+                    self.getBindingPointXY(), pointsDict)
+            elif currentTableType == 4 and newTableType == 2:
+                convertedValues = cvt.convertDMSCoord2Rumb(
+                    self.getBindingPointXY(), pointsDict)
+
+            elif currentTableType == 0 and newTableType == 3 or \
+                currentTableType == 0 and newTableType == 4:
+                convertedValues = cvt.convertCoord2Angle(self.getBindingPointXY(), pointsDict, newTableType, coordType)
+            elif currentTableType == 1 and newTableType == 3 or \
+                currentTableType == 1 and newTableType == 4:
+                convertedValues = cvt.convertAzimuth2Angle(pointsDict, newTableType, coordType)
+            elif currentTableType == 2 and newTableType == 3 or \
+                currentTableType == 2 and newTableType == 4:
+                convertedValues = cvt.convertRumb2Angle(pointsDict, newTableType, coordType)
+            elif currentTableType == 3 and newTableType == 4:
+                convertedValues = cvt.convertAngle2Angle(pointsDict, coordType)
+            elif currentTableType == 4 and newTableType == 3:
+                convertedValues = cvt.convertAngle2Angle(pointsDict, coordType)
+            if convertedValues:
+                self.populateTable(convertedValues)
         elif coordType == 0:
             if currentTableType == type:
                 pass
-            elif currentTableType == 3:
-                pass
+            # elif currentTableType == 3:
+            #     pass
             else:
-                cvt = Converter(tableList, currentTableType, coordType)
+                cvt = CoordinateConverter(tableList, currentTableType, coordType)
+                convertedValues = None
                 if currentTableType == 1 and newTableType == 2:
                     convertedValues = cvt.convertDDAzimuth2Rumb()
-                    self.populateTable(convertedValues)
                 elif currentTableType == 2 and newTableType == 1:
                     convertedValues = cvt.convertDDRumb2Azimuth()
-                    self.populateTable(convertedValues)
                 elif currentTableType == 0 and newTableType == 1:
-                    convertedValues = cvt.convertDDCoord2Azimuth(self.getBindingPointXY(), pointsDict)
-                    self.populateTable(convertedValues)
+                    convertedValues = cvt.convertDDCoord2Azimuth(
+                        self.getBindingPointXY(), pointsDict)
                 elif currentTableType == 0 and newTableType == 2:
-                    convertedValues = cvt.convertDDCoord2Rumb(self.getBindingPointXY(), pointsDict)
-                    self.populateTable(convertedValues)                    
+                    convertedValues = cvt.convertDDCoord2Rumb(
+                        self.getBindingPointXY(), pointsDict)
                 elif currentTableType == 1 and newTableType == 0:
                     convertedValues = cvt.convert2DDCoords(pointsDict)
-                    self.populateTable(convertedValues)
                 elif currentTableType == 2 and newTableType == 0:
                     convertedValues = cvt.convert2DDCoords(pointsDict)
+                elif currentTableType == 3 and newTableType == 0:
+                    convertedValues = cvt.convert2DDCoords(pointsDict)
+                elif currentTableType == 4 and newTableType == 0:
+                    convertedValues = cvt.convert2DDCoords(pointsDict)
+                elif currentTableType == 3 and newTableType == 1:
+                    convertedValues = cvt.convertDDCoord2Azimuth(
+                        self.getBindingPointXY(), pointsDict)
+                elif currentTableType == 4 and newTableType == 1:
+                    convertedValues = cvt.convertDDCoord2Azimuth(
+                        self.getBindingPointXY(), pointsDict)
+                elif currentTableType == 3 and newTableType == 2:
+                    convertedValues = cvt.convertDDCoord2Rumb(
+                        self.getBindingPointXY(), pointsDict)
+                elif currentTableType == 4 and newTableType == 2:
+                    convertedValues = cvt.convertDDCoord2Rumb(
+                        self.getBindingPointXY(), pointsDict)                                                
+
+                elif currentTableType == 0 and newTableType == 3 or \
+                    currentTableType == 0 and newTableType == 4:
+                    convertedValues = cvt.convertCoord2Angle(self.getBindingPointXY(), pointsDict, newTableType, coordType)
+                elif currentTableType == 1 and newTableType == 3 or \
+                    currentTableType == 1 and newTableType == 4:
+                    convertedValues = cvt.convertAzimuth2Angle(pointsDict, newTableType, coordType)
+                elif currentTableType == 2 and newTableType == 3 or \
+                    currentTableType == 2 and newTableType == 4:
+                    convertedValues = cvt.convertRumb2Angle(pointsDict, newTableType, coordType)
+                elif currentTableType == 3 and newTableType == 4:
+                    convertedValues = cvt.convertAngle2Angle(pointsDict, coordType)
+                elif currentTableType == 4 and newTableType == 3:
+                    convertedValues = cvt.convertAngle2Angle(pointsDict, coordType)
+                if convertedValues:
                     self.populateTable(convertedValues)
-
         self.tableModel.setRerender(True)
-
 
     def copyTableData(self):
         return self.tableModel.getTableAsList()
@@ -735,4 +910,3 @@ class DataTableWrapper():
             lineWidget = self.tableModel.cellWidget(row, 4)
             index = lineWidget.findText(ptTuple[1])
             lineWidget.setCurrentIndex(index)
-

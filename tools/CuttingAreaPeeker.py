@@ -5,6 +5,7 @@ from qgis.core import QgsProject
 from qgis.PyQt.QtWidgets import QMessageBox
 
 
+
 class PeekStratumFromMap(QgsMapToolEmitPoint, QObject):
     signal = pyqtSignal(object)
 
