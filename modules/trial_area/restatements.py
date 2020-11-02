@@ -21,7 +21,7 @@ from .src.config import Settings
 
 from .src.models.restatement import Trees
 from .src.models.public import Area
-from .src.models.nri import *
+from .src.models.nri import Species, Organization
 
 
 class Restatement(restatement_main_window.MainWindow):
@@ -159,7 +159,7 @@ class Restatement(restatement_main_window.MainWindow):
         self.label_6.setText(att_data["forestry"])
         self.label_7.setText(att_data["compartment"])
         self.label_8.setText(att_data["sub_compartment"])
-        self.label_10.setText(att_data["area_square"])
+        self.lineEdit.setText(att_data["area_square"])
 
     def add_table_new_species(self, data):
         self.tableWidget.insertColumn(data["column"] + 1)
@@ -237,17 +237,18 @@ class Restatement(restatement_main_window.MainWindow):
     def add_by_caliper(self):
         try:
             self.connection = serial.Serial(
-                Settings("Default_Settings", "caliper_port").read_setting(), 9600
+                Settings(group="Default_Settings", key="caliper_port").read_setting(),
+                9600,
             )
-            self.pushButton_2.setStyleSheet(f"background-color: #70c858")
+            self.pushButton_2.setStyleSheet("background-color: #70c858")
         except:
-            self.pushButton_2.setStyleSheet(f"background-color: #ee534e")
+            self.pushButton_2.setStyleSheet("background-color: #ee534e")
             return None
-        self.object_add_by_cliper_thread = add_by_caliper.Caliper(
+        self.object_add_by_caliper_thread = add_by_caliper.Caliper(
             connection=self.connection
         )
-        self.object_add_by_cliper_thread.start()
-        self.object_add_by_cliper_thread.signal_output_data.connect(
+        self.object_add_by_caliper_thread.start()
+        self.object_add_by_caliper_thread.signal_output_data.connect(
             self.add_table_item, QtCore.Qt.QueuedConnection
         )
 
@@ -345,7 +346,7 @@ class Restatement(restatement_main_window.MainWindow):
         self.object_import_from_db.signal_att_data.connect(
             self.add_data_att, QtCore.Qt.QueuedConnection
         )
-        self.object_import_from_db.siganl_calculate_amount.connect(
+        self.object_import_from_db.signal_calculate_amount.connect(
             self.calculate_amount, QtCore.Qt.QueuedConnection
         )
 
@@ -370,7 +371,7 @@ class Restatement(restatement_main_window.MainWindow):
                     return None
 
                 self.object_save_to_db_thread = export_to_db.DBData(
-                    table=self.tableWidget, uuid=self.uuid
+                    table=self.tableWidget, uuid=self.uuid, area=self.lineEdit.text()
                 )
                 self.object_save_to_db_thread.start()
                 self.object_save_to_db_thread.signal_status.connect(
@@ -406,14 +407,14 @@ class Restatement(restatement_main_window.MainWindow):
                 )
 
         else:
-            self.crit_message("Отсутсвуют данные экспорта.", "", "")
+            self.crit_message("Отсутствуют данные экспорта.", "", "")
 
     def import_from_json(self):
         if self.tableWidget.columnCount() > 1:
             q = QtWidgets.QMessageBox.warning(
                 self,
                 "Внимание",
-                "Данные уже присутсвуют\n" "Вы хотите перезаписать данные?",
+                "Данные уже присутствуют\n" "Вы хотите перезаписать данные?",
                 buttons=QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
             )
             if q == 16384:  # если нажали Yes
@@ -441,10 +442,10 @@ class Restatement(restatement_main_window.MainWindow):
                     self.object_import_from_json_thread.signal_output_record.connect(
                         self.add_table_item, QtCore.Qt.QueuedConnection
                     )
-                    self.object_import_from_json_thread.siganl_calculate_amount.connect(
+                    self.object_import_from_json_thread.signal_calculate_amount.connect(
                         self.calculate_amount, QtCore.Qt.QueuedConnection
                     )
-                    self.object_import_from_json_thread.siganl_error.connect(
+                    self.object_import_from_json_thread.signal_error.connect(
                         lambda: self.crit_message("Ошибка импорта файла.", "", ""),
                         QtCore.Qt.QueuedConnection,
                     )
@@ -467,15 +468,16 @@ class Restatement(restatement_main_window.MainWindow):
                 self.object_import_from_json_thread.signal_output_record.connect(
                     self.add_table_item, QtCore.Qt.QueuedConnection
                 )
-                self.object_import_from_json_thread.siganl_calculate_amount.connect(
+                self.object_import_from_json_thread.signal_calculate_amount.connect(
                     self.calculate_amount, QtCore.Qt.QueuedConnection
                 )
-                self.object_import_from_json_thread.siganl_error.connect(
+                self.object_import_from_json_thread.signal_error.connect(
                     lambda: self.crit_message("Ошибка импорта файла.", "", ""),
                     QtCore.Qt.QueuedConnection,
                 )
 
     def export_to_xls(self):
+        self.att_data["area_square"] = self.lineEdit.text()
         if self.tableWidget.columnCount() > 1:
             export_file = QtWidgets.QFileDialog.getSaveFileName(
                 caption="Сохранение файла",
@@ -495,7 +497,7 @@ class Restatement(restatement_main_window.MainWindow):
                 )
 
         else:
-            self.crit_message("Отсутсвуют данные экспорта.", "", "")
+            self.crit_message("Отсутствуют данные экспорта.", "", "")
 
     def crit_message(self, error, info, detailed_text):
         dlg = QtWidgets.QMessageBox(self)
@@ -523,30 +525,30 @@ class AreaProperty(area_property_main_window.MainWindow):
         super().__init__()
 
     def get_data_gui(self):
-        self.label.setStyleSheet(f"color: none;")
-        self.label_2.setStyleSheet(f"color: none;")
-        self.label_3.setStyleSheet(f"color: none;")
-        self.label_4.setStyleSheet(f"color: none;")
-        self.label_5.setStyleSheet(f"color: none;")
-        self.label_6.setStyleSheet(f"color: none;")
+        self.label.setStyleSheet("color: none;")
+        self.label_2.setStyleSheet("color: none;")
+        self.label_3.setStyleSheet("color: none;")
+        self.label_4.setStyleSheet("color: none;")
+        self.label_5.setStyleSheet("color: none;")
+        self.label_6.setStyleSheet("color: none;")
 
         if self.comboBox.currentText() == "":
-            self.label.setStyleSheet(f"color: red;")
+            self.label.setStyleSheet("color: red;")
             return False
         if self.comboBox_2.currentText() == "":
-            self.label_2.setStyleSheet(f"color: red;")
+            self.label_2.setStyleSheet("color: red;")
             return False
         if self.comboBox_3.currentText() == "":
-            self.label_3.setStyleSheet(f"color: red;")
+            self.label_3.setStyleSheet("color: red;")
             return False
         if self.spinBox.value() <= 0:
-            self.label_4.setStyleSheet(f"color: red;")
+            self.label_4.setStyleSheet("color: red;")
             return False
         if self.spinBox_2.value() <= 0:
-            self.label_5.setStyleSheet(f"color: red;")
+            self.label_5.setStyleSheet("color: red;")
             return False
         if self.doubleSpinBox.value() <= 0:
-            self.label_6.setStyleSheet(f"color: red;")
+            self.label_6.setStyleSheet("color: red;")
             return False
 
         num_enterprise = int(
