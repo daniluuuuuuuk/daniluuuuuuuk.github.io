@@ -107,7 +107,7 @@ class Restatement(restatement_main_window.MainWindow):
         num_fuel = data["num_fuel"] + old_num_fuel
         num_half_ind = data["num_half_ind"] + old_num_half_ind
 
-        if num_ind > 0:
+        if num_ind >= 0:
             self.tableWidget.setItem(
                 data["row"],
                 data["column"] + 1,
@@ -117,7 +117,7 @@ class Restatement(restatement_main_window.MainWindow):
                 QtCore.Qt.AlignHCenter
             )
 
-        if num_fuel > 0:
+        if num_fuel >= 0:
             self.tableWidget.setItem(
                 data["row"],
                 data["column"] + 2,
@@ -127,7 +127,7 @@ class Restatement(restatement_main_window.MainWindow):
                 QtCore.Qt.AlignHCenter
             )
 
-        if num_half_ind > 0:
+        if num_half_ind >= 0:
             self.tableWidget.setItem(
                 data["row"],
                 data["column"] + 3,
@@ -381,7 +381,7 @@ class Restatement(restatement_main_window.MainWindow):
                 return None
         except:
             self.object_save_to_db_thread = export_to_db.DBData(
-                table=self.tableWidget, uuid=self.uuid
+                table=self.tableWidget, uuid=self.uuid, area=self.lineEdit.text()
             )
             self.object_save_to_db_thread.start()
             self.object_save_to_db_thread.signal_status.connect(
