@@ -407,7 +407,7 @@ class Restatement(restatement_main_window.MainWindow):
                 )
 
         else:
-            self.crit_message("Отсутствуют данные экспорта.", "", "")
+            self.crit_message("Отсутствуют данные для экспорта.", "", "")
 
     def import_from_json(self):
         if self.tableWidget.columnCount() > 1:
@@ -497,7 +497,7 @@ class Restatement(restatement_main_window.MainWindow):
                 )
 
         else:
-            self.crit_message("Отсутствуют данные экспорта.", "", "")
+            self.crit_message("Отсутствуют данные для экспорта.", "", "")
 
     def crit_message(self, error, info, detailed_text):
         dlg = QtWidgets.QMessageBox(self)
@@ -585,7 +585,6 @@ class AreaProperty(area_property_main_window.MainWindow):
             "cutting_type": None,
             "num_plot": None,
             "person_name": None,
-            "date_trial": None,
             "description": None,
             "num_vds": None,
             "leshos_text": None,

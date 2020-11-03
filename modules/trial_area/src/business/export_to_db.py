@@ -17,7 +17,7 @@ class DBData(QtCore.QThread):
     def run(self):
         if self.table.columnCount() == 1:
             self.signal_status.emit(
-                {"head": "Ошибка", "body": "Отсутсвуют данные сохранения."}
+                {"head": "Ошибка", "body": "Отсутствуют данные для сохранения."}
             )
             return None
         for column in range(1, self.table.columnCount()):
