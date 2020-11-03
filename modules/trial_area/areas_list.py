@@ -49,7 +49,7 @@ class AreasList(areas_list_main_window.MainWindow):
         self.areas_data.start()
 
     def open_selected_area(self):
-        current_uuid = self.tableWidget.item(self.tableWidget.currentRow(), 5).text()
+        current_uuid = self.tableWidget.item(self.tableWidget.currentRow(), 6).text()
         self.one_area = Restatement(current_uuid)
         self.one_area.show()
 
@@ -61,7 +61,7 @@ class AreasList(areas_list_main_window.MainWindow):
         uuid_areas_for_delete = []
         selected_rows = self.tableWidget.selectionModel().selectedRows()
         for row in selected_rows:
-            uuid_areas_for_delete.append(self.tableWidget.item(row.row(), 5).text())
+            uuid_areas_for_delete.append(self.tableWidget.item(row.row(), 6).text())
 
         buttonReply = QtWidgets.QMessageBox.question(
             self,
