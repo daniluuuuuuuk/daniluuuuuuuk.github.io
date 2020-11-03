@@ -45,6 +45,18 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Создание новой пробной площади</string>
+        </property>
+        <property name="toolTipDuration">
+         <number>-1</number>
+        </property>
+        <property name="statusTip">
+         <string/>
+        </property>
+        <property name="whatsThis">
+         <string/>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -58,6 +70,9 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Обновить список пробных площадей</string>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -70,6 +85,9 @@
           <width>38</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Удаление выбранных пробных площадей</string>
         </property>
         <property name="text">
          <string/>
