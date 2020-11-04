@@ -153,6 +153,9 @@ class Restatement(restatement_main_window.MainWindow):
 
         self.last_data = data
 
+        if data["device_sign"] == "caliper":
+            self.calculate_amount()  # Считаю сумму
+
     def add_data_att(self, att_data):
         self.att_data = att_data
         self.label_4.setText(att_data["enterprise"])
