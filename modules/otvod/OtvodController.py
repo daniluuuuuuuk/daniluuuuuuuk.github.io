@@ -5,7 +5,8 @@ from .CanvasWidget import CanvasWidget
 from .ui.SwitchButton import Switch
 from .gui.LesosekaInfoDialog import LesosekaInfo
 from .tools import GeoOperations
-from . import TempFeatures, Report
+from .tools.tempFeatures.BindingPointBuilder import BindingPointBuilder
+from . import Report
 from .DataTable import DataTableWrapper
 from .OtvodSettingsDialog import OtvodSettingsWindow
 from ...tools import config
@@ -222,7 +223,7 @@ class OtvodController:
             print("Ошибка при чтении строк координат", n, e)
         if 50.0 <= n <= 57. and 20. <= e <= 33.:
             self.bindingPoint = GeoOperations.convertToZone35(QgsPointXY(e, n))
-            bp = TempFeatures.BindingPointBuilder(
+            bp = BindingPointBuilder(
                 self.bindingPoint, self.canvas)
             bp.makeFeature()
             self.tableWrapper.tableModel.setBindingPointXY(self.bindingPoint)

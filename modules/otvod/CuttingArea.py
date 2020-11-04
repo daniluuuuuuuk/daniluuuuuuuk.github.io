@@ -1,7 +1,9 @@
 import uuid
 from qgis.core import QgsPointXY, QgsGeometry, QgsFeatureRequest
 from qgis.core import QgsProject, QgsFeature, QgsExpression
-from . import TempFeatures, TieUpObject
+from .tools.tempFeatures.AnchorLineTemp import AnchorLineTemp
+from .tools.tempFeatures.CuttingAreaTemp import CuttingAreaTemp
+from . import TieUpObject
 from .tools.DiscrepancyCalculator import DiscrepancyCalculator
 from qgis.PyQt.QtWidgets import QDialog
 from .gui.discrepancyWindow import Ui_Dialog as DiscrepancyDialog
@@ -198,11 +200,11 @@ class CuttingArea:
         """
 
     def buildLine(self):
-        tempLineBuilder = TempFeatures.AnchorLineTemp(
+        tempLineBuilder = AnchorLineTemp(
             self.canvas, self.bindingPoint, self.anchorLinePoints, self.feature, self.uid, self.dictAttr)
         tempLineBuilder.makeFeature()
 
-        tempCuttingAreaBuilder = TempFeatures.CuttingAreaTemp(
+        tempCuttingAreaBuilder = CuttingAreaTemp(
             self.canvas, self.anchorLinePoints[-1], self.cuttingAreaPoints, self.feature, self.uid, self.dictAttr)
         return tempCuttingAreaBuilder.makeFeature()
 
@@ -211,7 +213,7 @@ class CuttingArea:
 
     def buildPoly(self, point):
         # print("cuttingareapoint", self.cuttingAreaPoints)
-        tempCuttingAreaBuilder = TempFeatures.CuttingAreaTemp(
+        tempCuttingAreaBuilder = CuttingAreaTemp(
             self.canvas, point, self.cuttingAreaPoints, self.feature, self.uid, self.dictAttr)
         return tempCuttingAreaBuilder.makeFeature()
 

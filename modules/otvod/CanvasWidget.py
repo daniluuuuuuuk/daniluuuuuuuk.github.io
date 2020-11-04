@@ -5,9 +5,11 @@ from .tools.mapTools.BuildFromMapPointsTool import BuildFromMapPointsTool
 from .tools.mapTools.BuildFromMapTool import BuildFromMapTool
 from .tools.mapTools.PeekPointFromMap import PeekPointFromMap
 from .tools.mapTools.PeekStratumFromMap import PeekStratumFromMap
-# from .LesosekaInfoDialog import LesosekaInfo
+from .tools.tempFeatures.AnchorPointBuilder import AnchorPointBuilder
+from .tools.tempFeatures.CuttingAreaBuilder import CuttingAreaBuilder
+from .tools.tempFeatures.PointBuilder import PointBuilder
 from .gui.LesosekaInfoDialog import LesosekaInfo
-from . import CuttingArea, TempFeatures
+from . import CuttingArea
 from qgis.PyQt.QtWidgets import QMessageBox, QDialog
 from qgis.core import QgsCoordinateReferenceSystem, QgsProject, QgsPointXY
 from PyQt5.QtGui import QColor
@@ -262,11 +264,11 @@ class CanvasWidget(QgsMapCanvas):
     def peekVydelFromMap(self, btn, btnState):
 
         def getResult(selectedFeature):
-            self.bap = TempFeatures.AnchorPointBuilder(
+            self.bap = AnchorPointBuilder(
                 self.canvas, selectedFeature)
             self.bap.makeFeature()
 
-            self.bcp = TempFeatures.CuttingAreaBuilder(
+            self.bcp = CuttingAreaBuilder(
                 self.canvas, selectedFeature)
             self.bcp.makeFeature()
 
@@ -288,7 +290,7 @@ class CanvasWidget(QgsMapCanvas):
     def showPointOnCanvas(self, pointDict):
         # print("Пришла точка", pointDict)
         try:
-            self.pb = TempFeatures.PointBuilder(pointDict, self.canvas)
+            self.pb = PointBuilder(pointDict, self.canvas)
             if pointDict:
                 # self.pb = TempFeatures.PointBuilder(pointDict, self.canvas)
                 self.pb.makeFeature()
