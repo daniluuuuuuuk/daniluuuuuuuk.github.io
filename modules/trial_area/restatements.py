@@ -187,13 +187,13 @@ class Restatement(restatement_main_window.MainWindow):
             QtCore.Qt.AlignHCenter
         )
         self.tableWidget.setItem(
-            1, data["column"] + 1, QtWidgets.QTableWidgetItem("Делов.")
+            1, data["column"] + 1, QtWidgets.QTableWidgetItem("ДЕЛ")
         )
         self.tableWidget.setItem(
-            1, data["column"] + 2, QtWidgets.QTableWidgetItem("Дрова")
+            1, data["column"] + 2, QtWidgets.QTableWidgetItem("ДР")
         )
         self.tableWidget.setItem(
-            1, data["column"] + 3, QtWidgets.QTableWidgetItem("Сух.")
+            1, data["column"] + 3, QtWidgets.QTableWidgetItem("СУХ")
         )
 
     def default_color(self):
