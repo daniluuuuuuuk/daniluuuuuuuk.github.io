@@ -68,6 +68,8 @@ class ForestObjectLoader(QgsTask):
         elif gplho is not None and leshoz is not None:
             self.getLesnichestvaByLeshoz(leshoz)
 
+        print(gplho, leshoz)
+
         return True
 
     def finished(self, result):

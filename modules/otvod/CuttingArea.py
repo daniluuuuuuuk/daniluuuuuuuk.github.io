@@ -37,17 +37,17 @@ class CuttingArea:
     def getLesosekaProperties(self):
 
         dictAttr = {}
-        sw = LesosekaInfo(False)
-        ui = sw.ui
-        sw.setUpValues()
-        dialogResult = sw.exec()
+        self.sw = LesosekaInfo(False)
+        ui = self.sw.ui
+        self.sw.setUpValues()
+        dialogResult = self.sw.exec()
         if dialogResult == QDialog.Accepted:
             self.btnControl.unlockSaveDeleteButtons()
-            dictAttr["num_lch"] = sw.getLesnichNumber()
+            dictAttr["num_lch"] = self.sw.getLesnichNumber()
             dictAttr["num_kv"] = ui.num_kv.text()
             dictAttr["num_vd"] = 0
             dictAttr["area"] = 0
-            dictAttr["leshos"] = sw.getLeshozNumber()
+            dictAttr["leshos"] = self.sw.getLeshozNumber()
             dictAttr["num"] = ui.num.text()
             dictAttr["useType"] = ""
             dictAttr["cuttingType"] = ""
