@@ -337,7 +337,6 @@ class DataTable(QTableWidget):
 
     def cellChangedHandler(self, row, column):
         if self.item(row, column) and self.item(row, column).text().find(",") != -1:
-            print("oh yeah")
             currentText = self.item(row, column).text()
             self.item(row, column).setText(currentText.replace(',','.'))
         
