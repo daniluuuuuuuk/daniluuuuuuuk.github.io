@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QTableWidgetItem, QApplication
 
 from .src.business import areas_list_main_window
 from .src.models.nri import Organization
+from .src.models.restatement import Trees
 from .src.models.public import Area
 from .restatements import Restatement, AreaProperty
 
@@ -78,6 +79,7 @@ class AreasList(areas_list_main_window.MainWindow):
         )
         if buttonReply == QtWidgets.QMessageBox.Yes:
             for area_uuid in uuid_areas_for_delete:
+                Trees.delete().where(Trees.area_uuid == area_uuid).execute()
                 Area.delete().where(Area.uuid == area_uuid).execute()
 
             self.import_data_from_db()
