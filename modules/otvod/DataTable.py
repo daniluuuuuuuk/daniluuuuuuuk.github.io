@@ -336,6 +336,11 @@ class DataTable(QTableWidget):
                         return GeoOperations.parseRightAngleDMSRow
 
     def cellChangedHandler(self, row, column):
+        if self.item(row, column) and self.item(row, column).text().find(",") != -1:
+            print("oh yeah")
+            currentText = self.item(row, column).text()
+            self.item(row, column).setText(currentText.replace(',','.'))
+        
         if self.ensureRowCellsNotEmpty(row) and self.rerenderEnabled:
 
             angle = False
@@ -389,12 +394,13 @@ class DataTable(QTableWidget):
                         )
 
             # если редактируется имеющаяся точка - удалить ее
-            if row in self.pointsDict:
-                del self.pointsDict[row]
+            # if row in self.pointsDict:
+            #     del self.pointsDict[row]
 
             self.pointsDict[row] = [point, self.getPointType(row)]
+            
             self.signal.emit(self.pointsDict)
-            # print(self.pointsDict)
+            print(self.pointsDict)
             return row
 
     def getPointType(self, row):

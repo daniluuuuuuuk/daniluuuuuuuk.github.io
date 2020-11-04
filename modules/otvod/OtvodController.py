@@ -181,10 +181,14 @@ class OtvodController:
     def bindingPointCoordChanged(self):
         e = n = 0
         try:
-            n = float(self.omw.x_coord_LineEdit.text())
-            e = float(self.omw.y_coord_LineEdit.text())
-        except:
-            print("Ошибка при чтении строк координат", n, e)
+            nRaw = self.omw.x_coord_LineEdit.text().replace(',','.')
+            eRaw = self.omw.y_coord_LineEdit.text().replace(',','.')
+            n = float(nRaw)
+            e = float(eRaw)
+        except Exception as e:
+            print("Ошибка формата точки привязки")
+            # QMessageBox.information(None, "Ошибка данных точки привязки", str(e))
+
         if 50.0 <= n <= 57. and 20. <= e <= 33.:
             self.bindingPoint = GeoOperations.convertToZone35(QgsPointXY(e, n))
             bp = BindingPointBuilder(
