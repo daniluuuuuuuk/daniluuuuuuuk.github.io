@@ -819,7 +819,7 @@ class DataTableWrapper():
                 convertedValues = cvt.convertDMSCoord2Az(
                     self.getBindingPointXY(), pointsDict)
             elif currentTableType == 4 and newTableType == 1:
-                convertedValues = cvt.convertDMSCoord2Rumb(
+                convertedValues = cvt.convertDMSCoord2Az(
                     self.getBindingPointXY(), pointsDict)
             elif currentTableType == 3 and newTableType == 2:
                 convertedValues = cvt.convertDMSCoord2Rumb(
