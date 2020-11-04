@@ -20,6 +20,7 @@ from qgis.PyQt.QtCore import Qt
 from qgis.utils import iface
 from qgis.gui import  QgsMapToolPan
 from .LayerManager import LayerManager
+from .icons.initIcons import IconSet
 
 
 class OtvodController:
@@ -36,37 +37,8 @@ class OtvodController:
         self.bindingPoint = QgsPointXY(0, 0)
         self.cuttingArea = None
         self.tableWrapper = self.loadDataTable()
-
-        self.omw.peekFromMap_PushButton.setIcon(
-            QIcon(self.resolve('icons\\pick_from_map_icon.png')))
-        self.omw.peekFromGPSPushButton.setIcon(
-            QIcon(self.resolve('icons\\pick_from_gps_icon.png')))
-        self.omw.addRangeFinderNode_button.setIcon(
-            QIcon(self.resolve('icons\\range_finder_icon.png')))
-        self.omw.azimuthTool_pushButton.setIcon(
-            QIcon(self.resolve('icons\\azimuth_icon.png')))
-        self.omw.buildLesoseka_Button.setIcon(
-            QIcon(self.resolve('icons\\build.png')))
-        self.omw.editAttributes_button.setIcon(
-            QIcon(self.resolve('icons\\pencil.png')))
-        self.omw.saveLesoseka_Button.setIcon(
-            QIcon(self.resolve('icons\\save.png')))
-        self.omw.deleteLesoseka_Button.setIcon(
-            QIcon(self.resolve('icons\\delete.png')))
-        self.omw.generateReport_Button.setIcon(
-            QIcon(self.resolve('icons\\report.png')))
-        self.omw.peekVydelFromMap_pushButton.setIcon(
-            QIcon(self.resolve('icons\\pin.png')))
-        self.omw.lesoseka_from_map_button.setIcon(
-            QIcon(self.resolve('icons\\lesoseka_from_map.png')))
-        self.omw.lesoseka_from_map_points_button.setIcon(
-            QIcon(self.resolve('icons\\lesoseka_from_map_points.png')))
-        self.omw.importCoordinates.setIcon(
-            QIcon(self.resolve('icons\\internet.png')))
-        self.omw.handTool_button.setIcon(
-            QIcon(self.resolve('icons\\hand_tool.png')))
-        self.omw.manageLayers_button.setIcon(
-            QIcon(self.resolve('icons\\layers.png')))
+        
+        IconSet(self.omw)
 
         self.omw.otvodSettingsAction.triggered.connect(
             lambda: self.otvodMenuSettings())
@@ -205,11 +177,6 @@ class OtvodController:
             for btn in self.radio_group.buttons():
                 if self.tableType == self.radio_group.id(btn):
                     btn.setChecked(True)
-
-    def resolve(self, name, basepath=None):
-        if not basepath:
-            basepath = os.path.dirname(os.path.realpath(__file__))
-        return os.path.join(basepath, name)
 
     def bindingPointCoordChanged(self):
         e = n = 0
