@@ -199,15 +199,12 @@ class OtvodController:
             buttonId = self.radio_group.id(button)
             currentTableType = self.tableType
             self.tableType = buttonId
-            # self.coordType = 0
             self.tableWrapper.convertCells(currentTableType, buttonId, self.tableType, self.coordType, float(
                 self.magneticInclination), self.bindingPoint)
-        else:
+        else:           
             for btn in self.radio_group.buttons():
                 if self.tableType == self.radio_group.id(btn):
                     btn.setChecked(True)
-                    QMessageBox.information(
-                        None, 'Ошибка', 'Заполните недостающие данные в таблице или очистите таблицу')
 
     def resolve(self, name, basepath=None):
         if not basepath:

@@ -14,6 +14,8 @@ import os
 import decimal
 import time
 from functools import partial
+from PyQt5.QtGui import QColor
+from PyQt5.QtCore import QTimer
 
 # Только в целях подсказки, нигде не используется:
 
@@ -423,14 +425,25 @@ class DataTable(QTableWidget):
         self.refreshData()
 
     def ensureTableCellsNotEmpty(self):
+
+        self.clearSelection()
+
+        def flicker(row, col):
+            self.item(row, col).setBackground(QColor(255,255,255))
+
         for row in range(0, self.getRowCount()):
             for col in range(0, self.getColCount()):
                 headertext = self.horizontalHeaderItem(col).text()
                 if headertext == "GPS" or headertext == "Тип" or headertext == "Румб":
                     break
                 if not self.item(row, col):
+                    self.setItem(row, col, QTableWidgetItem())
+                    self.item(row, col).setBackground(QColor(255,0,0,50))
+                    QTimer().singleShot(100, partial(flicker, row, col))
                     return False
                 if self.item(row, col).text() == "":
+                    self.item(row, col).setBackground(QColor(255,0,0,50)) 
+                    QTimer().singleShot(100, partial(flicker, row, col))
                     return False
         return True
 
