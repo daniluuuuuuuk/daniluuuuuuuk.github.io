@@ -50,9 +50,8 @@ class Amount(QtCore.QThread):
                         fuel = int(self.table.item(row, column + 1).text())
                     except AttributeError:
                         fuel = 0
-                    total_by_dmr_spc = ind + fuel
                     output_data.append(
-                        {"row": row, "column": column - 1, "total": total_by_dmr_spc}
+                        {"row": row, "column": column - 1, "total": ind + fuel}
                     )
 
         return output_data
