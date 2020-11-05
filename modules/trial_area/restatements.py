@@ -71,34 +71,35 @@ class Restatement(restatement_main_window.MainWindow):
         if (
             data["species"] not in self.species_positions.keys()
         ):  # если породы нету в таблице-присваю ей позицию в dict
+            # ! 4 (Четверка) в коже ниже, это сколько столбцов относится на породу
             self.species_positions[data["species"]] = (
-                len(self.species_positions.keys()) * 3
+                len(self.species_positions.keys()) * 4
             )
 
         data["row"] = int(data["dmr"] / 4)
         data["column"] = self.species_positions[data["species"]]
         self.tableWidget.showRow(data["row"])
         if (
-            self.tableWidget.columnCount() <= data["column"] + 1
+            self.tableWidget.columnCount() <= data["column"] + 2
         ):  # Создаю колонки, если такой попроды нету
             self.add_table_new_species(data)
-
         """Собираю старые значения"""
         try:
             old_num_ind = int(
-                self.tableWidget.item(data["row"], data["column"] + 1).text()
+                self.tableWidget.item(data["row"], data["column"] + 2).text()
             )
+
         except:
             old_num_ind = 0
         try:
             old_num_fuel = int(
-                self.tableWidget.item(data["row"], data["column"] + 2).text()
+                self.tableWidget.item(data["row"], data["column"] + 3).text()
             )
         except:
             old_num_fuel = 0
         try:
             old_num_half_ind = int(
-                self.tableWidget.item(data["row"], data["column"] + 3).text()
+                self.tableWidget.item(data["row"], data["column"] + 4).text()
             )
         except:
             old_num_half_ind = 0
@@ -110,46 +111,51 @@ class Restatement(restatement_main_window.MainWindow):
         if num_ind >= 0:
             self.tableWidget.setItem(
                 data["row"],
-                data["column"] + 1,
+                data["column"] + 2,
                 QtWidgets.QTableWidgetItem(str(num_ind)),
             )
-            self.tableWidget.item(data["row"], data["column"] + 1).setTextAlignment(
+            self.tableWidget.item(data["row"], data["column"] + 2).setTextAlignment(
                 QtCore.Qt.AlignHCenter
             )
 
         if num_fuel >= 0:
             self.tableWidget.setItem(
                 data["row"],
-                data["column"] + 2,
+                data["column"] + 3,
                 QtWidgets.QTableWidgetItem(str(num_fuel)),
             )
-            self.tableWidget.item(data["row"], data["column"] + 2).setTextAlignment(
+            self.tableWidget.item(data["row"], data["column"] + 3).setTextAlignment(
                 QtCore.Qt.AlignHCenter
             )
 
         if num_half_ind >= 0:
             self.tableWidget.setItem(
                 data["row"],
-                data["column"] + 3,
+                data["column"] + 4,
                 QtWidgets.QTableWidgetItem(str(num_half_ind)),
             )
-            self.tableWidget.item(data["row"], data["column"] + 3).setTextAlignment(
+            self.tableWidget.item(data["row"], data["column"] + 4).setTextAlignment(
                 QtCore.Qt.AlignHCenter
             )
 
         # Крашу новое значение:
         if num_ind != old_num_ind:
-            self.tableWidget.item(data["row"], data["column"] + 1).setBackground(
-                QtGui.QColor("#c1f593")
-            )
-        if num_fuel != old_num_fuel:
             self.tableWidget.item(data["row"], data["column"] + 2).setBackground(
                 QtGui.QColor("#c1f593")
             )
-        if num_half_ind != old_num_half_ind:
+        if num_fuel != old_num_fuel:
             self.tableWidget.item(data["row"], data["column"] + 3).setBackground(
                 QtGui.QColor("#c1f593")
             )
+        if num_half_ind != old_num_half_ind:
+            self.tableWidget.item(data["row"], data["column"] + 4).setBackground(
+                QtGui.QColor("#c1f593")
+            )
+
+        self.tableWidget.scrollToItem(
+            self.tableWidget.item(data["row"], data["column"] + 4),
+            QtWidgets.QAbstractItemView.PositionAtCenter,
+        )
 
         self.last_data = data
 
@@ -168,9 +174,10 @@ class Restatement(restatement_main_window.MainWindow):
         self.tableWidget.insertColumn(data["column"] + 1)
         self.tableWidget.insertColumn(data["column"] + 2)
         self.tableWidget.insertColumn(data["column"] + 3)
+        self.tableWidget.insertColumn(data["column"] + 4)
         # Sets the span of the table element at (row , column ) to the number of rows
         # and columns specified by (rowSpanCount , columnSpanCount ).
-        self.tableWidget.setSpan(0, data["column"] + 1, 1, 3)
+        self.tableWidget.setSpan(0, data["column"] + 1, 1, 4)
         self.tableWidget.setItem(
             0,
             data["column"] + 1,
@@ -187,13 +194,19 @@ class Restatement(restatement_main_window.MainWindow):
             QtCore.Qt.AlignHCenter
         )
         self.tableWidget.setItem(
-            1, data["column"] + 1, QtWidgets.QTableWidgetItem("ДЕЛ")
+            1, data["column"] + 1, QtWidgets.QTableWidgetItem("ИТГ")
+        )
+        self.tableWidget.item(1, data["column"] + 1).setBackground(
+            QtGui.QColor("#DDA0DD")
         )
         self.tableWidget.setItem(
-            1, data["column"] + 2, QtWidgets.QTableWidgetItem("ДР")
+            1, data["column"] + 2, QtWidgets.QTableWidgetItem("ДЕЛ")
         )
         self.tableWidget.setItem(
-            1, data["column"] + 3, QtWidgets.QTableWidgetItem("СУХ")
+            1, data["column"] + 3, QtWidgets.QTableWidgetItem("ДР")
+        )
+        self.tableWidget.setItem(
+            1, data["column"] + 4, QtWidgets.QTableWidgetItem("СУХ")
         )
 
     def default_color(self):
@@ -201,10 +214,6 @@ class Restatement(restatement_main_window.MainWindow):
         if self.tableWidget.item(self.last_data["row"], self.last_data["column"]):
             self.tableWidget.item(
                 self.last_data["row"], self.last_data["column"]
-            ).setBackground(QtGui.QColor("white"))
-        if self.tableWidget.item(self.last_data["row"], self.last_data["column"] + 1):
-            self.tableWidget.item(
-                self.last_data["row"], self.last_data["column"] + 1
             ).setBackground(QtGui.QColor("white"))
         if self.tableWidget.item(self.last_data["row"], self.last_data["column"] + 2):
             self.tableWidget.item(
@@ -214,13 +223,17 @@ class Restatement(restatement_main_window.MainWindow):
             self.tableWidget.item(
                 self.last_data["row"], self.last_data["column"] + 3
             ).setBackground(QtGui.QColor("white"))
+        if self.tableWidget.item(self.last_data["row"], self.last_data["column"] + 4):
+            self.tableWidget.item(
+                self.last_data["row"], self.last_data["column"] + 4
+            ).setBackground(QtGui.QColor("white"))
 
     def add_table_amount(self, data):
-        for column in range(1, len(data.keys()) + 1):
+        for column in range(1, len(data["amount"].keys()) + 1):
             self.tableWidget.setItem(
                 self.tableWidget.rowCount() - 1,
                 column,
-                QtWidgets.QTableWidgetItem(str(data[column])),
+                QtWidgets.QTableWidgetItem(str(data["amount"][column])),
             )
             self.tableWidget.item(
                 self.tableWidget.rowCount() - 1, column
@@ -228,6 +241,26 @@ class Restatement(restatement_main_window.MainWindow):
             self.tableWidget.item(
                 self.tableWidget.rowCount() - 1, column
             ).setBackground(QtGui.QColor("#bdf0ff"))
+
+        for _ in data["total_by_species_dmr"]:
+            self.tableWidget.setItem(
+                _["row"], _["column"], QtWidgets.QTableWidgetItem(str(_["total"])),
+            )
+            self.tableWidget.item(_["row"], _["column"]).setTextAlignment(
+                QtCore.Qt.AlignHCenter
+            )
+            self.tableWidget.item(_["row"], _["column"]).setBackground(
+                QtGui.QColor("#DDA0DD")
+            )
+
+        for req_row in list(data["total_by_dmr"].keys()):
+
+            self.tableWidget.setVerticalHeaderItem(
+                req_row,
+                QtWidgets.QTableWidgetItem(
+                    str(req_row * 4) + f'({data["total_by_dmr"][req_row]})'
+                ),
+            )
 
     def add_by_hand(self):
         object_add_record = add_by_hand.AddByHand(last_data=self.last_data)
@@ -262,7 +295,10 @@ class Restatement(restatement_main_window.MainWindow):
         if (
             self.tableWidget.rowCount() - 1 > self.tableWidget.currentRow() > 1
         ):  # Если это не шапка и не сумма
-            if self.tableWidget.currentColumn() > 0:  # Если это не диаметр
+            if (
+                self.tableWidget.currentColumn() > 0
+                and self.tableWidget.currentColumn() % 4 != 1
+            ):  # Если это не диаметр и не итого
                 self.default_color()
                 if current_item is None:
                     self.tableWidget.setItem(
@@ -305,7 +341,10 @@ class Restatement(restatement_main_window.MainWindow):
         if (
             self.tableWidget.rowCount() - 1 > self.tableWidget.currentRow() > 1
         ):  # Если это не шапка и не сумма
-            if self.tableWidget.currentColumn() > 0:  # Если это не диаметр
+            if (
+                self.tableWidget.currentColumn() > 0
+                and self.tableWidget.currentColumn() % 4 != 1
+            ):  # Если это не диаметр и не итого
                 if current_item is not None:
                     if int(current_item.text()) > 0:
                         self.tableWidget.setItem(
