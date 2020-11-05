@@ -152,6 +152,11 @@ class Restatement(restatement_main_window.MainWindow):
                 QtGui.QColor("#c1f593")
             )
 
+        self.tableWidget.scrollToItem(
+            self.tableWidget.item(data["row"], data["column"] + 4),
+            QtWidgets.QAbstractItemView.PositionAtCenter,
+        )
+
         self.last_data = data
 
         if data["device_sign"] == "caliper":
@@ -237,7 +242,7 @@ class Restatement(restatement_main_window.MainWindow):
                 self.tableWidget.rowCount() - 1, column
             ).setBackground(QtGui.QColor("#bdf0ff"))
 
-        for _ in data["total_by_species"]:
+        for _ in data["total_by_species_dmr"]:
             self.tableWidget.setItem(
                 _["row"], _["column"], QtWidgets.QTableWidgetItem(str(_["total"])),
             )
@@ -246,6 +251,15 @@ class Restatement(restatement_main_window.MainWindow):
             )
             self.tableWidget.item(_["row"], _["column"]).setBackground(
                 QtGui.QColor("#DDA0DD")
+            )
+
+        for req_row in list(data["total_by_dmr"].keys()):
+
+            self.tableWidget.setVerticalHeaderItem(
+                req_row,
+                QtWidgets.QTableWidgetItem(
+                    str(req_row * 4) + f'({data["total_by_dmr"][req_row]})'
+                ),
             )
 
     def add_by_hand(self):
