@@ -281,7 +281,10 @@ class Restatement(restatement_main_window.MainWindow):
         if (
             self.tableWidget.rowCount() - 1 > self.tableWidget.currentRow() > 1
         ):  # Если это не шапка и не сумма
-            if self.tableWidget.currentColumn() > 0:  # Если это не диаметр
+            if (
+                self.tableWidget.currentColumn() > 0
+                and self.tableWidget.currentColumn() % 4 != 1
+            ):  # Если это не диаметр и не итого
                 self.default_color()
                 if current_item is None:
                     self.tableWidget.setItem(
@@ -324,7 +327,10 @@ class Restatement(restatement_main_window.MainWindow):
         if (
             self.tableWidget.rowCount() - 1 > self.tableWidget.currentRow() > 1
         ):  # Если это не шапка и не сумма
-            if self.tableWidget.currentColumn() > 0:  # Если это не диаметр
+            if (
+                self.tableWidget.currentColumn() > 0
+                and self.tableWidget.currentColumn() % 4 != 1
+            ):  # Если это не диаметр и не итого
                 if current_item is not None:
                     if int(current_item.text()) > 0:
                         self.tableWidget.setItem(
