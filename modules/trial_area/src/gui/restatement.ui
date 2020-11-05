@@ -75,7 +75,7 @@
       <item>
        <widget class="QLabel" name="label">
         <property name="text">
-         <string>Квартал:</string>
+         <string>Кв.:</string>
         </property>
        </widget>
       </item>
@@ -96,7 +96,7 @@
       <item>
        <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>Выдел:</string>
+         <string>Выд.:</string>
         </property>
        </widget>
       </item>
@@ -117,7 +117,7 @@
       <item>
        <widget class="QLabel" name="label_9">
         <property name="text">
-         <string>Площадь:</string>
+         <string>Пл.:</string>
         </property>
        </widget>
       </item>

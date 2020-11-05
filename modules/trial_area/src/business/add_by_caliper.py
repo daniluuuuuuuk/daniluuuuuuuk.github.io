@@ -35,13 +35,20 @@ class Caliper(QtCore.QThread):
                     "num_half_ind": 0,
                     "device_sign": "caliper",
                 }
-                self.signal_output_data.emit(
-                    data
-                )  # Отправляю эти данные в основной поток для заполнения таблицы
-                winsound.MessageBeep()  # Издаю звук о добавлении ствола
+                if data["dmr"]:
+                    self.signal_output_data.emit(
+                        data
+                    )  # Отправляю эти данные в основной поток для заполнения таблицы
+                    winsound.MessageBeep()  # Издаю звук о добавлении ствола
 
-    def roundingData(self, i):
+    def roundingData(self, i: int):  # etc. i = 20; 24; 77 см
         """Привожу диаметры стволов"""
+        if i <= 20:  # Если вилку свели, что бы сделать следующее дерево дровами
+            return 0
+
+        if 20 <= i <= 60:  # Деревья меньше 6 см не учитываются (подрост)
+            return None
+
         i = float(i) / 10
         if 0 < i <= 12.9:
             # b = 1
@@ -54,8 +61,5 @@ class Caliper(QtCore.QThread):
         else:
             b = 1
         i = round(i / b + 10 ** (-9)) * b
-
-        if i <= 6:  # Меньше 6см деревья не учитываем
-            return 0
 
         return i

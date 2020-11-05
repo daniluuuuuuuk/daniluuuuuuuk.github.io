@@ -153,6 +153,9 @@ class Restatement(restatement_main_window.MainWindow):
 
         self.last_data = data
 
+        if data["device_sign"] == "caliper":
+            self.calculate_amount()  # Считаю сумму
+
     def add_data_att(self, att_data):
         self.att_data = att_data
         self.label_4.setText(att_data["enterprise"])
@@ -184,13 +187,13 @@ class Restatement(restatement_main_window.MainWindow):
             QtCore.Qt.AlignHCenter
         )
         self.tableWidget.setItem(
-            1, data["column"] + 1, QtWidgets.QTableWidgetItem("Делов.")
+            1, data["column"] + 1, QtWidgets.QTableWidgetItem("ДЕЛ")
         )
         self.tableWidget.setItem(
-            1, data["column"] + 2, QtWidgets.QTableWidgetItem("Дрова")
+            1, data["column"] + 2, QtWidgets.QTableWidgetItem("ДР")
         )
         self.tableWidget.setItem(
-            1, data["column"] + 3, QtWidgets.QTableWidgetItem("Сух.")
+            1, data["column"] + 3, QtWidgets.QTableWidgetItem("СУХ")
         )
 
     def default_color(self):
