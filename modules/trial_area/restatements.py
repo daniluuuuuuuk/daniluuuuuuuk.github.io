@@ -262,6 +262,8 @@ class Restatement(restatement_main_window.MainWindow):
                 ),
             )
 
+        self.label_5.setText(str(data["total_liquid"]))
+
     def add_by_hand(self):
         object_add_record = add_by_hand.AddByHand(last_data=self.last_data)
         if object_add_record.exec() == 1:

@@ -35,7 +35,7 @@ class Caliper(QtCore.QThread):
                     "num_half_ind": 0,
                     "device_sign": "caliper",
                 }
-                if data["dmr"]:
+                if data["dmr"] != None:
                     self.signal_output_data.emit(
                         data
                     )  # Отправляю эти данные в основной поток для заполнения таблицы
