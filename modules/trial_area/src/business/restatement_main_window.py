@@ -34,7 +34,7 @@ class MainWindow(
 
         """Атрибуты таблицы"""
         self.tableWidget.horizontalHeader().setDefaultSectionSize(
-            45
+            50
         )  # Стандартный ширина столбцов
         self.tableWidget.verticalHeader().setDefaultSectionSize(
             30
