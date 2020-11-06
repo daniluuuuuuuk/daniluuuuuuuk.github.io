@@ -21,7 +21,7 @@ class DBData(QtCore.QThread):
             )
             return None
         for column in range(1, self.table.columnCount()):
-            if column % 3 == 1:
+            if column % 4 == 1:
                 output_data = {
                     "species": Species.select()
                     .where(Species.name_species == self.table.item(0, column).text())
@@ -32,21 +32,21 @@ class DBData(QtCore.QThread):
                 for row in range(2, self.table.rowCount() - 1):
                     # Сумму не трогаю (self.table.rowCount()-1)
                     """Собираю данные с ячеек (если ячейки пусты - ставлю 0"""
-                    if self.table.item(row, column):
-                        output_data["num_ind"] = int(
-                            self.table.item(row, column).text()
-                        )
-                    else:
-                        output_data["num_ind"] = 0
                     if self.table.item(row, column + 1):
-                        output_data["num_fuel"] = int(
+                        output_data["num_ind"] = int(
                             self.table.item(row, column + 1).text()
                         )
                     else:
-                        output_data["num_fuel"] = 0
+                        output_data["num_ind"] = 0
                     if self.table.item(row, column + 2):
-                        output_data["num_half_ind"] = int(
+                        output_data["num_fuel"] = int(
                             self.table.item(row, column + 2).text()
+                        )
+                    else:
+                        output_data["num_fuel"] = 0
+                    if self.table.item(row, column + 3):
+                        output_data["num_half_ind"] = int(
+                            self.table.item(row, column + 3).text()
                         )
                     else:
                         output_data["num_half_ind"] = 0
