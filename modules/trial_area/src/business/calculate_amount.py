@@ -15,6 +15,7 @@ class Amount(QtCore.QThread):
         total = self.total_by_species_dmr()
         total_by_species_dmr = total[0]
         total_by_dmr = total[1]
+        total_liquid = total[2]
 
         output_data = {}
         #  Учитываю данные для подсчёта с метода total_by_species
@@ -38,6 +39,7 @@ class Amount(QtCore.QThread):
             "amount": output_data,
             "total_by_species_dmr": total_by_species_dmr,
             "total_by_dmr": total_by_dmr,
+            "total_liquid": total_liquid,
         }
 
     def total_by_species_dmr(self):
@@ -46,6 +48,7 @@ class Amount(QtCore.QThread):
         """
         output_data = []
         output_data_by_dmr = {}
+        total_liquid = 0
         for row in range(2, self.table.rowCount() - 1):
             for column in range(1, self.table.columnCount()):
                 if column % 4 == 2:  # (Столбец деловой)
@@ -66,8 +69,9 @@ class Amount(QtCore.QThread):
                             output_data_by_dmr[row] += liquid
                         except KeyError:
                             output_data_by_dmr[row] = liquid
+                        total_liquid += liquid
 
-        return output_data, output_data_by_dmr
+        return output_data, output_data_by_dmr, total_liquid
 
     def total_by_dmr(self):
         """

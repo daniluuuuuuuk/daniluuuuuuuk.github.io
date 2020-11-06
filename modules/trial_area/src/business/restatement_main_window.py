@@ -58,6 +58,12 @@ class MainWindow(
         self.pushButton_7.hide()  # Спрятал временно работу с JSON
         self.pushButton_6.hide()  # Спрятал временно работу с JSON
 
+        """Атрибуты полей ввода"""
+        area_validator = QtGui.QRegExpValidator(
+            QtCore.QRegExp(r"^\d*\.?\d*$"), self.lineEdit
+        )
+        self.lineEdit.setValidator(area_validator)
+
         """Создаю заголовок"""
         self.tableWidget.insertRow(0)
         self.tableWidget.insertRow(0)
