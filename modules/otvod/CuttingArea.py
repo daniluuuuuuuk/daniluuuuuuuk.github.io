@@ -100,7 +100,7 @@ class CuttingArea:
                 # return self.buildLine()
                 self.buildLine()
                 # print(self.anchorLinePoints, self.tiedUpPointList)
-                return self.getTiedUpPointsWithNumbers(self.anchorLinePoints, self.tiedUpPointList)
+                return self.getTiedUpPointsWithNumbers(self.anchorLinePoints, self.cuttingAreaPoints)
             else:
                 if not self.isTiedUp(self.bindingPoint, self.cuttingAreaPoints[-1]):
                     self.tiedUpPointList = [
@@ -110,7 +110,7 @@ class CuttingArea:
                 # return self.buildPoly(self.bindingPoint)
                 self.buildPoly(self.bindingPoint)
                 # print(self.tiedUpPointList)
-                return self.getTiedUpPointsWithNumbers(None, self.tiedUpPointList)
+                return self.getTiedUpPointsWithNumbers(None, self.cuttingAreaPoints)
 
     def showDiscrepancyWindow(self):
         discrepancies = self.getDiscrepanciesList()
@@ -167,6 +167,11 @@ class CuttingArea:
         if not anchorLinePoints:
             i = 0
             pairNumberPoint = {}
+            # if not cuttingAreaTiedUpPoints:
+            #     for point in self.cuttingAreaPoints:
+            #         pairNumberPoint[i] = [point, "Лесосека"]
+            #         i += 1
+            # else:
             for point in cuttingAreaTiedUpPoints:
                 pairNumberPoint[i] = [point, "Лесосека"]
                 i += 1
@@ -177,6 +182,10 @@ class CuttingArea:
                 pairNumberPoint[i] = [point, "Привязка"]
                 i += 1
             for point in cuttingAreaTiedUpPoints:
+                # print('point', point, 'pairnumber' ,pairNumberPoint[i - 1][0])
+                # if point == pairNumberPoint[i - 1][0]:
+                #     print(True)
+                #     continue
                 pairNumberPoint[i] = [point, "Лесосека"]
                 i += 1
         return pairNumberPoint
@@ -240,7 +249,7 @@ class CuttingArea:
         # for feature in features:
         #     destLYR.deleteFeature(feature.id())
         features = destLYR.getFeatures("uid = '{}'".format(self.uid))
-        print(features)
+        # print(features)
 
         # selection = destLYR.getFeatures(QgsFeatureRequest(QgsExpression("\"uid\ = '{}'".format(self.uid))))
         with edit(destLYR):

@@ -186,6 +186,8 @@ class OtvodController:
             n = float(nRaw)
             e = float(eRaw)
         except Exception as e:
+            n = 0
+            e = 0
             print("Ошибка формата точки привязки")
             # QMessageBox.information(None, "Ошибка данных точки привязки", str(e))
 

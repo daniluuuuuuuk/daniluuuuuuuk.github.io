@@ -639,6 +639,48 @@ class DataTableWrapper():
     def loadData(self, data):
         self.tableModel.importJSONData(data)
 
+    def makeTableFromCuttingArea(self, bindingPoint, cuttingArea):
+        currentTableType = self.tableModel.tabletype
+        currentCoordType = self.tableModel.coordType
+        self.tableModel.setParams(
+            1, 0, self.getMagneticInclination(), self.getBindingPointXY())
+        azimuthTableList = []
+        lastAnchorLinePoint = None
+        for key in cuttingArea:
+            if cuttingArea[key][1] == "Привязка":
+                lastAnchorLinePoint = key
+            if key == 0:
+                azimuth = GeoOperations.calculateAzimuth(bindingPoint, cuttingArea[key][0])
+                distance = GeoOperations.calculateDistance(bindingPoint, cuttingArea[key][0])
+            else:
+                azimuth = GeoOperations.calculateAzimuth(cuttingArea[key-1][0], cuttingArea[key][0])
+                distance = GeoOperations.calculateDistance(cuttingArea[key-1][0], cuttingArea[key][0])
+            azimuthTableList.append([str(key) + "-" + str(key + 1), str(azimuth), str(distance), cuttingArea[key][1]])
+        if lastAnchorLinePoint is None:
+            azimuth = GeoOperations.calculateAzimuth(cuttingArea[key][0], bindingPoint)
+            distance = GeoOperations.calculateDistance(cuttingArea[key][0], bindingPoint)
+            if azimuth <= 0.1 or distance <= 0.1:
+                row = azimuthTableList[-1]
+                row[0] = row[0].split('-')[0] + '-' + '0'
+                del azimuthTableList[-1]
+                azimuthTableList.append(row)
+                return
+            azimuthTableList.append([str(key + 1) + "-" + "0", str(azimuth), str(distance), cuttingArea[key][1]])
+        else:
+            azimuth = GeoOperations.calculateAzimuth(cuttingArea[key][0], cuttingArea[lastAnchorLinePoint][0])
+            distance = GeoOperations.calculateDistance(cuttingArea[key][0], cuttingArea[lastAnchorLinePoint][0])
+            if azimuth <= 0.1 or distance <= 0.1:
+                row = azimuthTableList[-1]
+                row[0] = row[0].split('-')[0] + '-' + str(lastAnchorLinePoint)
+                del azimuthTableList[-1]
+                azimuthTableList.append(row)
+                return
+            azimuthTableList.append([str(key + 1) + "-" + str(lastAnchorLinePoint + 1), str(azimuth), str(distance), cuttingArea[key][1]])
+
+        self.deleteRows()
+        self.populateTable(azimuthTableList)
+        # print(azimuthTableList)
+
     def convertCoordFormat(self, coordType):
         self.tableModel.setRerender(False)
         currentTableType = self.tableModel.tabletype
@@ -659,6 +701,7 @@ class DataTableWrapper():
         if self.tableModel.tabletype == 0:
             self.populateCoordTable(tableList)
         elif self.tableModel.tabletype == 1:
+            print(tableList)
             self.populateAzimuthTable(tableList)
         elif self.tableModel.tabletype == 2:
             self.populateRumbTable(tableList)
