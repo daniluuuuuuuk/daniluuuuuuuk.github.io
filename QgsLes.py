@@ -37,6 +37,8 @@ class QgsLes:
 
     def initGui(self):
 
+        self.initSnapping()
+        
         self.qgsLesToolbar = self.iface.mainWindow().findChild(
             QToolBar, "QGIS Отвод лесосек"
         )
