@@ -24,6 +24,9 @@ from .tools import CuttingAreaPeeker as peeker
 from qgis.gui import QgsMapToolZoom
 from qgis.core import QgsMessageLog, Qgis, QgsSnappingConfig, QgsTolerance
 from .modules.trial_area.restatements import AreaProperty, Restatement
+from qgis.core import QgsMessageLog, Qgis
+from .modules.trial_area.restatements import Restatement
+from .modules.trial_area.areas_list import AreasList
 from .tools.ProjectInitializer import QgsProjectInitializer
 
 
@@ -84,7 +87,9 @@ class QgsLes:
         self.settingsAction.triggered.connect(lambda: Settings.SettingsController())
 
         self.initProjectAction = QAction(
-            QIcon(util.resolvePath("res\\download.png")), "Инициализировать проект", self.iface.mainWindow()
+            QIcon(util.resolvePath("res\\download.png")),
+            "Инициализировать проект",
+            self.iface.mainWindow(),
         )
         self.initProjectAction.triggered.connect(self.initProjectClicked)
 
@@ -140,7 +145,6 @@ class QgsLes:
         self.canvas.setMapTool(self.rmt)
 
     def countButtonClicked(self):
-
         def getResult(feature):
             if feature:
                 uid = feature["uid"]
@@ -157,7 +161,7 @@ class QgsLes:
                 )
                 if response_window_message == 16384:  # если нажали Yes
                     # Вызываю окно первоначальных характеристик
-                    self.rst = AreaProperty()
+                    self.rst = AreasList()
                     self.rst.show()
 
                 if response_window_message == 65536:  # Если нажали No
