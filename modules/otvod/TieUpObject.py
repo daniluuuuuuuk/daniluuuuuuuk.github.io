@@ -15,30 +15,31 @@ class Polygon():
         rsX = self.residualX()
         rsY = self.residualY()
 
-        print("Невязка приращения координат X", rsX)
-        print("Невязка приращения координат Y", rsY)
-        print("===>Абсолютная невязка", sqrt((rsX * rsX) + (rsY * rsY)))
-        print("Сумма поправок приращения координат Х",
-              self.getIncrementCorrectionSumX())
-        print("Сумма поправок приращения координат Y",
-              self.getIncrementCorrectionSumY())
-        print("Допустимая линейная невязка", self.perimeter / 200)
+        # print("Невязка приращения координат X", rsX)
+        # print("Невязка приращения координат Y", rsY)
+        # print("===>Абсолютная невязка", sqrt((rsX * rsX) + (rsY * rsY)))
+        # print("Сумма поправок приращения координат Х",
+        #       self.getIncrementCorrectionSumX())
+        # print("Сумма поправок приращения координат Y",
+        #       self.getIncrementCorrectionSumY())
+        # print("Допустимая линейная невязка", self.perimeter / 200)
         self.validateSumCorrectedIncrements()
         self.getTiedUpFeature()
         self.printCorrectedFeature()
 
     def printCorrectedFeature(self):
-        for point in self.coordPoints:
-            print("Приращение по X", point.coordIncrementX)
-            print("Коррекция невязки приращения по X",
-                  point.coordIncrementCorrectionX())
-            print("Скорректированные приращения по X",
-                  point.correctedIncrementsX())
-            print("Приращение по Y", point.coordIncrementY)
-            print("Коррекция невязки приращения по Y",
-                  point.coordIncrementCorrectionY())
-            print("Скорректированные приращения по Y",
-                  point.correctedIncrementsY())
+        pass
+        # for point in self.coordPoints:
+        #     print("Приращение по X", point.coordIncrementX)
+        #     print("Коррекция невязки приращения по X",
+        #           point.coordIncrementCorrectionX())
+        #     print("Скорректированные приращения по X",
+        #           point.correctedIncrementsX())
+        #     print("Приращение по Y", point.coordIncrementY)
+        #     print("Коррекция невязки приращения по Y",
+        #           point.coordIncrementCorrectionY())
+        #     print("Скорректированные приращения по Y",
+        #           point.correctedIncrementsY())
 
     def validateSumCorrectedIncrements(self):
         sumX = 0

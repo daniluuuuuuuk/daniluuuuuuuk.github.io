@@ -11,7 +11,8 @@ class QgsProjectInitializer:
 
     def __init__(self):
         super().__init__()
-        self.clearCurrentProject()
+        if self.clearCurrentProject() == False:
+            return
         self.setCrs()
         self.settings = None
         self.layerDbNames = {'hidroline': 'Гидрография линейная', 'hidropoly': 'Гидрография площадная', 'compartment': 'Кварталы',
@@ -39,6 +40,8 @@ class QgsProjectInitializer:
         if reply == QMessageBox.Yes:
             for lyr in QgsProject.instance().mapLayers().values():
                 QgsProject.instance().removeMapLayers([lyr.id()])
+        else:
+            return False
 
     def setCrs(self):
         QgsProject.instance().setCrs(QgsCoordinateReferenceSystem(32635))

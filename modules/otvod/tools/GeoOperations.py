@@ -98,13 +98,14 @@ def pointFromAzimuthDMS(point1, xd, xm, xs, distance, magnIncl):
 
 def pointFromRumbDD(point1, rumbAngle, distance, rumb, magnIncl):
     if str(rumb) == 'СВ':
-        angle = float(rumbAngle) + float(magnIncl)
+        angle = float(rumbAngle)
     elif str(rumb) == 'ЮВ':
-        angle = 180 - float(rumbAngle) - float(magnIncl)
+        angle = 180 - float(rumbAngle)
     elif str(rumb) == 'ЮЗ':
-        angle = 180 + float(rumbAngle) + float(magnIncl)
+        angle = 180 + float(rumbAngle)
     elif str(rumb) == 'СЗ':
-        angle = 360 - float(rumbAngle) - float(magnIncl)
+        angle = 360 - float(rumbAngle)
+    angle += float(magnIncl)
     return pointFromAzimuthDD(point1, angle, distance)
 
 
@@ -112,13 +113,14 @@ def pointFromRumbDMS(point1, xd, xm, xs, distance, rumb, magnIncl):
     rumbAngle = convertToDD(xd, xm, xs)
     # print(rumbAngle, "<===", magnIncl)
     if str(rumb) == 'СВ':
-        angle = float(rumbAngle) + float(magnIncl)
+        angle = float(rumbAngle)
     elif str(rumb) == 'ЮВ':
-        angle = 180 - float(rumbAngle) - float(magnIncl)
+        angle = 180 - float(rumbAngle)
     elif str(rumb) == 'ЮЗ':
-        angle = 180 + float(rumbAngle) + float(magnIncl)
+        angle = 180 + float(rumbAngle)
     elif str(rumb) == 'СЗ':
-        angle = 360 - float(rumbAngle) - float(magnIncl)
+        angle = 360 - float(rumbAngle)
+    angle += float(magnIncl)
     return pointFromAzimuthDD(point1, angle, distance)
 
 
@@ -141,14 +143,15 @@ def parseDMSXYRow(table, row):
 
 
 def parseLeftAngleDDRow(point, azimuth, table, row, magnIncl):
-    angle = float(table.item(row, 1).text()) + magnIncl
+    angle = float(table.item(row, 1).text())
     az = float(azimuth) - 180 + angle
+    print(az, magnIncl, "<====")
     distance = table.item(row, 2).text()
     return pointFromAzimuthDD(point, float(az), float(distance))
 
 
 def parseRightAngleDDRow(point, azimuth, table, row, magnIncl):
-    angle = float(table.item(row, 1).text()) + magnIncl
+    angle = float(table.item(row, 1).text())
     az = float(azimuth) + 180 - angle
     distance = table.item(row, 2).text()
     return pointFromAzimuthDD(point, float(az), float(distance))
@@ -158,7 +161,7 @@ def parseLeftAngleDMSRow(point, azimuth, table, row, magnIncl):
     angleD = table.item(row, 1).text()
     angleM = table.item(row, 2).text()
     angleS = table.item(row, 3).text()
-    angle = float(convertDMSAngle(angleD, angleM, angleS)) + magnIncl
+    angle = float(convertDMSAngle(angleD, angleM, angleS))
     az = float(azimuth) - 180 + angle
     distance = table.item(row, 4).text()
     print(angle, az, distance, point)
@@ -169,8 +172,8 @@ def parseRightAngleDMSRow(point, azimuth, table, row, magnIncl):
     angleD = table.item(row, 1).text()
     angleM = table.item(row, 2).text()
     angleS = table.item(row, 3).text()
-    angle = float(convertDMSAngle(angleD, angleM, angleS)) + magnIncl
-    az = float(azimuth) + 180 - angle
+    angle = float(convertDMSAngle(angleD, angleM, angleS))
+    az = float(azimuth) + 180 - angle 
     distance = table.item(row, 4).text()
     print(angle, az, distance, point)
     return pointFromAzimuthDD(point, float(az), float(distance))
