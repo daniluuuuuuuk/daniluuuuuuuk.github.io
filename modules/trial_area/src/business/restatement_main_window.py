@@ -34,7 +34,7 @@ class MainWindow(
 
         """Атрибуты таблицы"""
         self.tableWidget.horizontalHeader().setDefaultSectionSize(
-            45
+            50
         )  # Стандартный ширина столбцов
         self.tableWidget.verticalHeader().setDefaultSectionSize(
             30
@@ -57,6 +57,12 @@ class MainWindow(
         self.pushButton_4.setIconSize(QtCore.QSize(60, 60))
         self.pushButton_7.hide()  # Спрятал временно работу с JSON
         self.pushButton_6.hide()  # Спрятал временно работу с JSON
+
+        """Атрибуты полей ввода"""
+        area_validator = QtGui.QRegExpValidator(
+            QtCore.QRegExp(r"^\d*\.?\d*$"), self.lineEdit
+        )
+        self.lineEdit.setValidator(area_validator)
 
         """Создаю заголовок"""
         self.tableWidget.insertRow(0)
