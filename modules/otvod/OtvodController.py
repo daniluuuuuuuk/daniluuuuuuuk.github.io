@@ -21,6 +21,7 @@ from qgis.utils import iface
 from qgis.gui import  QgsMapToolPan
 from .LayerManager import LayerManager
 from .icons.initIcons import IconSet
+from qgis.core import Qgis, QgsSnappingConfig, QgsTolerance
 
 
 class OtvodController:
@@ -100,6 +101,18 @@ class OtvodController:
         self.panTool = QgsMapToolPan(self.canvas)
 
         self.omw.manageLayers_button.clicked.connect(self.manageCanvasLayers)
+        
+        self.initSnapping()
+
+    def initSnapping(self):
+        my_snap_config = QgsSnappingConfig()
+        my_snap_config.setEnabled(True)
+        my_snap_config.setType(QgsSnappingConfig.VertexAndSegment)
+        my_snap_config.setUnits(QgsTolerance.Pixels)
+        my_snap_config.setTolerance(10)
+        my_snap_config.setIntersectionSnapping(True)
+        my_snap_config.setMode(QgsSnappingConfig.AllLayers)        
+        QgsProject.instance().setSnappingConfig(my_snap_config)
 
     def manageCanvasLayers(self):
         manager = LayerManager(self.canvas)

@@ -34,8 +34,6 @@ class QgsLes:
         self.canvas = self.iface.mapCanvas()
 
     def initGui(self):
-
-        self.initSnapping()
         
         self.qgsLesToolbar = self.iface.mainWindow().findChild(
             QToolBar, "QGIS Отвод лесосек"
@@ -98,16 +96,6 @@ class QgsLes:
         # self.qgsLesToolbar.addAction(self.mdolAction)
         self.qgsLesToolbar.addAction(self.settingsAction)
         self.qgsLesToolbar.addAction(self.initProjectAction)
-
-    def initSnapping(self):
-        my_snap_config = QgsSnappingConfig()
-        my_snap_config.setEnabled(True)
-        my_snap_config.setType(QgsSnappingConfig.VertexAndSegment)
-        my_snap_config.setUnits(QgsTolerance.Pixels)
-        my_snap_config.setTolerance(10)
-        my_snap_config.setIntersectionSnapping(True)
-        my_snap_config.setMode(QgsSnappingConfig.AllLayers)        
-        QgsProject.instance().setSnappingConfig(my_snap_config)
 
     def initProjectClicked(self):
         self.initializer = QgsProjectInitializer()
