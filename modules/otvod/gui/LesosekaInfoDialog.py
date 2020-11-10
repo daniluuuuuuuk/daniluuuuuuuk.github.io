@@ -73,6 +73,7 @@ class LesosekaInfo(QDialog):
             return        
 
         def workerFinished(result):
+            print("prishel result")
 
             worker.deleteLater()
             thread.quit()

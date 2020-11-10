@@ -5,9 +5,11 @@ from .tools.mapTools.BuildFromMapPointsTool import BuildFromMapPointsTool
 from .tools.mapTools.BuildFromMapTool import BuildFromMapTool
 from .tools.mapTools.PeekPointFromMap import PeekPointFromMap
 from .tools.mapTools.PeekStratumFromMap import PeekStratumFromMap
-# from .LesosekaInfoDialog import LesosekaInfo
+from .tools.tempFeatures.AnchorPointBuilder import AnchorPointBuilder
+from .tools.tempFeatures.CuttingAreaBuilder import CuttingAreaBuilder
+from .tools.tempFeatures.PointBuilder import PointBuilder
 from .gui.LesosekaInfoDialog import LesosekaInfo
-from . import CuttingArea, TempFeatures
+from . import CuttingArea
 from qgis.PyQt.QtWidgets import QMessageBox, QDialog
 from qgis.core import QgsCoordinateReferenceSystem, QgsProject, QgsPointXY
 from PyQt5.QtGui import QColor
@@ -160,7 +162,6 @@ class CanvasWidget(QgsMapCanvas):
         """
 
     def buildLesosekaFromMap(self):
-
         try:
             layer = QgsProject.instance().mapLayersByName("Пикеты")[0]
         except Exception as e:
@@ -171,61 +172,26 @@ class CanvasWidget(QgsMapCanvas):
         layerVd = QgsProject.instance().mapLayersByName("Выдела")[0]
         layerVd.removeSelection()
 
-        # dictAttr = {}
+        try:
+            n = float(self.omw.x_coord_LineEdit.text())
+            e = float(self.omw.y_coord_LineEdit.text())
+            bindingPoint = GeoOperations.convertToZone35(QgsPointXY(e, n))
+        except Exception as e:
+            QMessageBox.information(
+                None, "Ошибка модуля QGISLes", "Отсутствуют угловые точки")
+            return
 
-        # sw = LesosekaInfo()
-        # ui = sw.ui
-        # sw.setUpValues()
-        # dialogResult = sw.exec()
-        # if dialogResult == QDialog.Accepted:
-        #     self.btnControl.unlockSaveDeleteButtons()
-        #     dictAttr["num_lch"] = 0
-        #     dictAttr["num_kv"] = 0
-        #     dictAttr["num_vd"] = 0
-        #     dictAttr["area"] = 0
-        #     dictAttr["leshos"] = sw.lhNumber
-        #     dictAttr["num"] = ui.num.text()
-        #     dictAttr["useType"] = ""
-        #     dictAttr["cuttingType"] = ""
-        #     dictAttr["plot"] = ""
-        #     dictAttr["fio"] = ui.fio.text()
-        #     dictAttr["date"] = ui.date.text()
-        #     dictAttr["info"] = ui.info.toPlainText()
-        #     dictAttr["num_vds"] = ui.num_vds.text()
-        #     dictAttr["leshos_text"] = ui.leshos.currentText()
-        #     dictAttr["lesnich_text"] = ui.lesnich.currentText()
-        # else:
-        #     return
-        n = float(self.omw.x_coord_LineEdit.text())
-        e = float(self.omw.y_coord_LineEdit.text())
-        bindingPoint = GeoOperations.convertToZone35(QgsPointXY(e, n))
-        # self.cuttingArea = CuttingArea.CuttingArea(
-        #     self.canvas, bindingPoint, layer, None, dictAttr)
         self.cuttingArea = CuttingArea.CuttingArea(
-            self.canvas, bindingPoint, layer, None, self.btnControl)            
-        # zoomTool = QgsMapToolZoom(self.canvas, False)
+            self.canvas, bindingPoint, layer, None, self.btnControl)
         self.canvas.setMapTool(self.panTool)
         cuttingArea = self.cuttingArea.build()
-        # print("""""""""""""""""""""""""""""""""""""", cuttingArea)
-        # self.showPointOnCanvas(cuttingArea)
-        # x = self.refreshPolygonPoints(cuttingArea)
-        # self.showPointOnCanvas(x)
-        # print("cuttinarea =>", cuttingArea)
-        # print("cuttinarea =>", cuttingArea.geometry().asPolygon())
-        # print(type(cuttingArea.geometry().asPolygon()))
-
-    # def refreshPolygonPoints(self, area):
-
-    #     def assignNumbersToPoints(points):
-    #         pointsWithNumbers = []
-    #         i = 0
-    #         for point in points:
-    #             pointsWithNumbers.append([i, points[i]])
-    #             i += 1
-    #         return pointsWithNumbers
-
-    #     points = area.geometry().asPolygon()
-    #     return assignNumbersToPoints(points)
+        if not cuttingArea:
+            return
+            
+        print("JJJJJJJJJJJJJJJJJJJJJJJJJJJ", cuttingArea)
+        self.omw.azimuth_radio_button.setChecked(True)
+        self.table.makeTableFromCuttingArea(bindingPoint, cuttingArea)
+        
 
         """Получение точки из окна карты и занесение ее координат XY в таблицу
         """
@@ -262,11 +228,11 @@ class CanvasWidget(QgsMapCanvas):
     def peekVydelFromMap(self, btn, btnState):
 
         def getResult(selectedFeature):
-            self.bap = TempFeatures.AnchorPointBuilder(
+            self.bap = AnchorPointBuilder(
                 self.canvas, selectedFeature)
             self.bap.makeFeature()
 
-            self.bcp = TempFeatures.CuttingAreaBuilder(
+            self.bcp = CuttingAreaBuilder(
                 self.canvas, selectedFeature)
             self.bcp.makeFeature()
 
@@ -288,7 +254,7 @@ class CanvasWidget(QgsMapCanvas):
     def showPointOnCanvas(self, pointDict):
         # print("Пришла точка", pointDict)
         try:
-            self.pb = TempFeatures.PointBuilder(pointDict, self.canvas)
+            self.pb = PointBuilder(pointDict, self.canvas)
             if pointDict:
                 # self.pb = TempFeatures.PointBuilder(pointDict, self.canvas)
                 self.pb.makeFeature()
