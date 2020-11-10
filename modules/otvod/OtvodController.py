@@ -190,6 +190,10 @@ class OtvodController:
             for btn in self.radio_group.buttons():
                 if self.tableType == self.radio_group.id(btn):
                     btn.setChecked(True)
+        if self.radio_group.id(button) == 0:
+            self.omw.inclinationSlider.setEnabled(False)
+        else:
+            self.omw.inclinationSlider.setEnabled(True)
 
     def bindingPointCoordChanged(self):
         e = n = 0
