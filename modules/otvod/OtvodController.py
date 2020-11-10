@@ -287,6 +287,7 @@ class OtvodController:
             with open(filename, "r", encoding='utf8') as read_file:
                 data = json.load(read_file)
         if data:
+            self.deleteCuttingArea()
             for p in data:
                 for key, value in p.items():
                     if key == "Table":
