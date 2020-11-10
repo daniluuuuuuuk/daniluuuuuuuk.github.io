@@ -640,6 +640,7 @@ class DataTableWrapper():
         self.tableModel.importJSONData(data)
 
     def makeTableFromCuttingArea(self, bindingPoint, cuttingArea):
+        self.tableModel.setMagneticInclination(0)
         currentTableType = self.tableModel.tabletype
         currentCoordType = self.tableModel.coordType
         self.tableModel.setParams(
