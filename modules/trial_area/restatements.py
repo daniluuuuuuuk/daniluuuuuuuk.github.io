@@ -21,7 +21,7 @@ from .src.config import Settings
 
 from .src.models.restatement import Trees
 from .src.models.public import Area
-from .src.models.nri import *
+from .src.models.nri import Species, Organization
 
 
 class Restatement(restatement_main_window.MainWindow):
@@ -71,34 +71,35 @@ class Restatement(restatement_main_window.MainWindow):
         if (
             data["species"] not in self.species_positions.keys()
         ):  # если породы нету в таблице-присваю ей позицию в dict
+            # ! 4 (Четверка) в коже ниже, это сколько столбцов относится на породу
             self.species_positions[data["species"]] = (
-                len(self.species_positions.keys()) * 3
+                len(self.species_positions.keys()) * 4
             )
 
         data["row"] = int(data["dmr"] / 4)
         data["column"] = self.species_positions[data["species"]]
         self.tableWidget.showRow(data["row"])
         if (
-            self.tableWidget.columnCount() <= data["column"] + 1
+            self.tableWidget.columnCount() <= data["column"] + 2
         ):  # Создаю колонки, если такой попроды нету
             self.add_table_new_species(data)
-
         """Собираю старые значения"""
         try:
             old_num_ind = int(
-                self.tableWidget.item(data["row"], data["column"] + 1).text()
+                self.tableWidget.item(data["row"], data["column"] + 2).text()
             )
+
         except:
             old_num_ind = 0
         try:
             old_num_fuel = int(
-                self.tableWidget.item(data["row"], data["column"] + 2).text()
+                self.tableWidget.item(data["row"], data["column"] + 3).text()
             )
         except:
             old_num_fuel = 0
         try:
             old_num_half_ind = int(
-                self.tableWidget.item(data["row"], data["column"] + 3).text()
+                self.tableWidget.item(data["row"], data["column"] + 4).text()
             )
         except:
             old_num_half_ind = 0
@@ -107,51 +108,59 @@ class Restatement(restatement_main_window.MainWindow):
         num_fuel = data["num_fuel"] + old_num_fuel
         num_half_ind = data["num_half_ind"] + old_num_half_ind
 
-        if num_ind > 0:
-            self.tableWidget.setItem(
-                data["row"],
-                data["column"] + 1,
-                QtWidgets.QTableWidgetItem(str(num_ind)),
-            )
-            self.tableWidget.item(data["row"], data["column"] + 1).setTextAlignment(
-                QtCore.Qt.AlignHCenter
-            )
-
-        if num_fuel > 0:
+        if num_ind >= 0:
             self.tableWidget.setItem(
                 data["row"],
                 data["column"] + 2,
-                QtWidgets.QTableWidgetItem(str(num_fuel)),
+                QtWidgets.QTableWidgetItem(str(num_ind)),
             )
             self.tableWidget.item(data["row"], data["column"] + 2).setTextAlignment(
                 QtCore.Qt.AlignHCenter
             )
 
-        if num_half_ind > 0:
+        if num_fuel >= 0:
             self.tableWidget.setItem(
                 data["row"],
                 data["column"] + 3,
-                QtWidgets.QTableWidgetItem(str(num_half_ind)),
+                QtWidgets.QTableWidgetItem(str(num_fuel)),
             )
             self.tableWidget.item(data["row"], data["column"] + 3).setTextAlignment(
                 QtCore.Qt.AlignHCenter
             )
 
+        if num_half_ind >= 0:
+            self.tableWidget.setItem(
+                data["row"],
+                data["column"] + 4,
+                QtWidgets.QTableWidgetItem(str(num_half_ind)),
+            )
+            self.tableWidget.item(data["row"], data["column"] + 4).setTextAlignment(
+                QtCore.Qt.AlignHCenter
+            )
+
         # Крашу новое значение:
         if num_ind != old_num_ind:
-            self.tableWidget.item(data["row"], data["column"] + 1).setBackground(
-                QtGui.QColor("#c1f593")
-            )
-        if num_fuel != old_num_fuel:
             self.tableWidget.item(data["row"], data["column"] + 2).setBackground(
                 QtGui.QColor("#c1f593")
             )
-        if num_half_ind != old_num_half_ind:
+        if num_fuel != old_num_fuel:
             self.tableWidget.item(data["row"], data["column"] + 3).setBackground(
                 QtGui.QColor("#c1f593")
             )
+        if num_half_ind != old_num_half_ind:
+            self.tableWidget.item(data["row"], data["column"] + 4).setBackground(
+                QtGui.QColor("#c1f593")
+            )
+
+        self.tableWidget.scrollToItem(
+            self.tableWidget.item(data["row"], data["column"] + 4),
+            QtWidgets.QAbstractItemView.PositionAtCenter,
+        )
 
         self.last_data = data
+
+        if data["device_sign"] == "caliper":
+            self.calculate_amount()  # Считаю сумму
 
     def add_data_att(self, att_data):
         self.att_data = att_data
@@ -159,15 +168,16 @@ class Restatement(restatement_main_window.MainWindow):
         self.label_6.setText(att_data["forestry"])
         self.label_7.setText(att_data["compartment"])
         self.label_8.setText(att_data["sub_compartment"])
-        self.label_10.setText(att_data["area_square"])
+        self.lineEdit.setText(att_data["area_square"])
 
     def add_table_new_species(self, data):
         self.tableWidget.insertColumn(data["column"] + 1)
         self.tableWidget.insertColumn(data["column"] + 2)
         self.tableWidget.insertColumn(data["column"] + 3)
+        self.tableWidget.insertColumn(data["column"] + 4)
         # Sets the span of the table element at (row , column ) to the number of rows
         # and columns specified by (rowSpanCount , columnSpanCount ).
-        self.tableWidget.setSpan(0, data["column"] + 1, 1, 3)
+        self.tableWidget.setSpan(0, data["column"] + 1, 1, 4)
         self.tableWidget.setItem(
             0,
             data["column"] + 1,
@@ -184,13 +194,19 @@ class Restatement(restatement_main_window.MainWindow):
             QtCore.Qt.AlignHCenter
         )
         self.tableWidget.setItem(
-            1, data["column"] + 1, QtWidgets.QTableWidgetItem("Делов.")
+            1, data["column"] + 1, QtWidgets.QTableWidgetItem("ИТГ")
+        )
+        self.tableWidget.item(1, data["column"] + 1).setBackground(
+            QtGui.QColor("#DDA0DD")
         )
         self.tableWidget.setItem(
-            1, data["column"] + 2, QtWidgets.QTableWidgetItem("Дрова")
+            1, data["column"] + 2, QtWidgets.QTableWidgetItem("ДЕЛ")
         )
         self.tableWidget.setItem(
-            1, data["column"] + 3, QtWidgets.QTableWidgetItem("Сух.")
+            1, data["column"] + 3, QtWidgets.QTableWidgetItem("ДР")
+        )
+        self.tableWidget.setItem(
+            1, data["column"] + 4, QtWidgets.QTableWidgetItem("СУХ")
         )
 
     def default_color(self):
@@ -198,10 +214,6 @@ class Restatement(restatement_main_window.MainWindow):
         if self.tableWidget.item(self.last_data["row"], self.last_data["column"]):
             self.tableWidget.item(
                 self.last_data["row"], self.last_data["column"]
-            ).setBackground(QtGui.QColor("white"))
-        if self.tableWidget.item(self.last_data["row"], self.last_data["column"] + 1):
-            self.tableWidget.item(
-                self.last_data["row"], self.last_data["column"] + 1
             ).setBackground(QtGui.QColor("white"))
         if self.tableWidget.item(self.last_data["row"], self.last_data["column"] + 2):
             self.tableWidget.item(
@@ -211,13 +223,17 @@ class Restatement(restatement_main_window.MainWindow):
             self.tableWidget.item(
                 self.last_data["row"], self.last_data["column"] + 3
             ).setBackground(QtGui.QColor("white"))
+        if self.tableWidget.item(self.last_data["row"], self.last_data["column"] + 4):
+            self.tableWidget.item(
+                self.last_data["row"], self.last_data["column"] + 4
+            ).setBackground(QtGui.QColor("white"))
 
     def add_table_amount(self, data):
-        for column in range(1, len(data.keys()) + 1):
+        for column in range(1, len(data["amount"].keys()) + 1):
             self.tableWidget.setItem(
                 self.tableWidget.rowCount() - 1,
                 column,
-                QtWidgets.QTableWidgetItem(str(data[column])),
+                QtWidgets.QTableWidgetItem(str(data["amount"][column])),
             )
             self.tableWidget.item(
                 self.tableWidget.rowCount() - 1, column
@@ -225,6 +241,28 @@ class Restatement(restatement_main_window.MainWindow):
             self.tableWidget.item(
                 self.tableWidget.rowCount() - 1, column
             ).setBackground(QtGui.QColor("#bdf0ff"))
+
+        for _ in data["total_by_species_dmr"]:
+            self.tableWidget.setItem(
+                _["row"], _["column"], QtWidgets.QTableWidgetItem(str(_["total"])),
+            )
+            self.tableWidget.item(_["row"], _["column"]).setTextAlignment(
+                QtCore.Qt.AlignHCenter
+            )
+            self.tableWidget.item(_["row"], _["column"]).setBackground(
+                QtGui.QColor("#DDA0DD")
+            )
+
+        for req_row in list(data["total_by_dmr"].keys()):
+
+            self.tableWidget.setVerticalHeaderItem(
+                req_row,
+                QtWidgets.QTableWidgetItem(
+                    str(req_row * 4) + f'({data["total_by_dmr"][req_row]})'
+                ),
+            )
+
+        self.label_5.setText(str(data["total_liquid"]))
 
     def add_by_hand(self):
         object_add_record = add_by_hand.AddByHand(last_data=self.last_data)
@@ -237,17 +275,18 @@ class Restatement(restatement_main_window.MainWindow):
     def add_by_caliper(self):
         try:
             self.connection = serial.Serial(
-                Settings("Default_Settings", "caliper_port").read_setting(), 9600
+                Settings(group="Default_Settings", key="caliper_port").read_setting(),
+                9600,
             )
-            self.pushButton_2.setStyleSheet(f"background-color: #70c858")
+            self.pushButton_2.setStyleSheet("background-color: #70c858")
         except:
-            self.pushButton_2.setStyleSheet(f"background-color: #ee534e")
+            self.pushButton_2.setStyleSheet("background-color: #ee534e")
             return None
-        self.object_add_by_cliper_thread = add_by_caliper.Caliper(
+        self.object_add_by_caliper_thread = add_by_caliper.Caliper(
             connection=self.connection
         )
-        self.object_add_by_cliper_thread.start()
-        self.object_add_by_cliper_thread.signal_output_data.connect(
+        self.object_add_by_caliper_thread.start()
+        self.object_add_by_caliper_thread.signal_output_data.connect(
             self.add_table_item, QtCore.Qt.QueuedConnection
         )
 
@@ -258,7 +297,10 @@ class Restatement(restatement_main_window.MainWindow):
         if (
             self.tableWidget.rowCount() - 1 > self.tableWidget.currentRow() > 1
         ):  # Если это не шапка и не сумма
-            if self.tableWidget.currentColumn() > 0:  # Если это не диаметр
+            if (
+                self.tableWidget.currentColumn() > 0
+                and self.tableWidget.currentColumn() % 4 != 1
+            ):  # Если это не диаметр и не итого
                 self.default_color()
                 if current_item is None:
                     self.tableWidget.setItem(
@@ -301,7 +343,10 @@ class Restatement(restatement_main_window.MainWindow):
         if (
             self.tableWidget.rowCount() - 1 > self.tableWidget.currentRow() > 1
         ):  # Если это не шапка и не сумма
-            if self.tableWidget.currentColumn() > 0:  # Если это не диаметр
+            if (
+                self.tableWidget.currentColumn() > 0
+                and self.tableWidget.currentColumn() % 4 != 1
+            ):  # Если это не диаметр и не итого
                 if current_item is not None:
                     if int(current_item.text()) > 0:
                         self.tableWidget.setItem(
@@ -345,7 +390,7 @@ class Restatement(restatement_main_window.MainWindow):
         self.object_import_from_db.signal_att_data.connect(
             self.add_data_att, QtCore.Qt.QueuedConnection
         )
-        self.object_import_from_db.siganl_calculate_amount.connect(
+        self.object_import_from_db.signal_calculate_amount.connect(
             self.calculate_amount, QtCore.Qt.QueuedConnection
         )
 
@@ -370,7 +415,7 @@ class Restatement(restatement_main_window.MainWindow):
                     return None
 
                 self.object_save_to_db_thread = export_to_db.DBData(
-                    table=self.tableWidget, uuid=self.uuid
+                    table=self.tableWidget, uuid=self.uuid, area=self.lineEdit.text()
                 )
                 self.object_save_to_db_thread.start()
                 self.object_save_to_db_thread.signal_status.connect(
@@ -380,7 +425,7 @@ class Restatement(restatement_main_window.MainWindow):
                 return None
         except:
             self.object_save_to_db_thread = export_to_db.DBData(
-                table=self.tableWidget, uuid=self.uuid
+                table=self.tableWidget, uuid=self.uuid, area=self.lineEdit.text()
             )
             self.object_save_to_db_thread.start()
             self.object_save_to_db_thread.signal_status.connect(
@@ -406,14 +451,14 @@ class Restatement(restatement_main_window.MainWindow):
                 )
 
         else:
-            self.crit_message("Отсутсвуют данные экспорта.", "", "")
+            self.crit_message("Отсутствуют данные для экспорта.", "", "")
 
     def import_from_json(self):
         if self.tableWidget.columnCount() > 1:
             q = QtWidgets.QMessageBox.warning(
                 self,
                 "Внимание",
-                "Данные уже присутсвуют\n" "Вы хотите перезаписать данные?",
+                "Данные уже присутствуют\n" "Вы хотите перезаписать данные?",
                 buttons=QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
             )
             if q == 16384:  # если нажали Yes
@@ -441,10 +486,10 @@ class Restatement(restatement_main_window.MainWindow):
                     self.object_import_from_json_thread.signal_output_record.connect(
                         self.add_table_item, QtCore.Qt.QueuedConnection
                     )
-                    self.object_import_from_json_thread.siganl_calculate_amount.connect(
+                    self.object_import_from_json_thread.signal_calculate_amount.connect(
                         self.calculate_amount, QtCore.Qt.QueuedConnection
                     )
-                    self.object_import_from_json_thread.siganl_error.connect(
+                    self.object_import_from_json_thread.signal_error.connect(
                         lambda: self.crit_message("Ошибка импорта файла.", "", ""),
                         QtCore.Qt.QueuedConnection,
                     )
@@ -467,15 +512,16 @@ class Restatement(restatement_main_window.MainWindow):
                 self.object_import_from_json_thread.signal_output_record.connect(
                     self.add_table_item, QtCore.Qt.QueuedConnection
                 )
-                self.object_import_from_json_thread.siganl_calculate_amount.connect(
+                self.object_import_from_json_thread.signal_calculate_amount.connect(
                     self.calculate_amount, QtCore.Qt.QueuedConnection
                 )
-                self.object_import_from_json_thread.siganl_error.connect(
+                self.object_import_from_json_thread.signal_error.connect(
                     lambda: self.crit_message("Ошибка импорта файла.", "", ""),
                     QtCore.Qt.QueuedConnection,
                 )
 
     def export_to_xls(self):
+        self.att_data["area_square"] = self.lineEdit.text()
         if self.tableWidget.columnCount() > 1:
             export_file = QtWidgets.QFileDialog.getSaveFileName(
                 caption="Сохранение файла",
@@ -495,7 +541,7 @@ class Restatement(restatement_main_window.MainWindow):
                 )
 
         else:
-            self.crit_message("Отсутсвуют данные экспорта.", "", "")
+            self.crit_message("Отсутствуют данные для экспорта.", "", "")
 
     def crit_message(self, error, info, detailed_text):
         dlg = QtWidgets.QMessageBox(self)
@@ -523,30 +569,30 @@ class AreaProperty(area_property_main_window.MainWindow):
         super().__init__()
 
     def get_data_gui(self):
-        self.label.setStyleSheet(f"color: none;")
-        self.label_2.setStyleSheet(f"color: none;")
-        self.label_3.setStyleSheet(f"color: none;")
-        self.label_4.setStyleSheet(f"color: none;")
-        self.label_5.setStyleSheet(f"color: none;")
-        self.label_6.setStyleSheet(f"color: none;")
+        self.label.setStyleSheet("color: none;")
+        self.label_2.setStyleSheet("color: none;")
+        self.label_3.setStyleSheet("color: none;")
+        self.label_4.setStyleSheet("color: none;")
+        self.label_5.setStyleSheet("color: none;")
+        self.label_6.setStyleSheet("color: none;")
 
         if self.comboBox.currentText() == "":
-            self.label.setStyleSheet(f"color: red;")
+            self.label.setStyleSheet("color: red;")
             return False
         if self.comboBox_2.currentText() == "":
-            self.label_2.setStyleSheet(f"color: red;")
+            self.label_2.setStyleSheet("color: red;")
             return False
         if self.comboBox_3.currentText() == "":
-            self.label_3.setStyleSheet(f"color: red;")
+            self.label_3.setStyleSheet("color: red;")
             return False
         if self.spinBox.value() <= 0:
-            self.label_4.setStyleSheet(f"color: red;")
+            self.label_4.setStyleSheet("color: red;")
             return False
         if self.spinBox_2.value() <= 0:
-            self.label_5.setStyleSheet(f"color: red;")
+            self.label_5.setStyleSheet("color: red;")
             return False
         if self.doubleSpinBox.value() <= 0:
-            self.label_6.setStyleSheet(f"color: red;")
+            self.label_6.setStyleSheet("color: red;")
             return False
 
         num_enterprise = int(
@@ -583,7 +629,6 @@ class AreaProperty(area_property_main_window.MainWindow):
             "cutting_type": None,
             "num_plot": None,
             "person_name": None,
-            "date_trial": None,
             "description": None,
             "num_vds": None,
             "leshos_text": None,

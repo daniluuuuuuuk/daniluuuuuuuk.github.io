@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1270</width>
-    <height>725</height>
+    <height>720</height>
    </rect>
   </property>
   <property name="font">
@@ -75,7 +75,7 @@
       <item>
        <widget class="QLabel" name="label">
         <property name="text">
-         <string>Квартал:</string>
+         <string>Кв.:</string>
         </property>
        </widget>
       </item>
@@ -96,7 +96,7 @@
       <item>
        <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>Выдел:</string>
+         <string>Выд.:</string>
         </property>
        </widget>
       </item>
@@ -117,14 +117,29 @@
       <item>
        <widget class="QLabel" name="label_9">
         <property name="text">
-         <string>Площадь:</string>
+         <string>Пл.:</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label_10">
+       <widget class="QLineEdit" name="lineEdit">
+        <property name="maximumSize">
+         <size>
+          <width>70</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::WheelFocus</enum>
+        </property>
+        <property name="inputMask">
+         <string/>
+        </property>
         <property name="text">
-         <string>NULL</string>
+         <string/>
+        </property>
+        <property name="placeholderText">
+         <string/>
         </property>
        </widget>
       </item>
@@ -278,6 +293,20 @@
       <property name="bottomMargin">
        <number>6</number>
       </property>
+      <item>
+       <widget class="QLabel" name="label_10">
+        <property name="text">
+         <string>Дел.+Дров.:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
       <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
