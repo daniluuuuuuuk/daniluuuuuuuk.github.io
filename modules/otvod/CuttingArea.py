@@ -1,7 +1,9 @@
 import uuid
 from qgis.core import QgsPointXY, QgsGeometry, QgsFeatureRequest
 from qgis.core import QgsProject, QgsFeature, QgsExpression
-from . import TempFeatures, TieUpObject
+from .tools.tempFeatures.AnchorLineTemp import AnchorLineTemp
+from .tools.tempFeatures.CuttingAreaTemp import CuttingAreaTemp
+from . import TieUpObject
 from .tools.DiscrepancyCalculator import DiscrepancyCalculator
 from qgis.PyQt.QtWidgets import QDialog
 from .gui.discrepancyWindow import Ui_Dialog as DiscrepancyDialog
@@ -35,17 +37,17 @@ class CuttingArea:
     def getLesosekaProperties(self):
 
         dictAttr = {}
-        sw = LesosekaInfo(False)
-        ui = sw.ui
-        sw.setUpValues()
-        dialogResult = sw.exec()
+        self.sw = LesosekaInfo(False)
+        ui = self.sw.ui
+        self.sw.setUpValues()
+        dialogResult = self.sw.exec()
         if dialogResult == QDialog.Accepted:
             self.btnControl.unlockSaveDeleteButtons()
-            dictAttr["num_lch"] = sw.getLesnichNumber()
+            dictAttr["num_lch"] = self.sw.getLesnichNumber()
             dictAttr["num_kv"] = ui.num_kv.text()
             dictAttr["num_vd"] = 0
             dictAttr["area"] = 0
-            dictAttr["leshos"] = sw.getLeshozNumber()
+            dictAttr["leshos"] = self.sw.getLeshozNumber()
             dictAttr["num"] = ui.num.text()
             dictAttr["useType"] = ""
             dictAttr["cuttingType"] = ""
@@ -98,7 +100,7 @@ class CuttingArea:
                 # return self.buildLine()
                 self.buildLine()
                 # print(self.anchorLinePoints, self.tiedUpPointList)
-                return self.getTiedUpPointsWithNumbers(self.anchorLinePoints, self.tiedUpPointList)
+                return self.getTiedUpPointsWithNumbers(self.anchorLinePoints, self.cuttingAreaPoints)
             else:
                 if not self.isTiedUp(self.bindingPoint, self.cuttingAreaPoints[-1]):
                     self.tiedUpPointList = [
@@ -108,7 +110,7 @@ class CuttingArea:
                 # return self.buildPoly(self.bindingPoint)
                 self.buildPoly(self.bindingPoint)
                 # print(self.tiedUpPointList)
-                return self.getTiedUpPointsWithNumbers(None, self.tiedUpPointList)
+                return self.getTiedUpPointsWithNumbers(None, self.cuttingAreaPoints)
 
     def showDiscrepancyWindow(self):
         discrepancies = self.getDiscrepanciesList()
@@ -165,6 +167,11 @@ class CuttingArea:
         if not anchorLinePoints:
             i = 0
             pairNumberPoint = {}
+            # if not cuttingAreaTiedUpPoints:
+            #     for point in self.cuttingAreaPoints:
+            #         pairNumberPoint[i] = [point, "Лесосека"]
+            #         i += 1
+            # else:
             for point in cuttingAreaTiedUpPoints:
                 pairNumberPoint[i] = [point, "Лесосека"]
                 i += 1
@@ -175,6 +182,10 @@ class CuttingArea:
                 pairNumberPoint[i] = [point, "Привязка"]
                 i += 1
             for point in cuttingAreaTiedUpPoints:
+                # print('point', point, 'pairnumber' ,pairNumberPoint[i - 1][0])
+                # if point == pairNumberPoint[i - 1][0]:
+                #     print(True)
+                #     continue
                 pairNumberPoint[i] = [point, "Лесосека"]
                 i += 1
         return pairNumberPoint
@@ -198,11 +209,11 @@ class CuttingArea:
         """
 
     def buildLine(self):
-        tempLineBuilder = TempFeatures.AnchorLineTemp(
+        tempLineBuilder = AnchorLineTemp(
             self.canvas, self.bindingPoint, self.anchorLinePoints, self.feature, self.uid, self.dictAttr)
         tempLineBuilder.makeFeature()
 
-        tempCuttingAreaBuilder = TempFeatures.CuttingAreaTemp(
+        tempCuttingAreaBuilder = CuttingAreaTemp(
             self.canvas, self.anchorLinePoints[-1], self.cuttingAreaPoints, self.feature, self.uid, self.dictAttr)
         return tempCuttingAreaBuilder.makeFeature()
 
@@ -211,7 +222,7 @@ class CuttingArea:
 
     def buildPoly(self, point):
         # print("cuttingareapoint", self.cuttingAreaPoints)
-        tempCuttingAreaBuilder = TempFeatures.CuttingAreaTemp(
+        tempCuttingAreaBuilder = CuttingAreaTemp(
             self.canvas, point, self.cuttingAreaPoints, self.feature, self.uid, self.dictAttr)
         return tempCuttingAreaBuilder.makeFeature()
 
@@ -238,7 +249,7 @@ class CuttingArea:
         # for feature in features:
         #     destLYR.deleteFeature(feature.id())
         features = destLYR.getFeatures("uid = '{}'".format(self.uid))
-        print(features)
+        # print(features)
 
         # selection = destLYR.getFeatures(QgsFeatureRequest(QgsExpression("\"uid\ = '{}'".format(self.uid))))
         with edit(destLYR):

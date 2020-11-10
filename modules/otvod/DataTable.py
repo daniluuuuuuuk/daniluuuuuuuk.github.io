@@ -14,6 +14,8 @@ import os
 import decimal
 import time
 from functools import partial
+from PyQt5.QtGui import QColor
+from PyQt5.QtCore import QTimer
 
 # Только в целях подсказки, нигде не используется:
 
@@ -334,6 +336,10 @@ class DataTable(QTableWidget):
                         return GeoOperations.parseRightAngleDMSRow
 
     def cellChangedHandler(self, row, column):
+        if self.item(row, column) and self.item(row, column).text().find(",") != -1:
+            currentText = self.item(row, column).text()
+            self.item(row, column).setText(currentText.replace(',','.'))
+        
         if self.ensureRowCellsNotEmpty(row) and self.rerenderEnabled:
 
             angle = False
@@ -387,12 +393,13 @@ class DataTable(QTableWidget):
                         )
 
             # если редактируется имеющаяся точка - удалить ее
-            if row in self.pointsDict:
-                del self.pointsDict[row]
+            # if row in self.pointsDict:
+            #     del self.pointsDict[row]
 
             self.pointsDict[row] = [point, self.getPointType(row)]
+            
             self.signal.emit(self.pointsDict)
-            # print(self.pointsDict)
+            print(self.pointsDict)
             return row
 
     def getPointType(self, row):
@@ -423,14 +430,25 @@ class DataTable(QTableWidget):
         self.refreshData()
 
     def ensureTableCellsNotEmpty(self):
+
+        self.clearSelection()
+
+        def flicker(row, col):
+            self.item(row, col).setBackground(QColor(255,255,255))
+
         for row in range(0, self.getRowCount()):
             for col in range(0, self.getColCount()):
                 headertext = self.horizontalHeaderItem(col).text()
                 if headertext == "GPS" or headertext == "Тип" or headertext == "Румб":
                     break
                 if not self.item(row, col):
+                    self.setItem(row, col, QTableWidgetItem())
+                    self.item(row, col).setBackground(QColor(255,0,0,50))
+                    QTimer().singleShot(100, partial(flicker, row, col))
                     return False
                 if self.item(row, col).text() == "":
+                    self.item(row, col).setBackground(QColor(255,0,0,50)) 
+                    QTimer().singleShot(100, partial(flicker, row, col))
                     return False
         return True
 
@@ -621,6 +639,48 @@ class DataTableWrapper():
     def loadData(self, data):
         self.tableModel.importJSONData(data)
 
+    def makeTableFromCuttingArea(self, bindingPoint, cuttingArea):
+        currentTableType = self.tableModel.tabletype
+        currentCoordType = self.tableModel.coordType
+        self.tableModel.setParams(
+            1, 0, self.getMagneticInclination(), self.getBindingPointXY())
+        azimuthTableList = []
+        lastAnchorLinePoint = None
+        for key in cuttingArea:
+            if cuttingArea[key][1] == "Привязка":
+                lastAnchorLinePoint = key
+            if key == 0:
+                azimuth = GeoOperations.calculateAzimuth(bindingPoint, cuttingArea[key][0])
+                distance = GeoOperations.calculateDistance(bindingPoint, cuttingArea[key][0])
+            else:
+                azimuth = GeoOperations.calculateAzimuth(cuttingArea[key-1][0], cuttingArea[key][0])
+                distance = GeoOperations.calculateDistance(cuttingArea[key-1][0], cuttingArea[key][0])
+            azimuthTableList.append([str(key) + "-" + str(key + 1), str(azimuth), str(distance), cuttingArea[key][1]])
+        if lastAnchorLinePoint is None:
+            azimuth = GeoOperations.calculateAzimuth(cuttingArea[key][0], bindingPoint)
+            distance = GeoOperations.calculateDistance(cuttingArea[key][0], bindingPoint)
+            if azimuth <= 0.1 or distance <= 0.1:
+                row = azimuthTableList[-1]
+                row[0] = row[0].split('-')[0] + '-' + '0'
+                del azimuthTableList[-1]
+                azimuthTableList.append(row)
+                return
+            azimuthTableList.append([str(key + 1) + "-" + "0", str(azimuth), str(distance), cuttingArea[key][1]])
+        else:
+            azimuth = GeoOperations.calculateAzimuth(cuttingArea[key][0], cuttingArea[lastAnchorLinePoint][0])
+            distance = GeoOperations.calculateDistance(cuttingArea[key][0], cuttingArea[lastAnchorLinePoint][0])
+            if azimuth <= 0.1 or distance <= 0.1:
+                row = azimuthTableList[-1]
+                row[0] = row[0].split('-')[0] + '-' + str(lastAnchorLinePoint)
+                del azimuthTableList[-1]
+                azimuthTableList.append(row)
+                return
+            azimuthTableList.append([str(key + 1) + "-" + str(lastAnchorLinePoint + 1), str(azimuth), str(distance), cuttingArea[key][1]])
+
+        self.deleteRows()
+        self.populateTable(azimuthTableList)
+        # print(azimuthTableList)
+
     def convertCoordFormat(self, coordType):
         self.tableModel.setRerender(False)
         currentTableType = self.tableModel.tabletype
@@ -641,6 +701,7 @@ class DataTableWrapper():
         if self.tableModel.tabletype == 0:
             self.populateCoordTable(tableList)
         elif self.tableModel.tabletype == 1:
+            print(tableList)
             self.populateAzimuthTable(tableList)
         elif self.tableModel.tabletype == 2:
             self.populateRumbTable(tableList)
@@ -801,7 +862,7 @@ class DataTableWrapper():
                 convertedValues = cvt.convertDMSCoord2Az(
                     self.getBindingPointXY(), pointsDict)
             elif currentTableType == 4 and newTableType == 1:
-                convertedValues = cvt.convertDMSCoord2Rumb(
+                convertedValues = cvt.convertDMSCoord2Az(
                     self.getBindingPointXY(), pointsDict)
             elif currentTableType == 3 and newTableType == 2:
                 convertedValues = cvt.convertDMSCoord2Rumb(

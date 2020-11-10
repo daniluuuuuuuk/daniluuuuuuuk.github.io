@@ -5,7 +5,8 @@ from .CanvasWidget import CanvasWidget
 from .ui.SwitchButton import Switch
 from .gui.LesosekaInfoDialog import LesosekaInfo
 from .tools import GeoOperations
-from . import TempFeatures, Report
+from .tools.tempFeatures.BindingPointBuilder import BindingPointBuilder
+from . import Report
 from .DataTable import DataTableWrapper
 from .OtvodSettingsDialog import OtvodSettingsWindow
 from ...tools import config
@@ -19,6 +20,7 @@ from qgis.PyQt.QtCore import Qt
 from qgis.utils import iface
 from qgis.gui import  QgsMapToolPan
 from .LayerManager import LayerManager
+from .icons.initIcons import IconSet
 
 
 class OtvodController:
@@ -35,37 +37,8 @@ class OtvodController:
         self.bindingPoint = QgsPointXY(0, 0)
         self.cuttingArea = None
         self.tableWrapper = self.loadDataTable()
-
-        self.omw.peekFromMap_PushButton.setIcon(
-            QIcon(self.resolve('icons\\pick_from_map_icon.png')))
-        self.omw.peekFromGPSPushButton.setIcon(
-            QIcon(self.resolve('icons\\pick_from_gps_icon.png')))
-        self.omw.addRangeFinderNode_button.setIcon(
-            QIcon(self.resolve('icons\\range_finder_icon.png')))
-        self.omw.azimuthTool_pushButton.setIcon(
-            QIcon(self.resolve('icons\\azimuth_icon.png')))
-        self.omw.buildLesoseka_Button.setIcon(
-            QIcon(self.resolve('icons\\build.png')))
-        self.omw.editAttributes_button.setIcon(
-            QIcon(self.resolve('icons\\pencil.png')))
-        self.omw.saveLesoseka_Button.setIcon(
-            QIcon(self.resolve('icons\\save.png')))
-        self.omw.deleteLesoseka_Button.setIcon(
-            QIcon(self.resolve('icons\\delete.png')))
-        self.omw.generateReport_Button.setIcon(
-            QIcon(self.resolve('icons\\report.png')))
-        self.omw.peekVydelFromMap_pushButton.setIcon(
-            QIcon(self.resolve('icons\\pin.png')))
-        self.omw.lesoseka_from_map_button.setIcon(
-            QIcon(self.resolve('icons\\lesoseka_from_map.png')))
-        self.omw.lesoseka_from_map_points_button.setIcon(
-            QIcon(self.resolve('icons\\lesoseka_from_map_points.png')))
-        self.omw.importCoordinates.setIcon(
-            QIcon(self.resolve('icons\\internet.png')))
-        self.omw.handTool_button.setIcon(
-            QIcon(self.resolve('icons\\hand_tool.png')))
-        self.omw.manageLayers_button.setIcon(
-            QIcon(self.resolve('icons\\layers.png')))
+        
+        IconSet(self.omw)
 
         self.omw.otvodSettingsAction.triggered.connect(
             lambda: self.otvodMenuSettings())
@@ -198,31 +171,29 @@ class OtvodController:
             buttonId = self.radio_group.id(button)
             currentTableType = self.tableType
             self.tableType = buttonId
-            # self.coordType = 0
             self.tableWrapper.convertCells(currentTableType, buttonId, self.tableType, self.coordType, float(
                 self.magneticInclination), self.bindingPoint)
-        else:
+        else:           
             for btn in self.radio_group.buttons():
                 if self.tableType == self.radio_group.id(btn):
                     btn.setChecked(True)
-                    QMessageBox.information(
-                        None, 'Ошибка', 'Заполните недостающие данные в таблице или очистите таблицу')
-
-    def resolve(self, name, basepath=None):
-        if not basepath:
-            basepath = os.path.dirname(os.path.realpath(__file__))
-        return os.path.join(basepath, name)
 
     def bindingPointCoordChanged(self):
         e = n = 0
         try:
-            n = float(self.omw.x_coord_LineEdit.text())
-            e = float(self.omw.y_coord_LineEdit.text())
-        except:
-            print("Ошибка при чтении строк координат", n, e)
+            nRaw = self.omw.x_coord_LineEdit.text().replace(',','.')
+            eRaw = self.omw.y_coord_LineEdit.text().replace(',','.')
+            n = float(nRaw)
+            e = float(eRaw)
+        except Exception as e:
+            n = 0
+            e = 0
+            print("Ошибка формата точки привязки")
+            # QMessageBox.information(None, "Ошибка данных точки привязки", str(e))
+
         if 50.0 <= n <= 57. and 20. <= e <= 33.:
             self.bindingPoint = GeoOperations.convertToZone35(QgsPointXY(e, n))
-            bp = TempFeatures.BindingPointBuilder(
+            bp = BindingPointBuilder(
                 self.bindingPoint, self.canvas)
             bp.makeFeature()
             self.tableWrapper.tableModel.setBindingPointXY(self.bindingPoint)
