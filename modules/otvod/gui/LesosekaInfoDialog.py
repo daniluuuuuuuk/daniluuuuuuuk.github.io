@@ -1,5 +1,6 @@
 from qgis.PyQt.QtWidgets import QDialog
-from qgis.PyQt.QtCore import QDateTime, QDate
+from qgis.PyQt.QtCore import QDateTime, QDate, QRegExp
+from PyQt5.QtGui import QRegExpValidator
 from PyQt5 import QtCore
 from .lesosekaInfo import Ui_Dialog as uiLesosekaInfo
 from ..tools.threading.ForestObjectWorker import Worker as ForestObjWorker
@@ -13,13 +14,18 @@ class LesosekaInfo(QDialog):
         super(LesosekaInfo, self).__init__()
         self.ui = uiLesosekaInfo()
         self.ui.setupUi(self)
-
+        # self.setupValidation()
         self.forestObjectCode = None
         
         if not editMode:
             self.ui.gplho.currentTextChanged.connect(self.gplhoChanged)
             self.ui.leshos.currentTextChanged.connect(self.leshozChanged)
             self.ui.lesnich.currentTextChanged.connect(self.lesnichChanged)
+
+    # def setupValidation(self):
+    #     reg_ex = QRegExp("[a-z-A-Z_]+")
+    #     num_kv_validator = QRegExpValidator(reg_ex, self.ui.num_kv)
+    #     self.ui.num_kv.setValidator(num_kv_validator)
 
     def getLesnichNumber(self):
         if self.forestObjectCode is None:
