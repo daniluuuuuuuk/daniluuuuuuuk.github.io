@@ -5,7 +5,7 @@ import uuid
 from decimal import Decimal, ROUND_HALF_UP
 from PyQt5 import QtWidgets, QtCore, QtGui
 
-from .src.business import (
+from .src.services import (
     restatement_main_window,
     add_by_caliper,
     export_to_db,
@@ -17,7 +17,7 @@ from .src.business import (
     add_by_hand,
     area_property_main_window,
 )
-from .src.config import Settings
+from .src.services.config import Settings
 
 from .src.models.restatement import Trees
 from .src.models.public import Area

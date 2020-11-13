@@ -109,5 +109,6 @@ class BasicDir:
         пример: C:\\OSGeo4W64\\apps\\qgis\\python\\plugins\\QgsLes\\modules\\trial_area\\
         """
         if not basepath:
-            basepath = os.path.dirname(os.path.realpath(__file__))
+            basepath = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
         return os.path.join(basepath, name)

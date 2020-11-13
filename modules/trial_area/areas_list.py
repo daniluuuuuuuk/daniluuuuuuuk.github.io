@@ -1,7 +1,7 @@
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QTableWidgetItem, QApplication
 
-from .src.business import areas_list_main_window
+from .src.services import areas_list_main_window
 from .src.models.nri import Organization
 from .src.models.restatement import Trees
 from .src.models.public import Area

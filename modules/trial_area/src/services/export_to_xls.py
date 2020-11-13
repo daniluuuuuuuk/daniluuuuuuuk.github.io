@@ -1,6 +1,6 @@
 from PyQt5 import QtCore
 
-from ..config import BasicDir
+from .config import BasicDir
 
 from openpyxl import load_workbook
 
