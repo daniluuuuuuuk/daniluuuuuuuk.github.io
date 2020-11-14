@@ -150,7 +150,7 @@
       <item>
        <widget class="QLabel" name="label_6">
         <property name="text">
-         <string>Площадь пробы:</string>
+         <string>Площадь:</string>
         </property>
        </widget>
       </item>

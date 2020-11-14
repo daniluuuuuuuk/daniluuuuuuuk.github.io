@@ -5,7 +5,7 @@ import uuid
 from decimal import Decimal, ROUND_HALF_UP
 from PyQt5 import QtWidgets, QtCore, QtGui
 
-from .src.services import (
+from .services import (
     restatement_main_window,
     add_by_caliper,
     export_to_db,
@@ -17,11 +17,11 @@ from .src.services import (
     add_by_hand,
     area_property_main_window,
 )
-from .src.services.config import Settings
+from .services.config import Settings
 
-from .src.models.restatement import Trees
-from .src.models.public import Area
-from .src.models.nri import Species, Organization
+from .models.restatement import Trees
+from .models.public import Area
+from .models.nri import Species, Organization
 
 
 class Restatement(restatement_main_window.MainWindow):

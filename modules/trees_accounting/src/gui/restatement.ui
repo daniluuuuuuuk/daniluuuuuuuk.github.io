@@ -296,7 +296,7 @@
       <item>
        <widget class="QLabel" name="label_10">
         <property name="text">
-         <string>Дел.+Дров.:</string>
+         <string>Ликвид:</string>
         </property>
        </widget>
       </item>
