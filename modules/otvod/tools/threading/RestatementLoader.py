@@ -19,10 +19,9 @@ class RestatementLoader(QgsTask):
 
     def getRestatementData(self, guid):
         postgisConnection = PostgisDB.PostGisDB()
-        restatementData = postgisConnection.getQueryResult(
-            """select gplho, enterprise, forestry, compartment, sub_compartment, area_square from "restatement".areas_bak where area_uuid = '{}'""".format('babdd174-f0ea-11ea-b449-4cebbdc920ac'))
-        print(restatementData)
-        self.restatementData = self.unwrapRestatementData(restatementData)
+        self.restatementData = postgisConnection.getQueryResult(
+            """select gplho_text, leshos_text, lesnich_text, num_kv, num_vds, num, uid, date from "public".area where uid = '{}'""".format(guid))
+        # self.restatementData = self.unwrapRestatementData(restatementData)
         postgisConnection.__del__()
 
     def unwrapRestatementData(self, data):
