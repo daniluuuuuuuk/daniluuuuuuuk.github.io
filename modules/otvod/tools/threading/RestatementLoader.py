@@ -19,27 +19,58 @@ class RestatementLoader(QgsTask):
 
     def getRestatementData(self, guid):
         postgisConnection = PostgisDB.PostGisDB()
-        self.restatementData = postgisConnection.getQueryResult(
-            """select gplho_text, leshos_text, lesnich_text, num_kv, num_vds, num, uid, date from "public".area where uid = '{}'""".format(guid))
-        # self.restatementData = self.unwrapRestatementData(restatementData)
+        restatementData = postgisConnection.getQueryResult(
+            """select leshos, num_lch, num_kv, num_vd, area, num, uid, date from "public".area where uid = '{}'""".format(guid))
+        self.restatementData = self.unwrapRestatementData(restatementData)
+        print(self.restatementData)
         postgisConnection.__del__()
 
     def unwrapRestatementData(self, data):
         postgisConnection = PostgisDB.PostGisDB()
-        gplhoName = postgisConnection.getQueryResult(
-            """select name_organization from "dictionary".organization where id_organization = {}""".format(data[0][0]))[0][0]
+
         leshozName = postgisConnection.getQueryResult(
-            """select name_organization from "dictionary".organization where id_organization = {}""".format(data[0][1]))[0][0]
+            """select name_organization 
+            from "dictionary".organization
+            where substring(code_organization::varchar(255) from 6 for 3) = '{}'
+            and substring(code_organization::varchar(255) from 9 for 2) = '00'""".format(data[0][0]))[0][0]
+
+        gplhoNumber = postgisConnection.getQueryResult(
+            """select parent_id_organization from "dictionary".organization where name_organization = '{}'""".format(leshozName))[0][0]
+
+        gplhoName = postgisConnection.getQueryResult(
+            """select name_organization from "dictionary".organization where id_organization = {}""".format(gplhoNumber))[0][0]
+
+        code = '00'
+        if len(str(data[0][1])) == 2:
+            code = str(data[0][1])
+        else:
+            code = '0' + str(data[0][1])
+
         forestry = postgisConnection.getQueryResult(
-            """select name_organization from "dictionary".organization where id_organization = {}""".format(data[0][2]))[0][0]
+            """select name_organization 
+            from "dictionary".organization
+            where substring(code_organization::varchar(255) from 6 for 3) = '{}'
+            and substring(code_organization::varchar(255) from 9 for 2) = '{}'""".format(data[0][0], code))[0][0]
+
+        forestObjectCode = postgisConnection.getQueryResult(
+            """select code_organization 
+            from "dictionary".organization
+            where substring(code_organization::varchar(255) from 6 for 3) = '{}'
+            and substring(code_organization::varchar(255) from 9 for 2) = '{}'""".format(data[0][0], code))[0][0]            
+
         postgisConnection.__del__()
+
         return {
-            'ГПЛХО': gplhoName,
-            'Лесхоз': leshozName,
-            'Лесничество': forestry,
-            'Квартал': data[0][3],
-            'Выдел': data[0][4],
-            'Площадь': data[0][5],
+            'ГПЛХО': [gplhoName, gplhoNumber],
+            'Лесхоз': [leshozName, data[0][0]],
+            'Лесничество': [forestry, data[0][1]],
+            'Квартал': data[0][2],
+            'Выдел': data[0][3],
+            'Площадь': data[0][4],
+            'Номер': data[0][5],
+            'uid': data[0][6],
+            'Дата': data[0][7],
+            'Код': forestObjectCode
         }
 
     def run(self, guid):
