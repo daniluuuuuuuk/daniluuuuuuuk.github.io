@@ -23,8 +23,9 @@ from .modules.otvod.tools.mapTools.RectangleMapTool import RectangleMapTool
 from .tools import CuttingAreaPeeker as peeker
 from qgis.gui import QgsMapToolZoom
 from qgis.core import QgsMessageLog, Qgis
-from .modules.trial_area.restatements import Restatement
-from .modules.trial_area.areas_list import AreasList
+from .modules.trees_accounting.src.restatements import Restatement
+from .modules.trees_accounting.src.areas_list import AreasList
+from .modules.trees_accounting.src.main import TreesAccounting
 from .tools.ProjectInitializer import QgsProjectInitializer
 
 

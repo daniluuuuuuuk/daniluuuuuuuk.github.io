@@ -1,5 +1,5 @@
 from peewee import Model, PostgresqlDatabase
-from ..config import Settings
+from ..services.config import Settings
 
 
 class Database(Model):

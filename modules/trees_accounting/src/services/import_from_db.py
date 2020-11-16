@@ -29,6 +29,7 @@ class Data(QtCore.QThread):
             "compartment": str(area.compartment),
             "sub_compartment": str(area.sub_compartment),
             "area_square": str(area.area),
+            "num_cutting_area": area.num_cutting_area,
         }
         return att_data
 
