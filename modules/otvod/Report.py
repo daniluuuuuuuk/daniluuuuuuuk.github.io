@@ -47,7 +47,7 @@ class Report:
         p = document.add_paragraph(
             'Структурное подразделение юридического лица, ведущего лесное хозяйство:_______________'
             ', лесной квартал №{}, таксационный выдел №{}, площадь лесосеки {} га.'.format(str(
-                self.areaAttributes["num_kv"]), str(self.areaAttributes["num_vd"]), str(self.areaAttributes["area"]))
+                self.areaAttributes["num_kv"]), str(self.areaAttributes["num_vds"]), str(self.areaAttributes["area"]))
         )
         p.paragraph_format.first_line_indent = Inches(0.25)
 
@@ -144,7 +144,7 @@ class Report:
         try:
             attrDict = {}
             attrDict["num_kv"] = self.feature["num_kv"]
-            attrDict["num_vd"] = self.feature["num_vd"]
+            attrDict["num_vds"] = self.feature["num_vds"]
             attrDict["area"] = self.feature["area"]
             attrDict["num"] = self.feature["num"]
             attrDict["useType"] = self.feature["usetype"]

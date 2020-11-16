@@ -191,6 +191,7 @@ class CanvasWidget(QgsMapCanvas):
         print("JJJJJJJJJJJJJJJJJJJJJJJJJJJ", cuttingArea)
         self.omw.azimuth_radio_button.setChecked(True)
         self.table.makeTableFromCuttingArea(bindingPoint, cuttingArea)
+        self.omw.inclinationSlider.setValue(0)
         
 
         """Получение точки из окна карты и занесение ее координат XY в таблицу

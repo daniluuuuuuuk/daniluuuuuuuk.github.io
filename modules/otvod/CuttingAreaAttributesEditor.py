@@ -79,7 +79,7 @@ class CuttingAreaAttributesEditor:
             layer.updateFeature(feature)
         layer.commitChanges()
 
-        reply = QMessageBox.question(QDialog(), 'Временный слой изменен',
-                                     'Сохранить изменения в базу?', QMessageBox.Yes, QMessageBox.No)
-        if reply == QMessageBox.Yes:
-            self.cuttingArea.save()
+        # reply = QMessageBox.question(QDialog(), 'Временный слой изменен',
+        #                              'Сохранить изменения в базу?', QMessageBox.Yes, QMessageBox.No)
+        # if reply == QMessageBox.Yes:
+        #     self.cuttingArea.save()

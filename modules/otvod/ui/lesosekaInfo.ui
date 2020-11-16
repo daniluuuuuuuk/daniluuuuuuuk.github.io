@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>322</width>
-    <height>385</height>
+    <height>407</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,8 @@
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>340</y>
+     <x>0</x>
+     <y>370</y>
      <width>301</width>
      <height>32</height>
     </rect>
@@ -59,7 +59,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>260</y>
+     <y>290</y>
      <width>91</width>
      <height>16</height>
     </rect>
@@ -82,7 +82,7 @@
    <property name="geometry">
     <rect>
      <x>110</x>
-     <y>260</y>
+     <y>290</y>
      <width>191</width>
      <height>71</height>
     </rect>
@@ -237,6 +237,29 @@
    </property>
    <property name="text">
     <string>ГПЛХО</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_11">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>254</y>
+     <width>47</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Перечет</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="restatement_comboBox">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>255</y>
+     <width>191</width>
+     <height>22</height>
+    </rect>
    </property>
   </widget>
  </widget>

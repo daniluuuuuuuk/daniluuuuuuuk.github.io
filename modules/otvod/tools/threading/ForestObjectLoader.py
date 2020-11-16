@@ -7,7 +7,6 @@ MESSAGE_CATEGORY = 'Forest Object Loader Task'
 
 
 class ForestObjectLoader(QgsTask):
-    """This shows how to subclass QgsTask"""
 
     def __init__(self, description):
         super().__init__(description, QgsTask.CanCancel)
@@ -15,10 +14,20 @@ class ForestObjectLoader(QgsTask):
         self.allGplho = None
         self.allLeshozy = None
         self.allLesnichestva = None
+        self.allRestatements = None
 
         self.total = 0
         self.iterations = 0
         self.exception = None
+
+    def getAllRestatements(self):
+        postgisConnection = PostgisDB.PostGisDB()
+        allRestatements = postgisConnection.getQueryResult(
+            """select compartment, sub_compartment from "restatement".areas_bak""")
+        self.allRestatements = dict((str(idObject), str(nameObject))
+                             for (idObject, nameObject) in allRestatements)
+        print(allRestatements, '<=')
+        postgisConnection.__del__()
 
     def getAllGPLHO(self):
         postgisConnection = PostgisDB.PostGisDB()
@@ -49,17 +58,12 @@ class ForestObjectLoader(QgsTask):
         postgisConnection.__del__()
 
     def run(self, gplho, leshoz):
-        """Here you implement your heavy lifting. This method should
-        periodically test for isCancelled() to gracefully abort.
-        This method MUST return True or False
-        raising exceptions will crash QGIS so we handle them internally and
-        raise them in self.finished
-        """
-        print(gplho, leshoz, '((())))(*&)(*&)(*&)(*&)(&*)(&*)(*&')
         QgsMessageLog.logMessage('Started task "{}"'.format(
             self.description()), MESSAGE_CATEGORY, Qgis.Info)
 
+
         if gplho is None:
+            self.getAllRestatements()
             self.getAllGPLHO()
 
         elif gplho is not None and leshoz is None:
@@ -67,21 +71,11 @@ class ForestObjectLoader(QgsTask):
 
         elif gplho is not None and leshoz is not None:
             self.getLesnichestvaByLeshoz(leshoz)
-
-        print(gplho, leshoz)
+        
 
         return True
 
     def finished(self, result):
-        """This method is automatically called when self.run returns. result
-        is the return value from self.run.
-        This function is automatically called when the task has completed (
-        successfully or otherwise). You just implement finished() to do 
-        whatever
-        follow up stuff should happen after the task is complete. finished is
-        always called from the main thread, so it's safe to do GUI
-        operations and raise Python exceptions here.
-        """
         if result:
             QgsMessageLog.logMessage(
                 'Task "{name}" completed\n'
@@ -101,7 +95,7 @@ class ForestObjectLoader(QgsTask):
                     'Task "{name}" Exception: {exception}'.format(
                         name=self.description(), exception=self.exception),
                     MESSAGE_CATEGORY, Qgis.Critical)
-                # raise self.exception
+                raise self.exception
 
     def cancel(self):
         QgsMessageLog.logMessage(
