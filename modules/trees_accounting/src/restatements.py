@@ -168,6 +168,7 @@ class Restatement(restatement_main_window.MainWindow):
         self.label_6.setText(att_data["forestry"])
         self.label_7.setText(att_data["compartment"])
         self.label_8.setText(att_data["sub_compartment"])
+        self.label_12.setText(att_data["num_cutting_area"])
         self.lineEdit.setText(att_data["area_square"])
 
     def add_table_new_species(self, data):
@@ -591,6 +592,9 @@ class AreaProperty(area_property_main_window.MainWindow):
         if self.spinBox_2.value() <= 0:
             self.label_5.setStyleSheet("color: red;")
             return False
+        if self.spinBox_3.value() <= 0:
+            self.label_8.setStyleSheet("color: red;")
+            return False
         if self.doubleSpinBox.value() <= 0:
             self.label_6.setStyleSheet("color: red;")
             return False
@@ -624,7 +628,7 @@ class AreaProperty(area_property_main_window.MainWindow):
                 )
             ),
             "num_enterprise": num_enterprise,
-            "num_cutting_area": None,
+            "num_cutting_area": str(self.spinBox_3.value()),
             "use_type": None,
             "cutting_type": None,
             "num_plot": None,
