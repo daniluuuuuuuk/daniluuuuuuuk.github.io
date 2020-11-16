@@ -5,7 +5,7 @@ import uuid
 from decimal import Decimal, ROUND_HALF_UP
 from PyQt5 import QtWidgets, QtCore, QtGui
 
-from .src.business import (
+from .services import (
     restatement_main_window,
     add_by_caliper,
     export_to_db,
@@ -17,11 +17,11 @@ from .src.business import (
     add_by_hand,
     area_property_main_window,
 )
-from .src.config import Settings
+from .services.config import Settings
 
-from .src.models.restatement import Trees
-from .src.models.public import Area
-from .src.models.nri import Species, Organization
+from .models.restatement import Trees
+from .models.public import Area
+from .models.nri import Species, Organization
 
 
 class Restatement(restatement_main_window.MainWindow):
@@ -168,6 +168,7 @@ class Restatement(restatement_main_window.MainWindow):
         self.label_6.setText(att_data["forestry"])
         self.label_7.setText(att_data["compartment"])
         self.label_8.setText(att_data["sub_compartment"])
+        self.label_12.setText(att_data["num_cutting_area"])
         self.lineEdit.setText(att_data["area_square"])
 
     def add_table_new_species(self, data):
@@ -591,6 +592,9 @@ class AreaProperty(area_property_main_window.MainWindow):
         if self.spinBox_2.value() <= 0:
             self.label_5.setStyleSheet("color: red;")
             return False
+        if self.spinBox_3.value() <= 0:
+            self.label_8.setStyleSheet("color: red;")
+            return False
         if self.doubleSpinBox.value() <= 0:
             self.label_6.setStyleSheet("color: red;")
             return False
@@ -624,7 +628,7 @@ class AreaProperty(area_property_main_window.MainWindow):
                 )
             ),
             "num_enterprise": num_enterprise,
-            "num_cutting_area": None,
+            "num_cutting_area": str(self.spinBox_3.value()),
             "use_type": None,
             "cutting_type": None,
             "num_plot": None,

@@ -22,9 +22,10 @@ from .modules.otvod.OtvodController import OtvodController
 from .modules.otvod.tools.mapTools.RectangleMapTool import RectangleMapTool
 from .tools import CuttingAreaPeeker as peeker
 from qgis.gui import QgsMapToolZoom
-from qgis.core import QgsMessageLog, Qgis, QgsSnappingConfig, QgsTolerance
-from .modules.trial_area.restatements import AreaProperty, Restatement
-from .modules.trial_area.areas_list import AreasList
+from qgis.core import QgsMessageLog, Qgis
+from .modules.trees_accounting.src.restatements import Restatement
+from .modules.trees_accounting.src.areas_list import AreasList
+from .modules.trees_accounting.src.main import TreesAccounting
 from .tools.ProjectInitializer import QgsProjectInitializer
 
 
@@ -36,7 +37,7 @@ class QgsLes:
     def initGui(self):
 
         self.initSnapping()
-        
+
         self.qgsLesToolbar = self.iface.mainWindow().findChild(
             QToolBar, "QGIS Отвод лесосек"
         )
@@ -106,7 +107,7 @@ class QgsLes:
         my_snap_config.setUnits(QgsTolerance.Pixels)
         my_snap_config.setTolerance(10)
         my_snap_config.setIntersectionSnapping(True)
-        my_snap_config.setMode(QgsSnappingConfig.AllLayers)        
+        my_snap_config.setMode(QgsSnappingConfig.AllLayers)
         QgsProject.instance().setSnappingConfig(my_snap_config)
 
     def initProjectClicked(self):

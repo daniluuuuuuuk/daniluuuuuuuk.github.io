@@ -103,11 +103,10 @@ class Settings:
 
 
 class BasicDir:
-    def get_basic_dir(self, name, basepath=None):
+    def get_basic_dir(self, name):
         """
         Определяет каталог модуля
         пример: C:\\OSGeo4W64\\apps\\qgis\\python\\plugins\\QgsLes\\modules\\trial_area\\
         """
-        if not basepath:
-            basepath = os.path.dirname(os.path.realpath(__file__))
+        basepath = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
         return os.path.join(basepath, name)

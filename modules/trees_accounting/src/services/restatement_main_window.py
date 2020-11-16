@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets, uic, QtGui, QtCore
 from . import select_species, settings_caliper
-from ..config import Settings, BasicDir
+from .config import Settings, BasicDir
 
 
 class MainWindow(

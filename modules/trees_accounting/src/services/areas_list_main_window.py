@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets, uic, QtGui, QtCore
-from ..config import BasicDir
+from .config import BasicDir
 
 
 class MainWindow(
