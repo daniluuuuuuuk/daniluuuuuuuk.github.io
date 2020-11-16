@@ -22,11 +22,11 @@ class ForestObjectLoader(QgsTask):
 
     def getAllRestatements(self):
         postgisConnection = PostgisDB.PostGisDB()
-        allRestatements = postgisConnection.getQueryResult(
-            """select compartment, sub_compartment from "restatement".areas_bak""")
-        self.allRestatements = dict((str(idObject), str(nameObject))
-                             for (idObject, nameObject) in allRestatements)
-        print(allRestatements, '<=')
+        self.allRestatements = postgisConnection.getQueryResult(
+            """select uid, lesnich_text, num_kv, num_vds, num from "public".area where geom is NULL""")
+        # self.allRestatements = dict((str(idObject), str(nameObject))
+        #                      for (idObject, nameObject) in allRestatements)
+        # print(allRestatements, '<=')
         postgisConnection.__del__()
 
     def getAllGPLHO(self):

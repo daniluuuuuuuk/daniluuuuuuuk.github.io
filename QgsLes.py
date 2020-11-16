@@ -25,7 +25,6 @@ from qgis.gui import QgsMapToolZoom
 from qgis.core import QgsMessageLog, Qgis
 from .modules.trees_accounting.src.restatements import Restatement
 from .modules.trees_accounting.src.areas_list import AreasList
-from .modules.trees_accounting.src.main import TreesAccounting
 from .tools.ProjectInitializer import QgsProjectInitializer
 
 
