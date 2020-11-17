@@ -52,23 +52,28 @@ class LesosekaInfo(QDialog):
             self.comboboxClear(self.ui.gplho, self.ui.leshos, self.ui.lesnich)
             self.clearComboboxIndex(self.ui.gplho, self.ui.leshos, self.ui.lesnich)
 
-            self.ui.gplho.addItem(data[0][0])
-            self.ui.leshos.addItem(data[0][1])
-            self.ui.lesnich.addItem(data[0][2])
-            self.ui.num_kv.setText(data[0][3])
-            self.ui.num_vds.setText(data[0][4])
-            self.ui.num.setText(data[0][5])
-            self.guid = data[0][6]
-            # self.ui.date.
-            self.ui.date.setDate(QDate.fromString(data[0][7], 'dd.MM.yyyy'))
+            # self.ui.gplho.addItem(data[0][0][0])
+            # self.ui.leshos.addItem(data[0][1][0])
+            # self.ui.lesnich.addItem(data[0][2][0])
+            # self.ui.num_kv.setText(data[0][3])
+            # self.ui.num_vds.setText(data[0][4])
+            # self.ui.num.setText(data[0][5])
+            # self.guid = data[0][6]
+            # self.ui.date.setDate(QDate.fromString(data[0][7], 'dd.MM.yyyy'))
 
-            # index = self.ui.gplho.findText(data.get('ГПЛХО'))
+            # index = self.ui.gplho.findText(data.get('ГПЛХО')[0])
             # if index >= 0:
-            #     self.ui.gplho.setCurrentIndex(index)
-            # self.ui.leshos.addItem(data.get('Лесхоз'))
-            # self.ui.lesnich.addItem(data.get('Лесничество'))
-            # self.ui.num_kv.setText(str(data.get('Квартал')))
-            # self.ui.num_vds.setText(str(data.get('Выдел')))
+
+            self.ui.gplho.addItem(data.get('ГПЛХО')[0])
+            self.ui.leshos.addItem(data.get('Лесхоз')[0])
+            self.ui.lesnich.addItem(data.get('Лесничество')[0])
+            self.ui.num_kv.setText(str(data.get('Квартал')))
+            self.ui.num_vds.setText(str(data.get('Выдел')))
+            self.ui.num.setText(str(data.get('Номер')))
+            self.guid = data.get('uid')
+            self.ui.date.setDate(QDate.fromString(data.get('Дата'), 'dd.MM.yyyy'))
+
+            self.forestObjectCode = data.get('Код')
 
             self.ui.gplho.blockSignals(False)
             self.ui.leshos.blockSignals(False)
@@ -181,6 +186,7 @@ class LesosekaInfo(QDialog):
         worker.leshoz = self.ui.leshos.currentText()
         thread.started.connect(worker.run)
         thread.start()
+        print(self.forestObjectCode)
 
     def setUpValues(self):
 
@@ -197,7 +203,7 @@ class LesosekaInfo(QDialog):
             items = []
             self.guidItems = {}
             for rst in result[3]:
-                items.append(rst[1] + ' кв. ' + rst[2] + ' выд. ' + rst[3] + ' № ' + rst[4])
+                items.append(str(rst[1]) + ' кв. ' + str(rst[2]) + ' выд. ' + str(rst[3]) + ' № ' + str(rst[4]))
                 self.guidItems[items[-1]] = rst[0]
             self.ui.restatement_comboBox.addItems(items)
 
