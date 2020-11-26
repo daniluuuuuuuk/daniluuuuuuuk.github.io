@@ -190,10 +190,10 @@ class OtvodController:
             for btn in self.radio_group.buttons():
                 if self.tableType == self.radio_group.id(btn):
                     btn.setChecked(True)
-        if self.radio_group.id(button) == 0:
-            self.omw.inclinationSlider.setEnabled(False)
-        else:
-            self.omw.inclinationSlider.setEnabled(True)
+        # if self.radio_group.id(button) == 0:
+        #     self.omw.inclinationSlider.setEnabled(False)
+        # else:
+        #     self.omw.inclinationSlider.setEnabled(True)
 
     def bindingPointCoordChanged(self):
         e = n = 0
@@ -382,7 +382,7 @@ class OtvodController:
             QgsProject.instance().removeMapLayers([layer.id()])
         except Exception as e:
             print(str(e) + "Ошибка при удалении слоя Пикеты")
-        self.omw.outputLabel.setText("Лесосека удалена")
+        # self.omw.outputLabel.setText("Лесосека удалена")
         self.magneticInclination = 0.0
         self.omw.inclinationSlider.setValue(0)
         self.canvasWidget.btnControl.lockLesosekaButtons()

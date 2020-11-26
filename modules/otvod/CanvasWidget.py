@@ -188,7 +188,14 @@ class CanvasWidget(QgsMapCanvas):
         if not cuttingArea:
             return
             
-        print("JJJJJJJJJJJJJJJJJJJJJJJJJJJ", cuttingArea)
+        # print("JJJJJJJJJJJJJJJJJJJJJJJJJJJ", cuttingArea)
+        # self.table.tableModel.refreshData()
+
+        switch = self.omw.switchLayout.itemAt(0).widget()
+        if switch.isChecked():
+            switch.setChecked(False)
+
+        # self.tableWrapper.convertCoordFormat(self.coordType)
         self.omw.azimuth_radio_button.setChecked(True)
         self.table.makeTableFromCuttingArea(bindingPoint, cuttingArea)
         self.omw.inclinationSlider.setValue(0)

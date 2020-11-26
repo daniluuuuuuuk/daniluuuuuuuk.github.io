@@ -680,6 +680,7 @@ class DataTableWrapper():
 
         self.deleteRows()
         self.populateTable(azimuthTableList)
+        self.tableModel.pointsDict = cuttingArea        
         # print(azimuthTableList)
 
     def convertCoordFormat(self, coordType):
