@@ -4,11 +4,12 @@ import decimal
 
 class CoordinateConverter:
 
-    def __init__(self, tableList, tableType, coordType):
+    def __init__(self, tableList, tableType, coordType, inclination):
         super().__init__()
         self.tableList = tableList
         self.tableType = tableType
         self.coordType = coordType
+        self.inclination = inclination
 
     def decdeg2dms(self, dd, roundUp):
         mnt, sec = divmod(float(dd) * 3600, 60)

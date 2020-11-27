@@ -111,11 +111,12 @@ class CanvasWidget(QgsMapCanvas):
     def findAzimuth(self, btn, btnState):
 
         def getResult(result):
+            sign = '+' if self.table.getMagneticInclination() > 0 else ''
             self.omw.outputLabel.setText(
-                "Аз.: " + str(round(result[0], 1)) + "°. " + "Раст.: " + str(round(result[1], 2)) + " м.")
+                "Аз.: " + str(round(result[0], 1)) + "°. (" + sign + str(self.table.getMagneticInclination()) + ") Раст.: " + str(round(result[1], 2)) + " м.")
 
         if btnState == True:
-            self.amt = AzimuthMapTool(self.canvas)
+            self.amt = AzimuthMapTool(self.canvas, self.table.getMagneticInclination())
             self.canvas.setMapTool(self.amt)
             self.amt.signal.connect(getResult)
         elif btnState == False:
@@ -142,7 +143,7 @@ class CanvasWidget(QgsMapCanvas):
             self.omw.coord_radio_button.toggle()
             self.table.deleteRows()
             if btn.objectName() == "lesoseka_from_map_points_button":
-                self.bfm = BuildFromMapPointsTool(self.canvas)
+                self.bfm = BuildFromMapPointsTool(self.canvas, self.table.getMagneticInclination())
             elif btn.objectName() == "lesoseka_from_map_button":
                 self.bfm = BuildFromMapTool(self.canvas)
             self.canvas.setMapTool(self.bfm)
@@ -198,7 +199,7 @@ class CanvasWidget(QgsMapCanvas):
         # self.tableWrapper.convertCoordFormat(self.coordType)
         self.omw.azimuth_radio_button.setChecked(True)
         self.table.makeTableFromCuttingArea(bindingPoint, cuttingArea)
-        self.omw.inclinationSlider.setValue(0)
+        # self.omw.inclinationSlider.setValue(0)
         
 
         """Получение точки из окна карты и занесение ее координат XY в таблицу

@@ -6,13 +6,14 @@ from qgis.core import QgsWkbTypes, QgsSnappingUtils, QgsPointLocator, QgsToleran
 from ...tools import GeoOperations
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QToolTip, QWidget, QApplication
+from decimal import *
 
 
 class BuildFromMapPointsTool(QgsMapToolEmitPoint, QWidget):
 
     signal = pyqtSignal(object)
 
-    def __init__(self, canvas):
+    def __init__(self, canvas, inclination):
         self.canvas = canvas
         QgsMapToolEmitPoint.__init__(self, self.canvas)
         # print("____________________________________")
@@ -23,6 +24,8 @@ class BuildFromMapPointsTool(QgsMapToolEmitPoint, QWidget):
         self.snapConfig.setType(2)
         # print(self.snapConfig.type())
         self.snapUtils.setConfig(self.snapConfig)
+
+        self.inclination = inclination
 
         self.aimMarker = []
         self.vertexMarkers = []
@@ -60,9 +63,10 @@ class BuildFromMapPointsTool(QgsMapToolEmitPoint, QWidget):
         self.showAimPoint(point)
 
     def drawToolTip(self, dist, az):
+        sign = '+' if self.inclination > 0 else ''
         if self.canvas.underMouse():  # Only if mouse is over the map
             QToolTip.showText(self.canvas.mapToGlobal(self.canvas.mouseLastXY(
-            )), "Расстояние: " + dist + " м\n" + "Азимут: " + az + "°", self.canvas)
+            )), "Расстояние: " + dist + " м\n" + "Азимут: " + az + "° (" + sign + str(self.inclination) + ")", self.canvas)
             # QToolTip.hideText()
 
     def drawMeasureLine(self, point):
@@ -75,7 +79,7 @@ class BuildFromMapPointsTool(QgsMapToolEmitPoint, QWidget):
             pt2 = point
             firstAndLastPoints = [pt1, pt2]
             length = round(GeoOperations.calculateDistance(pt1, pt2), 1)
-            azimuth = round(GeoOperations.calculateAzimuth(pt1, pt2), 1)
+            azimuth = round(GeoOperations.calculateAzimuth(pt1, pt2) + Decimal(self.inclination), 1)
             self.drawToolTip(str(length), str(azimuth))
             self.measureLineRubber.setToGeometry(
                 QgsGeometry.fromPolylineXY(firstAndLastPoints), None)

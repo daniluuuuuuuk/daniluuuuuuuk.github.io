@@ -184,8 +184,10 @@ class OtvodController:
             buttonId = self.radio_group.id(button)
             currentTableType = self.tableType
             self.tableType = buttonId
+            # print(self.magneticInclination)
+            # print(float(self.magneticInclination), '<==')
             self.tableWrapper.convertCells(currentTableType, buttonId, self.tableType, self.coordType, float(
-                self.magneticInclination), self.bindingPoint)
+                self.tableWrapper.getMagneticInclination()), self.bindingPoint)
         else:           
             for btn in self.radio_group.buttons():
                 if self.tableType == self.radio_group.id(btn):
@@ -384,7 +386,7 @@ class OtvodController:
             print(str(e) + "Ошибка при удалении слоя Пикеты")
         # self.omw.outputLabel.setText("Лесосека удалена")
         self.magneticInclination = 0.0
-        self.omw.inclinationSlider.setValue(0)
+        # self.omw.inclinationSlider.setValue(0)
         self.canvasWidget.btnControl.lockLesosekaButtons()
         self.tableWrapper.deleteRows()
         self.omw.y_coord_LineEdit.clear()

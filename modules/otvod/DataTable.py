@@ -73,7 +73,7 @@ class DataTable(QTableWidget):
             header.setSectionResizeMode(x, QtWidgets.QHeaderView.Stretch)
 
     def setParams(self, tableType, coordType, inclination, bindingPoint):
-        # print("table type in setParams: ", tableType)
+        print("table type in setParams: ", tableType, inclination)
         # print("SetParams:", tableType, coordType, inclination, bindingPoint)
         self.tabletype = tableType
         self.coordType = coordType
@@ -640,7 +640,7 @@ class DataTableWrapper():
         self.tableModel.importJSONData(data)
 
     def makeTableFromCuttingArea(self, bindingPoint, cuttingArea):
-        self.tableModel.setMagneticInclination(0)
+        # self.tableModel.setMagneticInclination(0)
         currentTableType = self.tableModel.tabletype
         currentCoordType = self.tableModel.coordType
         self.tableModel.setParams(
@@ -838,7 +838,7 @@ class DataTableWrapper():
         self.tableModel.setParams(
             tableType, coordType, magneticInclination, bindingPoint)
         if coordType == 1:
-            cvt = CoordinateConverter(tableList, currentTableType, coordType)
+            cvt = CoordinateConverter(tableList, currentTableType, coordType, magneticInclination)
             convertedValues = None
             # if newTableType == 3 or currentTableType == 3:
             #     convertedValues = []
@@ -894,7 +894,7 @@ class DataTableWrapper():
             # elif currentTableType == 3:
             #     pass
             else:
-                cvt = CoordinateConverter(tableList, currentTableType, coordType)
+                cvt = CoordinateConverter(tableList, currentTableType, coordType, magneticInclination)
                 convertedValues = None
                 if currentTableType == 1 and newTableType == 2:
                     convertedValues = cvt.convertDDAzimuth2Rumb()
