@@ -55,7 +55,8 @@ class AzimuthMapTool(QgsMapToolEmitPoint, QObject):
             self.secondPoint = self.toMapCoordinates(e.pos())
             self.showPoint(self.secondPoint)
             az = GeoOperations.calculateAzimuth(
-                self.pointList[0], self.pointList[1]) + Decimal(self.inclination)
+                # self.pointList[0], self.pointList[1]) + Decimal(self.inclination)
+                self.pointList[0], self.pointList[1])             
             dist = GeoOperations.calculateDistance(
                 self.pointList[0], self.pointList[1])
             self.signal.emit([az, dist])

@@ -6,13 +6,14 @@ from qgis.core import QgsWkbTypes, QgsSnappingUtils, QgsPointLocator, QgsToleran
 from ...tools import GeoOperations
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QToolTip, QWidget, QApplication
+from decimal import *
 
 
 class BuildFromMapTool(QgsMapToolEmitPoint, QWidget):
 
     signal = pyqtSignal(object)
 
-    def __init__(self, canvas):
+    def __init__(self, canvas, inclination):
         self.canvas = canvas
         QgsMapToolEmitPoint.__init__(self, self.canvas)
         # print("____________________________________")
@@ -20,6 +21,8 @@ class BuildFromMapTool(QgsMapToolEmitPoint, QWidget):
         self.prj = QgsProject.instance()
         self.snapConfig = self.prj.snappingConfig()
         self.snapUtils.setConfig(self.snapConfig)
+
+        self.inclination = inclination
 
         self.aimMarker = []
         self.vertexMarkers = []
@@ -56,11 +59,18 @@ class BuildFromMapTool(QgsMapToolEmitPoint, QWidget):
         point = self.canvas.getCoordinateTransform().toMapCoordinates(x, y)
         self.showAimPoint(point)
 
+    # def drawToolTip(self, dist, az):
+    #     if self.canvas.underMouse():  # Only if mouse is over the map
+    #         QToolTip.showText(self.canvas.mapToGlobal(self.canvas.mouseLastXY(
+    #         )), "Расстояние: " + dist + " м\n" + "Азимут: " + az + "°", self.canvas)
+    #         # QToolTip.hideText()
+
     def drawToolTip(self, dist, az):
+        sign = '+' if self.inclination > 0 else ''
         if self.canvas.underMouse():  # Only if mouse is over the map
             QToolTip.showText(self.canvas.mapToGlobal(self.canvas.mouseLastXY(
-            )), "Расстояние: " + dist + " м\n" + "Азимут: " + az + "°", self.canvas)
-            # QToolTip.hideText()
+            )), "Расстояние: " + dist + " м\n" + "Азимут: " + az + "° (" + sign + str(self.inclination) + ")", self.canvas)
+            # QToolTip.hideText()    
 
     def drawMeasureLine(self, point):
         if not point:
@@ -72,7 +82,8 @@ class BuildFromMapTool(QgsMapToolEmitPoint, QWidget):
             pt2 = point
             firstAndLastPoints = [pt1, pt2]
             length = round(GeoOperations.calculateDistance(pt1, pt2), 1)
-            azimuth = round(GeoOperations.calculateAzimuth(pt1, pt2), 1)
+            # azimuth = round(GeoOperations.calculateAzimuth(pt1, pt2), 1)
+            azimuth = round(GeoOperations.calculateAzimuth(pt1, pt2) + Decimal(self.inclination), 1)
             self.drawToolTip(str(length), str(azimuth))
             self.measureLineRubber.setToGeometry(
                 QgsGeometry.fromPolylineXY(firstAndLastPoints), None)
@@ -134,31 +145,6 @@ class BuildFromMapTool(QgsMapToolEmitPoint, QWidget):
             elif i > index:
                 pointTuple[1] = "Лесосека"
             i += 1
-
-    # def canvasPressEvent(self, e):
-    #     lineType = None
-    #     if e.button() == Qt.RightButton:
-    #       lineType = "Привязка"
-    #     elif e.button() == Qt.LeftButton:
-    #       lineType = "Лесосека"
-    #     point = self.toMapCoordinates(e.pos())
-    #     matchres = self.snapUtils.snapToMap(point)  # QgsPointLocator.Match
-    #     if matchres.isValid():
-    #       m = self.getVertexMarker(lineType)
-    #       m.setCenter(matchres.point())
-    #       self.vertexMarkers.append(m)
-    #       # if (self.ifPointExists(matchres.point()) == True):
-    #       #   self.deactivate()
-    #       #   self.signal.emit("Close")
-    #       # else:
-    #       self.pointList.append([matchres.point(), lineType])
-    #       self.rubberBand.setToGeometry(QgsGeometry.fromPolylineXY(self.getPointsFromList()), None)
-    #       self.canvas.refresh()
-    #       xPoint = round(matchres.point().x(), 5)
-    #       yPoint = round(matchres.point().y(), 5)
-    #       self.signal.emit(self.pointList)
-    #     else:
-    #       print("Не удалось выполнить привязку")
 
     def ifPointExists(self, newPoint):
         xPoint = round(newPoint.x(), 4)

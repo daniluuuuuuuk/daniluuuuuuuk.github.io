@@ -138,14 +138,15 @@ class CanvasWidget(QgsMapCanvas):
             if btn.objectName() == "lesoseka_from_map_button":
                 self.buildLesosekaFromMap()
             btn.toggle()
-
+            # self.omw.inclinationSlider.setValue(0)
+            
         if btnState == True:
             self.omw.coord_radio_button.toggle()
             self.table.deleteRows()
             if btn.objectName() == "lesoseka_from_map_points_button":
                 self.bfm = BuildFromMapPointsTool(self.canvas, self.table.getMagneticInclination())
             elif btn.objectName() == "lesoseka_from_map_button":
-                self.bfm = BuildFromMapTool(self.canvas)
+                self.bfm = BuildFromMapTool(self.canvas, self.table.getMagneticInclination())
             self.canvas.setMapTool(self.bfm)
             self.bfm.signal.connect(getResult)
 

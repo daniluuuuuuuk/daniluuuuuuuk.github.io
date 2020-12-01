@@ -1,4 +1,3 @@
-# import some modules used in the example
 from qgis.core import *
 from .ForestObjectLoader import ForestObjectLoader
 from PyQt5 import QtCore, QtGui

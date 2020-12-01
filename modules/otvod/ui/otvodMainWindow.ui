@@ -181,9 +181,9 @@
    <widget class="QLabel" name="sliderLabel">
     <property name="geometry">
      <rect>
-      <x>785</x>
+      <x>692</x>
       <y>390</y>
-      <width>24</width>
+      <width>31</width>
       <height>20</height>
      </rect>
     </property>
@@ -408,7 +408,7 @@
    <widget class="QSlider" name="inclinationSlider">
     <property name="geometry">
      <rect>
-      <x>700</x>
+      <x>728</x>
       <y>390</y>
       <width>81</width>
       <height>22</height>
@@ -433,7 +433,7 @@
      <number>0</number>
     </property>
     <property name="tracking">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
     <property name="orientation">
      <enum>Qt::Horizontal</enum>

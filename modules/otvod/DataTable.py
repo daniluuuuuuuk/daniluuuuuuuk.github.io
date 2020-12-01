@@ -16,6 +16,7 @@ import time
 from functools import partial
 from PyQt5.QtGui import QColor
 from PyQt5.QtCore import QTimer
+from .tools.threading import InclinationCalculation
 
 # Только в целях подсказки, нигде не используется:
 
@@ -34,13 +35,13 @@ class CoordType(Enum):
 class DataTable(QTableWidget):
 
     signal = pyqtSignal(object)
-    # rows_changed_signal = pyqtSignal(object)
 
-    def __init__(self, datatable, tableType, coordType, inclination, bindingPoint):
+    def __init__(self, datatable, tableType, coordType, inclination, bindingPoint, inclinationSlider):
         super().__init__(datatable)
         self.coordType = coordType
         self.tabletype = tableType
         self.bindingPoint = bindingPoint
+        self.inclinationSlider = inclinationSlider
         self.setGeometry(QtCore.QRect(0, 0, 401, 341))
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
@@ -52,9 +53,9 @@ class DataTable(QTableWidget):
         self.builder = None
 
         self.cellChanged.connect(self.cellChangedHandler)
-        # self.cellChanged.connect(self.refreshData)
 
         self.magneticInclination = inclination
+        self.inclinationDifference = None
 
         self.rerenderEnabled = True
 
@@ -73,8 +74,6 @@ class DataTable(QTableWidget):
             header.setSectionResizeMode(x, QtWidgets.QHeaderView.Stretch)
 
     def setParams(self, tableType, coordType, inclination, bindingPoint):
-        print("table type in setParams: ", tableType, inclination)
-        # print("SetParams:", tableType, coordType, inclination, bindingPoint)
         self.tabletype = tableType
         self.coordType = coordType
         self.magneticInclination = inclination
@@ -256,6 +255,12 @@ class DataTable(QTableWidget):
     def getMagneticInclination(self):
         return self.magneticInclination
 
+    def setMagneticInclinationDifference(self, magneticInclinationDifference):
+        self.inclinationDifference = magneticInclinationDifference
+
+    def getMagneticInclinationDifference(self):
+        return self.inclinationDifference
+
     def getJSONRows(self):
         rowsList = [{"Table": {"table_type": self.tabletype,
                                "coord_type": self.coordType,
@@ -335,7 +340,20 @@ class DataTable(QTableWidget):
                     else:
                         return GeoOperations.parseRightAngleDMSRow
 
+    # def getInclinationDifference(self):
+    #     sliderValue = self.inclinationSlider.value() / 10
+    #     print(self.magneticInclination, sliderValue)
+    #     return self.magneticInclination - sliderValue
+        # print(sliderValue)
+        # print(self.magneticInclination)
+        # return 0 if self.magneticInclination == 2 else self.magneticInclination - sliderValue
+        # print(difference, '<<<')
+    
     def cellChangedHandler(self, row, column):
+        # inclination = self.inclinationDifference if self.inclinationDifference is not None else self.magneticInclination
+        # diff = self.getMagneticInclinationDifference()
+        # inclination = self.magneticInclination if diff is None else self.magneticInclination + diff
+
         if self.item(row, column) and self.item(row, column).text().find(",") != -1:
             currentText = self.item(row, column).text()
             self.item(row, column).setText(currentText.replace(',','.'))
@@ -399,7 +417,6 @@ class DataTable(QTableWidget):
             self.pointsDict[row] = [point, self.getPointType(row)]
             
             self.signal.emit(self.pointsDict)
-            print(self.pointsDict)
             return row
 
     def getPointType(self, row):
@@ -519,7 +536,7 @@ class DataTable(QTableWidget):
             if self.rowCount() < len(self.pointsDict):
                 self.pointsDict.pop(self.getRowCount())
             self.refreshData()
-            print(self.pointsDict)
+            # print(self.pointsDict)
             # self.refreshData()
 
     def move_row_down(self):
@@ -570,11 +587,12 @@ class DataTable(QTableWidget):
 
 class DataTableWrapper():
 
-    def __init__(self, datatable, coordType, tableType, inclination, bindingPoint):
+    def __init__(self, datatable, coordType, tableType, inclination, bindingPoint, inclinationSlider):
         self.tableModel = DataTable(
-            datatable, coordType, tableType, inclination, bindingPoint)
+            datatable, coordType, tableType, inclination, bindingPoint, inclinationSlider)
         self.tableModel.initColumns()
         self.i = 0
+        # self.inclinationCalculationWorker = None
 
     def changeTable(self, newDatatable):
         self.datatable = newDatatable
@@ -643,45 +661,63 @@ class DataTableWrapper():
         # self.tableModel.setMagneticInclination(0)
         currentTableType = self.tableModel.tabletype
         currentCoordType = self.tableModel.coordType
+        inclination = decimal.Decimal(self.getMagneticInclination()).quantize(decimal.Decimal('.1'))
         self.tableModel.setParams(
-            1, 0, self.getMagneticInclination(), self.getBindingPointXY())
+            1, 0, float(inclination), self.getBindingPointXY())
         azimuthTableList = []
         lastAnchorLinePoint = None
         for key in cuttingArea:
             if cuttingArea[key][1] == "Привязка":
                 lastAnchorLinePoint = key
             if key == 0:
-                azimuth = GeoOperations.calculateAzimuth(bindingPoint, cuttingArea[key][0])
+                azimuth = GeoOperations.calculateAzimuth(bindingPoint, cuttingArea[key][0]) + inclination
+                azimuth = self.validatedAzimuth(azimuth)
                 distance = GeoOperations.calculateDistance(bindingPoint, cuttingArea[key][0])
             else:
-                azimuth = GeoOperations.calculateAzimuth(cuttingArea[key-1][0], cuttingArea[key][0])
+                azimuth = GeoOperations.calculateAzimuth(cuttingArea[key-1][0], cuttingArea[key][0]) + inclination
+                azimuth = self.validatedAzimuth(azimuth)
                 distance = GeoOperations.calculateDistance(cuttingArea[key-1][0], cuttingArea[key][0])
+            
             azimuthTableList.append([str(key) + "-" + str(key + 1), str(azimuth), str(distance), cuttingArea[key][1]])
         if lastAnchorLinePoint is None:
-            azimuth = GeoOperations.calculateAzimuth(cuttingArea[key][0], bindingPoint)
+            azimuth = GeoOperations.calculateAzimuth(cuttingArea[key][0], bindingPoint) + inclination
+            azimuth = self.validatedAzimuth(azimuth)
             distance = GeoOperations.calculateDistance(cuttingArea[key][0], bindingPoint)
             if azimuth <= 0.1 or distance <= 0.1:
                 row = azimuthTableList[-1]
                 row[0] = row[0].split('-')[0] + '-' + '0'
                 del azimuthTableList[-1]
-                azimuthTableList.append(row)
+                azimuthTableList.append(row)      
+                self.refreshTable(azimuthTableList, cuttingArea)
                 return
             azimuthTableList.append([str(key + 1) + "-" + "0", str(azimuth), str(distance), cuttingArea[key][1]])
         else:
-            azimuth = GeoOperations.calculateAzimuth(cuttingArea[key][0], cuttingArea[lastAnchorLinePoint][0])
+            azimuth = GeoOperations.calculateAzimuth(cuttingArea[key][0], cuttingArea[lastAnchorLinePoint][0]) + inclination
+            azimuth = self.validatedAzimuth(azimuth)
             distance = GeoOperations.calculateDistance(cuttingArea[key][0], cuttingArea[lastAnchorLinePoint][0])
             if azimuth <= 0.1 or distance <= 0.1:
                 row = azimuthTableList[-1]
                 row[0] = row[0].split('-')[0] + '-' + str(lastAnchorLinePoint)
                 del azimuthTableList[-1]
-                azimuthTableList.append(row)
+                azimuthTableList.append(row)   
+                self.refreshTable(azimuthTableList, cuttingArea)
                 return
             azimuthTableList.append([str(key + 1) + "-" + str(lastAnchorLinePoint + 1), str(azimuth), str(distance), cuttingArea[key][1]])
 
+        self.refreshTable(azimuthTableList, cuttingArea)
+    
+    def validatedAzimuth(self, azimuth):
+        if azimuth > 360:
+            return azimuth - 360
+        elif azimuth < 0:
+            return 360 - abs(azimuth)
+        else:
+            return azimuth
+
+    def refreshTable(self, azimuthTableList, cuttingArea):
         self.deleteRows()
         self.populateTable(azimuthTableList)
-        self.tableModel.pointsDict = cuttingArea        
-        # print(azimuthTableList)
+        self.tableModel.pointsDict = cuttingArea.copy()
 
     def convertCoordFormat(self, coordType):
         self.tableModel.setRerender(False)
@@ -703,7 +739,7 @@ class DataTableWrapper():
         if self.tableModel.tabletype == 0:
             self.populateCoordTable(tableList)
         elif self.tableModel.tabletype == 1:
-            print(tableList)
+            # print(tableList)
             self.populateAzimuthTable(tableList)
         elif self.tableModel.tabletype == 2:
             self.populateRumbTable(tableList)
@@ -973,3 +1009,23 @@ class DataTableWrapper():
             lineWidget = self.tableModel.cellWidget(row, 4)
             index = lineWidget.findText(ptTuple[1])
             lineWidget.setCurrentIndex(index)
+
+    def updateTableDataInclination(self, inclinationDifference):
+
+        def workerFinished(result):
+
+            worker.deleteLater()
+            thread.quit()
+            thread.wait()
+            thread.deleteLater()
+
+            self.populateTable(result)
+
+        tableList = self.copyTableData()
+        thread = QtCore.QThread()
+
+        worker = InclinationCalculation.Worker(tableList, self.tableModel.tabletype, self.tableModel.coordType, inclinationDifference)
+        worker.moveToThread(thread)
+        worker.finished.connect(workerFinished)
+        thread.started.connect(worker.run)
+        thread.start()

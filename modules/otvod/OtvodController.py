@@ -63,6 +63,7 @@ class OtvodController:
             partial(self.build_from_map_toggled, self.omw.lesoseka_from_map_points_button))
 
         self.omw.inclinationSlider.valueChanged.connect(self.inclinationValueChanged)
+        self.omw.inclinationSlider.sliderMoved.connect(self.updateSliderLabel)
 
         self.omw.editAttributes_button.clicked.connect(self.editAreaAttributes)
 
@@ -120,10 +121,20 @@ class OtvodController:
     def initHandTool(self):
         self.canvas.setMapTool(self.panTool)
 
+    def updateSliderLabel(self, value):
+        self.omw.sliderLabel.setText(str(value / 10))
+
     def inclinationValueChanged(self, value):
+        if self.tableWrapper.getRowsCount() > 0 and self.tableType != 0:
+            currentMagneticInclination = self.tableWrapper.getMagneticInclination()
+            inclinationDifference = currentMagneticInclination - value / 10
+            self.tableWrapper.tableModel.setMagneticInclinationDifference(inclinationDifference)
+            # self.tableWrapper.updateTableDataInclination(inclinationDifference)
+
         self.magneticInclination = value / 10
         self.tableWrapper.tableModel.setMagneticInclination(
             self.magneticInclination)
+
         self.tableWrapper.tableModel.refreshData()
         self.omw.sliderLabel.setText(str(self.magneticInclination))
         print('~~~~', value / 10)
@@ -184,18 +195,16 @@ class OtvodController:
             buttonId = self.radio_group.id(button)
             currentTableType = self.tableType
             self.tableType = buttonId
-            # print(self.magneticInclination)
-            # print(float(self.magneticInclination), '<==')
             self.tableWrapper.convertCells(currentTableType, buttonId, self.tableType, self.coordType, float(
                 self.tableWrapper.getMagneticInclination()), self.bindingPoint)
         else:           
             for btn in self.radio_group.buttons():
                 if self.tableType == self.radio_group.id(btn):
                     btn.setChecked(True)
-        # if self.radio_group.id(button) == 0:
-        #     self.omw.inclinationSlider.setEnabled(False)
-        # else:
-        #     self.omw.inclinationSlider.setEnabled(True)
+        if self.radio_group.id(button) == 0:
+            self.omw.inclinationSlider.setEnabled(False)
+        else:
+            self.omw.inclinationSlider.setEnabled(True)
 
     def bindingPointCoordChanged(self):
         e = n = 0
@@ -226,7 +235,7 @@ class OtvodController:
 
     def loadDataTable(self):
         datatable = DataTableWrapper(self.omw.tableWidget, int(
-            self.tableType), int(self.coordType), 0, self.bindingPoint)
+            self.tableType), int(self.coordType), 0, self.bindingPoint, self.omw.inclinationSlider)
         datatable.deleteRows()
         self.omw.addNode_button.clicked.connect(datatable.addRow)
         self.omw.deleteNode_button.clicked.connect(datatable.deleteRow)
@@ -341,20 +350,6 @@ class OtvodController:
             self.cuttingArea.save()
             self.canvasWidget.btnControl.unlockReportBotton()
             self.omw.outputLabel.setText("Лесосека сохранена")
-
-    # def rotateCuttingArea(self, btn):
-    #     try:
-    #         rotate_value = float(self.omw.rotate_inclination.text())
-    #         if (btn.text() == '<'):
-    #             self.magneticInclination -= rotate_value
-    #         elif(btn.text()) == ">":
-    #             self.magneticInclination += rotate_value
-    #     except:
-    #         QMessageBox.information(
-    #             None, "Ошибка модуля QGISLes", "Некорректное значение в поле магнитного склонения")
-    #     self.tableWrapper.tableModel.setMagneticInclination(
-    #         self.magneticInclination)
-    #     self.tableWrapper.tableModel.refreshData()
 
     def deleteCuttingArea(self):
         try:
