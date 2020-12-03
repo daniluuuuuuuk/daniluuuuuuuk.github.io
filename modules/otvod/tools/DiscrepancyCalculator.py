@@ -31,10 +31,10 @@ class DiscrepancyCalculator:
         # print('@@@', self.measuredDiscrepance - self.theoreticalDiscrepance)
 
     def isLinearDiscrepancyAcceptable(self):
-        return self.maxLinearDiscrepancy > float(self.linearDiscrepancy)
+        return self.maxLinearDiscrepancy >= float(self.linearDiscrepancy)
 
     def isAngleDiscrepancyAcceptable(self):
-        return self.maxAngleDiscrepapancy > self.angleDiscrepancy
+        return self.maxAngleDiscrepapancy >= self.angleDiscrepancy
 
     def getLinearDiscrepancy(self):
         pointA = self.points[0][0]
