@@ -63,11 +63,18 @@ class BuildFromMapPointsTool(QgsMapToolEmitPoint, QWidget):
         self.showAimPoint(point)
 
     def drawToolTip(self, dist, az):
-        sign = '+' if self.inclination > 0 else ''
+        magnAz = self.validatedAzimuth(float(az) + self.inclination)
         if self.canvas.underMouse():  # Only if mouse is over the map
             QToolTip.showText(self.canvas.mapToGlobal(self.canvas.mouseLastXY(
-            )), "Расстояние: " + dist + " м\n" + "Азимут: " + az + "° (" + sign + str(self.inclination) + ")", self.canvas)
-            # QToolTip.hideText()
+            )), "Расстояние: " + dist + " м\n" + "Аз. истин.: " + az + "°\nАз. магнитн.: " + str(round(magnAz, 1)) + "°", self.canvas)
+
+    def validatedAzimuth(self, azimuth):
+        if azimuth > 360:
+            return azimuth - 360
+        elif azimuth < 0:
+            return 360 - abs(azimuth)
+        else:
+            return azimuth
 
     def drawMeasureLine(self, point):
         if not point:
@@ -79,7 +86,7 @@ class BuildFromMapPointsTool(QgsMapToolEmitPoint, QWidget):
             pt2 = point
             firstAndLastPoints = [pt1, pt2]
             length = round(GeoOperations.calculateDistance(pt1, pt2), 1)
-            azimuth = round(GeoOperations.calculateAzimuth(pt1, pt2) + Decimal(self.inclination), 1)
+            azimuth = round(GeoOperations.calculateAzimuth(pt1, pt2), 1)
             self.drawToolTip(str(length), str(azimuth))
             self.measureLineRubber.setToGeometry(
                 QgsGeometry.fromPolylineXY(firstAndLastPoints), None)

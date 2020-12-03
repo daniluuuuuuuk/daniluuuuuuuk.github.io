@@ -111,9 +111,9 @@ class CanvasWidget(QgsMapCanvas):
     def findAzimuth(self, btn, btnState):
 
         def getResult(result):
-            sign = '+' if self.table.getMagneticInclination() > 0 else ''
+            magnAz = self.validatedAzimuth(float(round(result[0], 1)) + self.table.getMagneticInclination())
             self.omw.outputLabel.setText(
-                "Аз.: " + str(round(result[0], 1)) + "°. (" + sign + str(self.table.getMagneticInclination()) + ") Раст.: " + str(round(result[1], 2)) + " м.")
+                "Аз. истин.: " + str(round(result[0], 1)) + "°, магн.: " + str(round(magnAz, 1)) + "°. Расст.: " + str(round(result[1], 1)) + "м.")
 
         if btnState == True:
             self.amt = AzimuthMapTool(self.canvas, self.table.getMagneticInclination())
@@ -123,6 +123,14 @@ class CanvasWidget(QgsMapCanvas):
             self.amt.deactivate()
             # zoomTool = QgsMapToolZoom(self.canvas, False)
             self.canvas.setMapTool(self.panTool)
+
+    def validatedAzimuth(self, azimuth):
+        if azimuth > 360:
+            return azimuth - 360
+        elif azimuth < 0:
+            return 360 - abs(azimuth)
+        else:
+            return azimuth
 
         """Инструмент выноса лесосеки из канваса
         """
