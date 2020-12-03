@@ -27,6 +27,8 @@ class CuttingArea:
         # self.dictAttr = dictAttr
         self.dictAttr = None
 
+        self.isAlreadyTiedUp = None
+
         self.anchorLinePoints = []
         self.cuttingAreaPoints = []
 
@@ -175,6 +177,8 @@ class CuttingArea:
             for point in cuttingAreaTiedUpPoints:
                 pairNumberPoint[i] = [point, "Лесосека"]
                 i += 1
+            if not self.isAlreadyTiedUp:
+                pairNumberPoint[i] = [self.bindingPoint, "Лесосека"]
         else:
             i = 0
             pairNumberPoint = {}
@@ -188,12 +192,16 @@ class CuttingArea:
                 #     continue
                 pairNumberPoint[i] = [point, "Лесосека"]
                 i += 1
+            if not self.isAlreadyTiedUp:
+                pairNumberPoint[i] = [anchorLinePoints[-1], "Лесосека"]
         return pairNumberPoint
 
     def isTiedUp(self, firstPoint, lastPoint):
         if firstPoint == lastPoint:
+            self.isAlreadyTiedUp = True
             return True
         else:
+            self.isAlreadyTiedUp = False
             return False
 
         """Увязка полигона
