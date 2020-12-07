@@ -26,6 +26,7 @@ from qgis.core import QgsMessageLog, Qgis
 from .modules.trees_accounting.src.restatements import Restatement
 from .modules.trees_accounting.src.areas_list import AreasList
 from .tools.ProjectInitializer import QgsProjectInitializer
+from .tools.TaxationLoader import Worker as taxWorker
 
 
 class QgsLes:
@@ -48,6 +49,13 @@ class QgsLes:
             self.iface.mainWindow(),
         )
         self.otvodAction.triggered.connect(self.otvodButtonClicked)
+
+        self.taxationAction = QAction(
+            QIcon(util.resolvePath("res\\info.png")),
+            "Информация о выделе",
+            self.iface.mainWindow(),
+        )
+        self.taxationAction.triggered.connect(self.taxationButtonClicked)        
 
         # self.mdolAction = QAction(
         #     QIcon(util.resolvePath("res\\icon4.png")),
@@ -91,6 +99,7 @@ class QgsLes:
         )
         self.initProjectAction.triggered.connect(self.initProjectClicked)
 
+        self.qgsLesToolbar.addAction(self.taxationAction)
         self.qgsLesToolbar.addAction(self.otvodAction)
         self.qgsLesToolbar.addAction(self.countAction)
         # self.qgsLesToolbar.addAction(self.mdolAction)
@@ -102,6 +111,21 @@ class QgsLes:
 
     def unload(self):
         del self.qgsLesToolbar
+
+    def taxationButtonClicked(self):
+        def getResult(feature):
+
+            if feature:
+                txwrker = taxWorker(feature)
+                txwrker.run()
+                # print(feature)
+
+            zoomTool = QgsMapToolZoom(self.canvas, False)
+            self.canvas.setMapTool(zoomTool)            
+
+        self.pkr = peeker.PeekStratumFromMap(self.canvas, 'Выдела')
+        self.canvas.setMapTool(self.pkr)
+        self.pkr.signal.connect(getResult)        
 
     def otvodButtonClicked(self):
         def getMapRect(rct):
@@ -158,7 +182,7 @@ class QgsLes:
             zoomTool = QgsMapToolZoom(self.canvas, False)
             self.canvas.setMapTool(zoomTool)
 
-        self.pkr = peeker.PeekStratumFromMap(self.canvas)
+        self.pkr = peeker.PeekStratumFromMap(self.canvas, 'Лесосеки')
         self.canvas.setMapTool(self.pkr)
         self.pkr.signal.connect(getResult)
 

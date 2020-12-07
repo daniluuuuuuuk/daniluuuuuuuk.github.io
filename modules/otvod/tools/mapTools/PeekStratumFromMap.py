@@ -28,8 +28,6 @@ class PeekStratumFromMap(QgsMapToolEmitPoint, QObject):
                             y + radius)
         layer.selectByRect(rect, False)
         self.canvas.setCurrentLayer(layer)
-        # self.canvas.zoomToSelected()
-        # print("====>", list(layer.getSelectedFeatures())[0])
         self.signal.emit(list(layer.getSelectedFeatures())[0])
         layer.removeSelection()
 
