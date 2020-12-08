@@ -1,5 +1,6 @@
 from .UIButtonController import ButtonController
 from .tools import GeoOperations
+from .tools.Serializer import DbSerializer
 from .tools.mapTools.AzimuthMapTool import AzimuthMapTool
 from .tools.mapTools.BuildFromMapPointsTool import BuildFromMapPointsTool
 from .tools.mapTools.BuildFromMapTool import BuildFromMapTool
@@ -37,6 +38,7 @@ class CanvasWidget(QgsMapCanvas):
         self.btnControl = ButtonController(self.getButtons())
         self.btnControl.lockLesosekaButtons()
         self.panTool = QgsMapToolPan(self.canvas)
+        self.editedUid = None
 
         """Возвращает кнопки управления лесосекой
         """
@@ -82,11 +84,6 @@ class CanvasWidget(QgsMapCanvas):
         canvas.enableAntiAliasing(True)
         canvas.setFixedWidth(371)
         canvas.setFixedHeight(341)
-        # lp = QgsProject.instance().mapLayersByName("Линия привязки")[0]
-        # lss = QgsProject.instance().mapLayersByName("Лесосеки")[0]
-
-        # self.layers.insert(0, lp)
-        # self.layers.insert(0, lss)
 
         canvas.setLayers(self.layers)
 
@@ -94,7 +91,6 @@ class CanvasWidget(QgsMapCanvas):
         canvas.setDestinationCrs(crs)
         mapSettings = canvas.mapSettings()
         canvas.setExtent(self.rct)
-        # canvas.zoomScale(10000)
 
         canvas.refresh()
         return canvas
@@ -121,7 +117,6 @@ class CanvasWidget(QgsMapCanvas):
             self.amt.signal.connect(getResult)
         elif btnState == False:
             self.amt.deactivate()
-            # zoomTool = QgsMapToolZoom(self.canvas, False)
             self.canvas.setMapTool(self.panTool)
 
     def validatedAzimuth(self, azimuth):
@@ -141,12 +136,10 @@ class CanvasWidget(QgsMapCanvas):
             point = GeoOperations.convertToWgs(result[0][0])
             self.omw.y_coord_LineEdit.setText(str(point.x()))
             self.omw.x_coord_LineEdit.setText(str(point.y()))
-            # self.omw.coord_radio_button.clicked.emit()
             self.table.appendTableFromMap(result[1:])
             if btn.objectName() == "lesoseka_from_map_button":
                 self.buildLesosekaFromMap()
             btn.toggle()
-            # self.omw.inclinationSlider.setValue(0)
             
         if btnState == True:
             self.omw.coord_radio_button.toggle()
@@ -192,14 +185,11 @@ class CanvasWidget(QgsMapCanvas):
             return
 
         self.cuttingArea = CuttingArea.CuttingArea(
-            self.canvas, bindingPoint, layer, None, self.btnControl)
+            self.canvas, bindingPoint, layer, None, self.btnControl, self.editedUid)
         self.canvas.setMapTool(self.panTool)
         cuttingArea = self.cuttingArea.build()
         if not cuttingArea:
             return
-            
-        # print("JJJJJJJJJJJJJJJJJJJJJJJJJJJ", cuttingArea)
-        # self.table.tableModel.refreshData()
 
         switch = self.omw.switchLayout.itemAt(0).widget()
         if switch.isChecked():
@@ -207,6 +197,7 @@ class CanvasWidget(QgsMapCanvas):
 
         # self.tableWrapper.convertCoordFormat(self.coordType)
         self.omw.azimuth_radio_button.setChecked(True)
+        print('>>>>>>>>>>>>>>>>>>>>>', cuttingArea)
         self.table.makeTableFromCuttingArea(bindingPoint, cuttingArea)
         # self.omw.inclinationSlider.setValue(0)
         
@@ -217,18 +208,13 @@ class CanvasWidget(QgsMapCanvas):
     def peekPointFromMap(self, btn, btnState):
 
         def getResult(point):
-            # print("Пришла точка привязки", point)
             point = GeoOperations.convertToWgs(point)
             self.omw.y_coord_LineEdit.setText(str(round(point.x(), 10)))
             self.omw.x_coord_LineEdit.setText(str(round(point.y(), 10)))
 
-            # if self.table.getRowsCount() > 0:
-            #     self.buildLesosekaFromMap()
-
             if btnState == True:
                 btn.setChecked(False)
                 self.ppfm.deactivate()
-                # zoomTool = QgsMapToolZoom(self.canvas, False)
                 self.canvas.setMapTool(self.panTool)
 
         if btnState == True:
@@ -237,44 +223,45 @@ class CanvasWidget(QgsMapCanvas):
             self.ppfm.signal.connect(getResult)
 
         elif btnState == False:
-            # zoomTool = QgsMapToolZoom(self.canvas, False)
             self.canvas.setMapTool(self.panTool)
-
-        """Инструмент выбора выдела на карте и построение его опорных точек
-        """
-
+    
     def peekVydelFromMap(self, btn, btnState):
 
-        def getResult(selectedFeature):
-            self.bap = AnchorPointBuilder(
-                self.canvas, selectedFeature)
-            self.bap.makeFeature()
+        def getSelectedFeature(selectedFeature):
+            
+            def getAreaPoints(areaData, areaPoints):
+                self.editedUid = areaData[0]
+                self.omw.azimuth_radio_button.setChecked(True)
+                point = GeoOperations.convertToWgs(areaData[1])            
+                self.omw.y_coord_LineEdit.setText(str(round(point.x(), 10)))
+                self.omw.x_coord_LineEdit.setText(str(round(point.y(), 10)))
+                self.omw.inclinationSlider.setValue(float(areaData[2] * 10))
+                self.table.makeTableFromCuttingArea(areaData[1], areaPoints[0])
 
-            self.bcp = CuttingAreaBuilder(
-                self.canvas, selectedFeature)
-            self.bcp.makeFeature()
-
-            if btnState == True:
-                btn.setChecked(False)
-                self.ppfm.deactivate()
-                # zoomTool = QgsMapToolZoom(self.canvas, False)
-                self.canvas.setMapTool(self.panTool)
+            if not selectedFeature:
+                return
+            try:
+                serializer = DbSerializer(selectedFeature['uid'])
+                serializer.signal.connect(getAreaPoints)
+                serializer.loadFromDb()
+            finally:
+                if btnState == True:
+                    btn.setChecked(False)
+                    self.ppfm.deactivate()
+                    self.canvas.setMapTool(self.panTool)
 
         if btnState == True:
-            self.ppfm = PeekStratumFromMap(self.canvas)
+            self.ppfm = PeekStratumFromMap(self.canvas, 'Лесосеки')
             self.canvas.setMapTool(self.ppfm)
-            self.ppfm.signal.connect(getResult)
+            self.ppfm.signal.connect(getSelectedFeature)
 
         elif btnState == False:
-            # zoomTool = QgsMapToolZoom(self.canvas, False)
             self.canvas.setMapTool(self.panTool)
 
     def showPointOnCanvas(self, pointDict):
-        # print("Пришла точка", pointDict)
         try:
             self.pb = PointBuilder(pointDict, self.canvas)
             if pointDict:
-                # self.pb = TempFeatures.PointBuilder(pointDict, self.canvas)
                 self.pb.makeFeature()
             elif not pointDict:
                 self.pb.deleteTempLayerIfExists()

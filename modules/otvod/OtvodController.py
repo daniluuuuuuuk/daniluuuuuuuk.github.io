@@ -137,6 +137,7 @@ class OtvodController:
 
         self.tableWrapper.tableModel.refreshData()
         self.omw.sliderLabel.setText(str(self.magneticInclination))
+        print(self.magneticInclination)
         print('~~~~', value / 10)
 
     def initSwitchButton(self):
@@ -347,7 +348,7 @@ class OtvodController:
             QMessageBox.information(None, "Ошибка модуля QGISLes",
                                     "Отсутствует лесосека. Постройте лесосеку, после чего будет возможность ее сохранить")
         else:
-            self.cuttingArea.save()
+            self.cuttingArea.save(self.tableWrapper.getSerializableData())
             self.canvasWidget.btnControl.unlockReportBotton()
             self.omw.outputLabel.setText("Лесосека сохранена")
 

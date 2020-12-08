@@ -10,10 +10,11 @@ from .gui.discrepancyWindow import Ui_Dialog as DiscrepancyDialog
 from .gui.LesosekaInfoDialog import LesosekaInfo
 from .tools import GeoOperations
 from qgis.core import edit
+from .tools.Serializer import DbSerializer
 
 class CuttingArea:
 
-    def __init__(self, canvas, bindingPoint, layer, feature, btnControl):
+    def __init__(self, canvas, bindingPoint, layer, feature, btnControl, editedUid):
         super().__init__()
 
         if feature == None:
@@ -23,8 +24,8 @@ class CuttingArea:
         self.canvas = canvas
         self.bindingPoint = bindingPoint
         self.layer = layer
+        self.uid = editedUid
         self.fields = self.feature.fields()
-        # self.dictAttr = dictAttr
         self.dictAttr = None
 
         self.isAlreadyTiedUp = None
@@ -33,9 +34,9 @@ class CuttingArea:
         self.cuttingAreaPoints = []
 
         self.btnControl = btnControl
-
-        self.uid = str(uuid.uuid4())
-
+        if self.uid == None:
+            self.uid = str(uuid.uuid4())
+            
     def getLesosekaProperties(self):
 
         dictAttr = {}
@@ -237,12 +238,16 @@ class CuttingArea:
         """Сохранение лесосеки
         """
 
-    def save(self):
+    def save(self, tableData):
         if self.anchorLinePoints:
             self.copyOnLayer("Привязка временный слой", "Линия привязки")
             self.copyOnLayer("Лесосека временный слой", "Лесосеки")
         else:
             self.copyOnLayer("Лесосека временный слой", "Лесосеки")
+
+        data = [self.uid] + tableData
+        DbSerializer(data).saveToDb()
+
 
         """Копирование лесосеки с временного слоя на слой из базы данных
         """

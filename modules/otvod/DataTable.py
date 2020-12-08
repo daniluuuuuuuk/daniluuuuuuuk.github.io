@@ -1029,3 +1029,13 @@ class DataTableWrapper():
         worker.finished.connect(workerFinished)
         thread.started.connect(worker.run)
         thread.start()
+
+    def getSerializableData(self):
+        return [
+            self.tableModel.tabletype,
+            self.tableModel.coordType,
+            self.tableModel.bindingPoint.x(),
+            self.tableModel.bindingPoint.y(),
+            self.tableModel.magneticInclination,
+            self.tableModel.pointsDict,
+        ]
