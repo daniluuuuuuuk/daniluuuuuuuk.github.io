@@ -69,20 +69,20 @@ class QgsLes:
         )
         self.countAction.triggered.connect(self.countButtonClicked)
 
-        # if not PostgisDB.PostGisDB().setConnection():
-        #     QMessageBox.information(
-        #         None, er.MODULE_ERROR, er.DATABASE_CONNECTION_ERROR + er.FILTER_DISABLED
-        #     )
-        # else:
-        #     self.fter = Filter.FilterWidget(self.iface, QgsProject.instance())
-        #     self.filterAction = self.fter.getFilterWidget()
-        #     self.qgsLesToolbar.addWidget(self.filterAction)
-        #     self.filterButtonAction = QAction(
-        #         QIcon(util.resolvePath("res\\icon3.png")),
-        #         "Поиск",
-        #         self.iface.mainWindow(),
-        #     )
-        #     self.filterAction.setDefaultAction(self.filterButtonAction)
+        if not PostgisDB.PostGisDB().setConnection():
+            QMessageBox.information(
+                None, er.MODULE_ERROR, er.DATABASE_CONNECTION_ERROR + er.FILTER_DISABLED
+            )
+        else:
+            self.fter = Filter.FilterWidget(self.iface, QgsProject.instance())
+            self.filterAction = self.fter.getFilterWidget()
+            self.qgsLesToolbar.addWidget(self.filterAction)
+            self.filterButtonAction = QAction(
+                QIcon(util.resolvePath("res\\icon3.png")),
+                "Поиск",
+                self.iface.mainWindow(),
+            )
+            self.filterAction.setDefaultAction(self.filterButtonAction)
 
         self.settingsAction = QAction(
             QIcon(util.resolvePath("res\\settings.png")),

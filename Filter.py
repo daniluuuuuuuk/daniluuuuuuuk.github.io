@@ -41,13 +41,9 @@ class FilterWidget(QWidget):
 
   def initFilter(self):
     self.fo.forestry = ForestObject.Forestry(self.fo.forestEnterprise.number)
-
     self.ui.leshoz_combobox_3.setCurrentText(self.fo.forestEnterprise.name)
     self.ui.lch_combobox_3.addItems(self.fo.forestry.getAllForestries())
     self.ui.lch_combobox_3.setCurrentIndex(-1)
-
-  # def forestObjectChanged(self):
-  #   pass
 
 class FilterWidgetController:
   def __init__(self, view, fo, iface, project):
@@ -92,6 +88,9 @@ class FilterWidgetController:
     self.stratum.number = self.view.ui.vd_combobox_3.currentText()
 
   def search(self):
+    print(self.forestry.number, 'forestry')
+    print(self.quarter.number, 'quarter')
+    print(self.stratum.number, 'stratum')
     if self.forestry.number == "" :
       QMessageBox.information(None, 'Ошибка', "Введите значение лесничества")
     elif self.forestry.number != "" and self.quarter.number == "":
@@ -99,6 +98,7 @@ class FilterWidgetController:
     elif self.quarter.number != "" and self.stratum.number == "":
       util.zoomToQuarter(self.forestry.number, self.quarter.number, self.project, self.iface)
     else:
+      print('zoom to stratum')
       util.zoomToStratum(self.forestry.number, self.quarter.number, self.stratum.number, self.project, self.iface)
 
   def comboboxClear(self, *args):
