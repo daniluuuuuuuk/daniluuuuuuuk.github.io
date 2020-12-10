@@ -33,12 +33,41 @@ class QgsLes:
     def __init__(self, iface):
         self.iface = iface
         self.canvas = self.iface.mapCanvas()
+        QgsProject.instance().legendLayersAdded.connect(self.ifKvLayerReady)
+        self.filter = None
+
+    def ifKvLayerReady(self, layer):
+        if layer[0].name() == 'Кварталы' and self.filter == None:
+            self.initFilter()
+
+    def initFilter(self):
+        if not PostgisDB.PostGisDB().setConnection():
+            QMessageBox.information(
+                None, er.MODULE_ERROR, er.DATABASE_CONNECTION_ERROR + er.FILTER_DISABLED
+            )
+        else:
+            try:
+                self.filter = Filter.FilterWidget()
+                self.filterAction = self.filter.getFilterWidget()
+                self.qgsLesToolbar.addWidget(self.filterAction)
+                self.filterButtonAction = QAction(
+                    QIcon(util.resolvePath("res\\icon3.png")),
+                    "Поиск",
+                    self.iface.mainWindow(),
+                )
+                
+                self.filterAction.setDefaultAction(self.filterButtonAction)
+                self.ctrl = Filter.FilterWidgetController(self.filter, self.iface)
+
+            except Exception as e:
+                print(e)
 
     def initGui(self):
         
         self.qgsLesToolbar = self.iface.mainWindow().findChild(
             QToolBar, "QGIS Отвод лесосек"
         )
+        
         if not self.qgsLesToolbar:
             self.qgsLesToolbar = self.iface.addToolBar("QGIS Отвод лесосек")
             self.qgsLesToolbar.setObjectName("QGIS Отвод лесосек")
@@ -57,32 +86,10 @@ class QgsLes:
         )
         self.taxationAction.triggered.connect(self.taxationButtonClicked)        
 
-        # self.mdolAction = QAction(
-        #     QIcon(util.resolvePath("res\\icon4.png")),
-        #     "Материально-денежная оценка",
-        #     self.iface.mainWindow(),
-        # )
-        # self.mdolAction.triggered.connect(self.mdolButtonClicked)
-
         self.countAction = QAction(
             QIcon(util.resolvePath("res\\icon.png")), "Перечет", self.iface.mainWindow()
         )
         self.countAction.triggered.connect(self.countButtonClicked)
-
-        if not PostgisDB.PostGisDB().setConnection():
-            QMessageBox.information(
-                None, er.MODULE_ERROR, er.DATABASE_CONNECTION_ERROR + er.FILTER_DISABLED
-            )
-        else:
-            self.fter = Filter.FilterWidget(self.iface, QgsProject.instance())
-            self.filterAction = self.fter.getFilterWidget()
-            self.qgsLesToolbar.addWidget(self.filterAction)
-            self.filterButtonAction = QAction(
-                QIcon(util.resolvePath("res\\icon3.png")),
-                "Поиск",
-                self.iface.mainWindow(),
-            )
-            self.filterAction.setDefaultAction(self.filterButtonAction)
 
         self.settingsAction = QAction(
             QIcon(util.resolvePath("res\\settings.png")),
@@ -98,13 +105,15 @@ class QgsLes:
             self.iface.mainWindow(),
         )
         self.initProjectAction.triggered.connect(self.initProjectClicked)
-
+        
         self.qgsLesToolbar.addAction(self.taxationAction)
         self.qgsLesToolbar.addAction(self.otvodAction)
         self.qgsLesToolbar.addAction(self.countAction)
-        # self.qgsLesToolbar.addAction(self.mdolAction)
         self.qgsLesToolbar.addAction(self.settingsAction)
         self.qgsLesToolbar.addAction(self.initProjectAction)
+
+        if QgsProject.instance().mapLayersByName('Выдела'):
+            self.initFilter()
 
     def initProjectClicked(self):
         self.initializer = QgsProjectInitializer()
@@ -118,7 +127,6 @@ class QgsLes:
             if feature:
                 txwrker = taxWorker(feature)
                 txwrker.run()
-                # print(feature)
 
             zoomTool = QgsMapToolZoom(self.canvas, False)
             self.canvas.setMapTool(zoomTool)            
@@ -128,6 +136,7 @@ class QgsLes:
         self.pkr.signal.connect(getResult)        
 
     def otvodButtonClicked(self):
+        
         def getMapRect(rct):
             layer_list = QgsProject.instance().layerTreeRoot().children()
             layers = [
@@ -146,7 +155,7 @@ class QgsLes:
                 self.canvas.unsetMapTool(self.rmt)
 
         self.canvas = self.iface.mapCanvas()
-        # print("main podcast scale", self.canvas.scale())
+
         try:
             currentMapTool = self.canvas.mapTool()
         except:
@@ -185,21 +194,3 @@ class QgsLes:
         self.pkr = peeker.PeekStratumFromMap(self.canvas, 'Лесосеки')
         self.canvas.setMapTool(self.pkr)
         self.pkr.signal.connect(getResult)
-
-    # def mdolButtonClicked(self):
-
-    #     def getResult(feature):
-    #         if feature:
-    #             uid = feature['uid']
-    #             self.ev = Evaluation(uid)
-    #             self.ev.show()
-
-    #         zoomTool = QgsMapToolZoom(self.canvas, False)
-    #         self.canvas.setMapTool(zoomTool)
-
-    #     self.pkr = peeker.PeekStratumFromMap(self.canvas)
-    #     self.canvas.setMapTool(self.pkr)
-    #     self.pkr.signal.connect(getResult)
-
-    def filterButtonClicked(self):
-        print("show filter Window")

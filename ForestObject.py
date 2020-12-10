@@ -1,16 +1,20 @@
 from . import PostgisDB
 from qgis.PyQt.QtWidgets import QMessageBox
 from qgis.core import QgsProject, QgsFeatureRequest
-
+from qgis.core import (QgsMessageLog, QgsTask, QgsApplication, Qgis)
+from PyQt5 import QtCore
+from .tools import config
 import re
+from PyQt5.QtCore import pyqtSignal, QObject
+
+MESSAGE_CATEGORY = 'DB query task'
 
 class ForestObject:
     def __init__(self):
-        # self._forestEnterprise = None
         self._forestry= None
         self._quartal = None
         self._stratum = None
-        self._forestEnterprise = ForestEnterprise()
+        self._forestEnterprise = None
         self._mObservers = []
 
     @property
@@ -32,44 +36,33 @@ class ForestObject:
     @forestEnterprise.setter
     def forestEnterprise(self, forestEnterprise):
         self._forestEnterprise = forestEnterprise
-        self.notifyObservers()
     
     @forestry.setter
     def forestry(self, forestry):
         self._forestry = forestry
-        self.notifyObservers()
 
     @quartal.setter
     def quartal(self, quartal):
         self._quartal = quartal
-        self.notifyObservers()
     
     @stratum.setter
     def stratum(self, stratum):
         self._stratum = stratum
-        self.notifyObservers()
 
-    def addObserver( self, inObserver ):
-        self._mObservers.append(inObserver)
 
-    def removeObserver( self, inObserver ):
-        self._mObservers.remove(inObserver)
+class ForestEnterprise(QtCore.QObject):
 
-    def notifyObservers( self ):
-        for x in self._mObservers:
-            x.forestObjectChanged()
+    nameLoaded = QtCore.pyqtSignal(object)
 
-class ForestEnterprise:
-    
     def __init__(self):
-        layer = QgsProject.instance().mapLayersByName("Выдела")[0]
-        idx = layer.fields().indexOf('num_lhz')
-        num_lhz = list(layer.uniqueValues(idx))[0]
-        print(num_lhz)
+        QtCore.QObject.__init__(self)        
         try:
+            cf = config.Configurer('enterprise')
+            settings = cf.readConfigs()
+            num_lhz = settings.get('num_lhz')  
             self._number = num_lhz
-            self._name = self.setNameFromDB()[0]
-        except:
+        except Exception as e:
+            print(e)
             self._number = -1
             self._name = ""
 
@@ -89,23 +82,29 @@ class ForestEnterprise:
     def name(self, name):
         self._name = name
 
-    def setNameFromDB(self):
-        try:
-            postgisConnection = PostgisDB.PostGisDB()
-            result = postgisConnection.getQueryResult(
+    def setNameFromDb(self):
+
+        def workerFinished(result):
+            worker.deleteLater()
+            thread.quit()
+            thread.wait()
+            thread.deleteLater()
+            self.nameLoaded.emit(result)
+        
+        thread = QtCore.QThread()
+        worker = DbQueryWorker(
                 """select name_organization 
                 from "dictionary".organization
-                where substring(code_organization::varchar(255) from 6 for 3) = '{}'""".format(self._number))[0]
-            postgisConnection.__del__()
-            return result
-        except Exception as e:
-            QMessageBox.information(None, 'Ошибка', str(e))
+                where substring(code_organization::varchar(255) from 6 for 3) = '{}'""".format(self._number))
+        worker.moveToThread(thread)
+        worker.finished.connect(workerFinished)
+        thread.started.connect(worker.run)
+        thread.start()
 
 class Forestry(ForestObject):
 
-    def __init__(self, lhnumber):
+    def __init__(self):
         self._number = None
-        self.leshoz_Number = lhnumber
 
     @property
     def number(self):
@@ -115,25 +114,6 @@ class Forestry(ForestObject):
     def number(self, number):
         self._number = number
 
-    def prepareForestries(self, result):
-        forestries = []
-        for fr in result:
-            forestries.append(str(fr[0])[-2:] + ' ' + fr[1])
-        return forestries
-
-
-    def getAllForestries(self):
-        lesnichList = []
-        postgisConnection = PostgisDB.PostGisDB()
-        leshozId = postgisConnection.getQueryResult(
-            """select id_organization 
-                from "dictionary".organization
-                where substring(code_organization::varchar(255) from 6 for 3) = '{}'""".format(self.leshoz_Number))[0][0]
-        result = postgisConnection.getQueryResult(
-            """select code_organization, name_organization from "dictionary".organization where parent_id_organization = {}""".format(leshozId))
-        lesnichestva = self.prepareForestries(result)
-        postgisConnection.__del__()
-        return lesnichestva
 
 class Quarter():
 
@@ -177,5 +157,77 @@ class Stratum():
         features = layer.getFeatures(request)
         num_vds = (int(feature['num_vd']) for feature in features)
         num_vds = set(sorted(num_vds))
-        print(num_kv)
         return map(str, num_vds)
+
+class DbQueryWorker(QtCore.QObject):
+
+    def __init__(self, query):
+        QtCore.QObject.__init__(self)
+
+        self.query = query
+
+        self.killed = False
+        self.loader = DatabaseQueryTask('Query Database')
+
+    def run(self):
+        ret = None
+        try:
+            self.loader.run(self.query)
+            self.loader.waitForFinished()
+            ret = self.loader.result
+
+        except Exception as e:
+            raise e
+        self.finished.emit(ret)
+
+    def kill(self):
+        self.killed = True
+
+    finished = QtCore.pyqtSignal(object)
+
+class DatabaseQueryTask(QgsTask):
+
+    def __init__(self, description):
+        super().__init__(description, QgsTask.CanCancel)
+
+        self.result = None
+
+        self.total = 0
+        self.iterations = 0
+        self.exception = None
+
+    def run(self, query):
+        QgsMessageLog.logMessage('Started task "{}"'.format(
+            self.description()), MESSAGE_CATEGORY, Qgis.Info)
+        postgisConnection = PostgisDB.PostGisDB()
+        self.result = postgisConnection.getQueryResult(query)
+        postgisConnection.__del__()
+        return True
+
+    def finished(self, result):
+        if result:
+            QgsMessageLog.logMessage(
+                'Task "{name}" completed\n'
+                .format(
+                    name=self.description()),
+                MESSAGE_CATEGORY, Qgis.Success)
+        else:
+            if self.exception is None:
+                QgsMessageLog.logMessage(
+                    'Task "{name}" not successful but without exception '
+                    '(probably the task was manually canceled by the '
+                    'user)'.format(
+                        name=self.description()),
+                    MESSAGE_CATEGORY, Qgis.Warning)
+            else:
+                QgsMessageLog.logMessage(
+                    'Task "{name}" Exception: {exception}'.format(
+                        name=self.description(), exception=self.exception),
+                    MESSAGE_CATEGORY, Qgis.Critical)
+                raise self.exception
+
+    def cancel(self):
+        QgsMessageLog.logMessage(
+            'Task "{name}" was cancelled'.format(name=self.description()),
+            MESSAGE_CATEGORY, Qgis.Info)
+        super().cancel()
