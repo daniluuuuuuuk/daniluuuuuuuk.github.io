@@ -24,12 +24,12 @@ from .icons.initIcons import IconSet
 from qgis.core import Qgis, QgsSnappingConfig, QgsTolerance
 
 
-class OtvodController:
+class OtvodController():
     def __init__(self, layerList, rct):
         self.layers = layerList
         self.rct = rct
 
-        self.omw = MainWindow()
+        self.omw = MainWindow(self)
 
         self.tableType = 0
         self.coordType = 0
@@ -105,6 +105,7 @@ class OtvodController:
         
         self.initSnapping()
 
+
     def initSnapping(self):
         my_snap_config = QgsSnappingConfig()
         my_snap_config.setEnabled(True)
@@ -137,8 +138,6 @@ class OtvodController:
 
         self.tableWrapper.tableModel.refreshData()
         self.omw.sliderLabel.setText(str(self.magneticInclination))
-        print(self.magneticInclination)
-        print('~~~~', value / 10)
 
     def initSwitchButton(self):
         s4 = Switch(thumb_radius=6, track_radius=8)

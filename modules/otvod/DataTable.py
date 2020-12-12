@@ -45,6 +45,8 @@ class DataTable(QTableWidget):
         self.setGeometry(QtCore.QRect(0, 0, 401, 341))
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
+        self.cellClicked.connect(self.activeteEditing)        
+
         self.anchorLineRows = []
         self.lesosekaRows = []
 
@@ -57,7 +59,11 @@ class DataTable(QTableWidget):
         self.magneticInclination = inclination
         self.inclinationDifference = None
 
-        self.rerenderEnabled = True
+        self.rerenderEnabled = True    
+
+    def activeteEditing(self, i, t):
+        index = self.model().index(i, t)
+        self.edit(index)
 
     def setRerender(self, bl):
         self.rerenderEnabled = bl

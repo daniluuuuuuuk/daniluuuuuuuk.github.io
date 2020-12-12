@@ -95,7 +95,7 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>Выбрать точку на карте</string>
+     <string>Выбрать точку на карте (Ctrl+Q)</string>
     </property>
     <property name="text">
      <string/>
@@ -146,7 +146,7 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>Добавить точку</string>
+     <string>Добавить точку (Ctrl + +)</string>
     </property>
     <property name="text">
      <string>+</string>
@@ -227,7 +227,7 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>Измерение расстояния и азимута</string>
+     <string>Измерение расстояния и азимута (Ctrl+A)</string>
     </property>
     <property name="text">
      <string/>
@@ -304,7 +304,7 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>Опорные точки</string>
+     <string>Загрузить данные лесосеки</string>
     </property>
     <property name="text">
      <string/>
@@ -323,7 +323,7 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>Вынос по границам выдела</string>
+     <string>Вынос по границам выдела (Ctrl+W)</string>
     </property>
     <property name="text">
      <string/>
@@ -345,7 +345,7 @@
      <item>
       <widget class="QLabel" name="label_3">
        <property name="toolTip">
-        <string>Decimal Degrees (Десятичный формат)</string>
+        <string>Decimal Degrees (Десятичный формат) (Ctrl+Shift+R)</string>
        </property>
        <property name="text">
         <string>DD</string>
@@ -358,7 +358,7 @@
      <item>
       <widget class="QLabel" name="label_2">
        <property name="toolTip">
-        <string>Degrees Minutes Seconds (Градусы, Минуты, Секунды)</string>
+        <string>Degrees Minutes Seconds (Градусы, Минуты, Секунды) (Ctrl+Shift+R)</string>
        </property>
        <property name="text">
         <string>DMS</string>
@@ -396,7 +396,7 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>Вынос по произвольным точкам</string>
+     <string>Вынос по произвольным точкам (Ctrl+E)</string>
     </property>
     <property name="text">
      <string/>
@@ -413,6 +413,9 @@
       <width>81</width>
       <height>22</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string>Магнитное склонение (Ctrl+Вниз/Вверх, Ctrl+Shift+Вниз/Вверх)</string>
     </property>
     <property name="minimum">
      <number>-200</number>
@@ -463,6 +466,9 @@
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QRadioButton" name="coord_radio_button">
+       <property name="toolTip">
+        <string>Координаты (Ctrl+1)</string>
+       </property>
        <property name="text">
         <string>КРД</string>
        </property>
@@ -470,6 +476,9 @@
      </item>
      <item>
       <widget class="QRadioButton" name="azimuth_radio_button">
+       <property name="toolTip">
+        <string>Азимуты (Ctrl+2)</string>
+       </property>
        <property name="text">
         <string>АЗТ</string>
        </property>
@@ -477,6 +486,9 @@
      </item>
      <item>
       <widget class="QRadioButton" name="rumb_radio_button">
+       <property name="toolTip">
+        <string>Румбы (Ctrl+3)</string>
+       </property>
        <property name="text">
         <string>РМБ</string>
        </property>
@@ -484,6 +496,9 @@
      </item>
      <item>
       <widget class="QRadioButton" name="left_angle_radio_button">
+       <property name="toolTip">
+        <string>Левые внутренние углы (Ctrl+4)</string>
+       </property>
        <property name="text">
         <string>ЛВУ</string>
        </property>
@@ -491,6 +506,9 @@
      </item>
      <item>
       <widget class="QRadioButton" name="right_angle_radio_button">
+       <property name="toolTip">
+        <string>Правые внутернние углы (Ctrl + 5)</string>
+       </property>
        <property name="text">
         <string>ПВУ</string>
        </property>
@@ -508,7 +526,7 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>Построить лесосеку</string>
+     <string>Навигация по карте (Ctrl+H)</string>
     </property>
     <property name="text">
      <string/>
@@ -524,7 +542,7 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>Построить лесосеку</string>
+     <string>Настроить видимость слоев (Ctrl+L)</string>
     </property>
     <property name="text">
      <string/>
@@ -556,7 +574,7 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>Построить лесосеку</string>
+     <string>Построить лесосеку (Ctrl+B)</string>
     </property>
     <property name="text">
      <string/>
@@ -608,25 +626,6 @@
     </property>
     <property name="text">
      <string/>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="saveLesosekaPoints">
-    <property name="geometry">
-     <rect>
-      <x>800</x>
-      <y>10</y>
-      <width>21</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Опорные точки</string>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="checkable">
-     <bool>true</bool>
     </property>
    </widget>
   </widget>
