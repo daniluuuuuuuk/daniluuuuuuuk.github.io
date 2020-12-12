@@ -1,4 +1,4 @@
-from qgis.PyQt.QtWidgets import QDialog, QMessageBox, QToolButton
+from qgis.PyQt.QtWidgets import QDialog, QMessageBox, QToolButton, QFileDialog
 from .gui import settingsDialog, changePortDialog
 from .tools import config
 from .tools import module_errors as er
@@ -26,6 +26,15 @@ class SettingsController:
     self.sd.setModal(False)
     self.tableUi = self.sd.ui
 
+    self.tabletypes = {'Координаты': 0,
+                          'Азимуты': 1,
+                          'Румбы': 2,
+                          'Левые углы': 3,
+                          'Правые углы': 4}
+    self.coordtypes = {'Десятичный': 0,
+                          'Градусы/Минуты/Секунды': 1}
+
+    self.populateOtvodSettings()
     self.populateBDSettings()
     self.populateBTSettings()
 
@@ -36,7 +45,35 @@ class SettingsController:
     self.tableUi.changeRangeFinderComButton.clicked.connect(self.changeComPort)
     self.tableUi.SaveBTConfigPushButton.clicked.connect(self.saveComPortConfig)
 
+    self.tableUi.toolButton.clicked.connect(self.chooseReportFolder)
+    self.tableUi.saveOtvodSettingsButton.clicked.connect(self.saveOtvodSettings)
+
     self.sd.exec()
+
+  def saveOtvodSettings(self):
+      cfReport = config.Configurer('report', {'path': self.tableUi.lineEdit.text()})
+      cfReport.writeConfigs()
+      otvodSettings = {'tabletype': str(self.tabletypes.get(self.tableUi.tableType_comboBox.currentText(), "0")),
+      'coordtype': str(self.coordtypes.get(self.tableUi.coordType_comboBox.currentText(), "0"))}
+      cfOtvod = config.Configurer('otvod', otvodSettings)
+      cfOtvod.writeConfigs()
+
+  def chooseReportFolder(self):
+      path = str(QFileDialog.getExistingDirectory(None, "Select Directory"))
+      self.tableUi.lineEdit.setText(path)
+
+  def populateOtvodSettings(self):
+      self.tableUi.tableType_comboBox.addItems(
+          [key for key, value in self.tabletypes.items()])
+      self.tableUi.coordType_comboBox.addItems(
+          [key for key, value in self.coordtypes.items()])  
+      cfReport = config.Configurer('report')
+      cfOtvod = config.Configurer('otvod')
+      settingsReport = cfReport.readConfigs()
+      self.tableUi.lineEdit.setText(settingsReport.get('path', 'No data'))
+      settingsOtvod = cfOtvod.readConfigs()
+      self.tableUi.tableType_comboBox.setCurrentIndex(int(settingsOtvod.get('tabletype')))
+      self.tableUi.coordType_comboBox.setCurrentIndex(int(settingsOtvod.get('coordtype')))
 
   def populateBDSettings(self):
     try:

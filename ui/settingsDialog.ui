@@ -110,13 +110,13 @@
       </rect>
      </property>
      <property name="text">
-      <string>Формат координат по умолчанию</string>
+      <string>Формат данных</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
      </property>
     </widget>
-    <widget class="QComboBox" name="comboBox">
+    <widget class="QComboBox" name="tableType_comboBox">
      <property name="geometry">
       <rect>
        <x>120</x>
@@ -136,13 +136,13 @@
       </rect>
      </property>
      <property name="text">
-      <string>Формат ввода по умолчанию</string>
+      <string>Формат координат</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
      </property>
     </widget>
-    <widget class="QComboBox" name="comboBox_2">
+    <widget class="QComboBox" name="coordType_comboBox">
      <property name="geometry">
       <rect>
        <x>120</x>

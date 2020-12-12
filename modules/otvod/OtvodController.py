@@ -31,8 +31,8 @@ class OtvodController():
 
         self.omw = MainWindow(self)
 
-        self.tableType = 0
-        self.coordType = 0
+        self.tableType = self.getConfigTableType()
+        self.coordType = self.getConfigCoordType()
         self.magneticInclination = 0.0
 
         self.bindingPoint = QgsPointXY(0, 0)
@@ -78,7 +78,6 @@ class OtvodController():
         self.omw.peekFromGPSPushButton.clicked.connect(self.getGPSCoords)
         self.omw.generateReport_Button.clicked.connect(self.generateReport)
 
-        # self.omw.buildLesoseka_Button.clicked.connect(self.buildTempCuttingArea)
         self.omw.buildLesoseka_Button.clicked.connect(
             self.canvasWidget.buildLesosekaFromMap)
         self.omw.saveLesoseka_Button.clicked.connect(self.saveCuttingArea)
@@ -92,7 +91,7 @@ class OtvodController():
         self.radio_group = self.setup_radio_buttons()
         self.radio_group.buttonClicked.connect(self.radio_clicked)
         self.radio_group.buttonToggled.connect(self.radio_clicked)
-        self.omw.coord_radio_button.toggle()
+        # self.omw.coord_radio_button.toggle()
 
         self.canvas = self.canvasWidget.getCanvas()
         self.omw.show()
@@ -103,8 +102,27 @@ class OtvodController():
 
         self.omw.manageLayers_button.clicked.connect(self.manageCanvasLayers)
         
+        self.turnOnTableAndCoords()
+
         self.initSnapping()
 
+    def turnOnTableAndCoords(self):
+        tableTypeButton = self.radio_group.button(self.tableType)
+        tableTypeButton.toggle()
+        if self.coordType:
+            self.switch.setChecked(True)
+        else:
+            self.switch.setChecked(False)
+
+    def getConfigTableType(self):
+        cf = config.Configurer('otvod')
+        settings = cf.readConfigs()
+        return int(settings.get('tabletype', 'No data'))
+
+    def getConfigCoordType(self):
+        cf = config.Configurer('otvod')
+        settings = cf.readConfigs()
+        return int(settings.get('coordtype', 'No data'))
 
     def initSnapping(self):
         my_snap_config = QgsSnappingConfig()

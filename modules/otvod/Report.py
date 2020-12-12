@@ -8,7 +8,7 @@ from docx.enum.style import WD_STYLE_TYPE
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from qgis.PyQt.QtCore import QSize
 from PIL import Image, ImageOps
-
+from ...tools import config
 
 class Report:
 
@@ -90,14 +90,18 @@ class Report:
         p = document.add_paragraph(
             '\nИсполнитель:{}'.format(self.areaAttributes["fio"]))
 
-        path = os.path.join(QgsProject.instance().homePath(
-        ), 'Отвод_кв_{}.docx'.format(str(self.areaAttributes["num_kv"])))
+        path = os.path.join(self.getReportFolder(), 'Отвод_кв_{}.docx'.format(str(self.areaAttributes["num_kv"])))
         document.save(path)
         path = path.replace("\\", "\\\\")
         path = path.replace("/", "\\\\")
         path = path.replace(" ", "%20")
 
         return path
+
+    def getReportFolder(self):
+        cf = config.Configurer('report')
+        settings = cf.readConfigs()
+        return settings.get('path')
 
     def extractColumnNames(self, columnNames):
         newColumns = []
