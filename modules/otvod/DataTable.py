@@ -135,12 +135,19 @@ class DataTable(QTableWidget):
     def getColCount(self):
         return self.columnCount()
 
+    def getLastLineTypeComboboxIndex(self, index):
+        if index > 0:
+            widget = self.cellWidget(index - 1, len(self.columnNames) - 1)
+            return widget.currentIndex()
+        return 0
+
     def setup_cell_widgets(self, index):
         lineTypeCombobox = QtWidgets.QComboBox()
         lineTypeCombobox.addItem(
             QIcon(self.resolve("icons\\line_icon.png")), "Привязка")
         lineTypeCombobox.addItem(
             QIcon(self.resolve("icons\\lesoseka_icon.png")), "Лесосека")
+        lineTypeCombobox.setCurrentIndex(self.getLastLineTypeComboboxIndex(index))
         lineTypeCombobox.currentIndexChanged.connect(
             self.lineTypeComboboxChanged)
         self.setCellWidget(index, len(self.columnNames) - 1, lineTypeCombobox)
