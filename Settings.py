@@ -4,6 +4,11 @@ from .tools import config
 from .tools import module_errors as er
 from .PostgisDB import PostGisDB
 from .BluetoothAdapter import BTAdapter
+from PyQt5 import QtCore
+from .modules.otvod.tools.threading.ForestObjectWorker import Worker as ForestObjWorker
+from .modules.otvod.tools.threading.ForestObjectLoader import ForestObjectLoader
+from qgis.utils import iface
+
 
 class SettingsWindow(QDialog):
 
@@ -19,9 +24,10 @@ class comPortWindow(QDialog):
         self.ui = changePortDialog.Ui_Dialog()
         self.ui.setupUi(self)
 
-class SettingsController:
+class SettingsController(QtCore.QObject):
 
   def __init__(self, *args, **kwargs):
+    QtCore.QObject.__init__(self)
     self.sd = SettingsWindow()
     self.sd.setModal(False)
     self.tableUi = self.sd.ui
@@ -35,20 +41,137 @@ class SettingsController:
                           'Градусы/Минуты/Секунды': 1}
 
     self.populateOtvodSettings()
+    
+    self.num_lhz, self.gplho, self.leshoz, self.lesnich = self.getEnterpriseConfig()
+
+    self.populateEnterprise()
+
     self.populateBDSettings()
     self.populateBTSettings()
 
     self.tableUi.saveConfigButton.clicked.connect(self.saveBDConfig)
     self.tableUi.testDBConnection_pushButton.clicked.connect(self.getDBConnectionState)
+    self.tableUi.saveEnterpriseSettingsButton.clicked.connect(self.saveEnterpriseConfig)
 
     self.tableUi.changeForkComButton.clicked.connect(self.changeComPort)
     self.tableUi.changeRangeFinderComButton.clicked.connect(self.changeComPort)
     self.tableUi.SaveBTConfigPushButton.clicked.connect(self.saveComPortConfig)
 
+    self.tableUi.gplho_comboBox.currentTextChanged.connect(self.gplhoChanged)
+    self.tableUi.leshoz_comboBox.currentTextChanged.connect(self.leshozChanged)
+
     self.tableUi.toolButton.clicked.connect(self.chooseReportFolder)
     self.tableUi.saveOtvodSettingsButton.clicked.connect(self.saveOtvodSettings)
-
     self.sd.exec()
+
+  def getEnterpriseConfig(self):
+    cf = config.Configurer('enterprise')
+    settings = cf.readConfigs()
+    return [settings.get('num_lhz', ''),
+            settings.get('gplho', ''),
+            settings.get('leshoz', ''),
+            settings.get('lesnich', '')]
+
+  def saveEnterpriseConfig(self):
+    try:
+      settingsDict = {'num_lhz' : self.num_lhz,
+                    'gplho' : self.tableUi.gplho_comboBox.currentText(), 
+                    'leshoz' : self.tableUi.leshoz_comboBox.currentText(),
+                    'lesnich' : self.tableUi.lesnich_comboBox.currentText()}
+      cf = config.Configurer('enterprise', settingsDict)
+      cf.writeConfigs()
+    except Exception as e:
+        QMessageBox.information(None, er.MODULE_ERROR, er.CONFIG_FILE_ERROR + str(e))
+
+  def gplhoChanged(self):
+    if self.tableUi.gplho_comboBox.currentText() == "":
+      return
+
+    def workerFinished(result):
+
+        worker.deleteLater()
+        thread.quit()
+        thread.wait()
+        thread.deleteLater()
+
+        self.comboboxClear(self.tableUi.leshoz_comboBox, self.tableUi.lesnich_comboBox)
+        self.clearComboboxIndex(self.tableUi.leshoz_comboBox, self.tableUi.lesnich_comboBox)
+        self.tableUi.leshoz_comboBox.addItem("")
+        self.tableUi.leshoz_comboBox.addItems(result[1].values())
+        if self.leshoz:
+            index = self.tableUi.leshoz_comboBox.findText(self.leshoz)
+            if index >= 0:
+                self.tableUi.leshoz_comboBox.setCurrentIndex(index)
+
+    thread = QtCore.QThread()
+    worker = ForestObjWorker()
+    worker.moveToThread(thread)
+    worker.finished.connect(workerFinished)
+    worker.gplho = self.tableUi.gplho_comboBox.currentText()
+    worker.leshoz = None
+    thread.started.connect(worker.run)
+    thread.start()
+
+
+  def leshozChanged(self):
+    
+    if self.tableUi.leshoz_comboBox.currentText() == "":
+        return        
+
+    def workerFinished(result):
+        worker.deleteLater()
+        thread.quit()
+        thread.wait()
+        thread.deleteLater()
+        self.comboboxClear(self.tableUi.lesnich_comboBox)
+        self.clearComboboxIndex(self.tableUi.lesnich_comboBox)
+
+        self.tableUi.lesnich_comboBox.addItems(result[2].values())
+        if self.lesnich:
+            index = self.tableUi.lesnich_comboBox.findText(self.lesnich)
+            if index >= 0:
+                self.tableUi.lesnich_comboBox.setCurrentIndex(index)
+
+    thread = QtCore.QThread()
+    worker = ForestObjWorker()
+    worker.moveToThread(thread)
+    worker.finished.connect(workerFinished)
+    worker.gplho = self.tableUi.gplho_comboBox.currentText()
+    worker.leshoz = self.tableUi.leshoz_comboBox.currentText()
+    thread.started.connect(worker.run)
+    thread.start()
+
+
+  def populateEnterprise(self):
+
+      def workerFinished(result):
+          worker.deleteLater()
+          thread.quit()
+          thread.wait()
+          thread.deleteLater()
+          self.tableUi.gplho_comboBox.addItem("")
+          self.tableUi.gplho_comboBox.addItems(result[0].values())
+
+          if self.gplho:
+              index = self.tableUi.gplho_comboBox.findText(self.gplho)
+              if index >= 0:
+                  self.tableUi.gplho_comboBox.setCurrentIndex(index)
+
+
+      thread = QtCore.QThread(iface.mainWindow())
+      worker = ForestObjWorker()
+      worker.moveToThread(thread)
+      worker.finished.connect(workerFinished)
+      thread.started.connect(worker.run)
+      thread.start()
+
+  def comboboxClear(self, *args):
+      for arg in args:
+          arg.clear()
+
+  def clearComboboxIndex(self, *args):
+      for arg in args:
+          arg.setCurrentIndex(-1)
 
   def saveOtvodSettings(self):
       cfReport = config.Configurer('report', {'path': self.tableUi.lineEdit.text()})
