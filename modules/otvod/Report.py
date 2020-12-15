@@ -40,16 +40,19 @@ class Report:
 
         p = document.add_paragraph(
             'Месторасположение лесосеки:\n'
-            'Юридическое лицо, ведущее лесное хозяйство:'
+            'Юридическое лицо, ведущее лесное хозяйство: {}'.format(str(self.areaAttributes["leshos_text"]))
         )
         p.paragraph_format.left_indent = Inches(0.25)
+        p.paragraph_format.space_before = Pt(0)
+        p.paragraph_format.space_after = Pt(0)
 
         p = document.add_paragraph(
-            'Структурное подразделение юридического лица, ведущего лесное хозяйство:_______________'
-            ', лесной квартал №{}, таксационный выдел №{}, площадь лесосеки {} га.'.format(str(
+            'Структурное подразделение юридического лица, ведущего лесное хозяйство: {} л-во'
+            ', лесной квартал №{}, таксационный выдел №{}, площадь лесосеки {} га.'.format( str(self.areaAttributes["lesnich_text"]),str(
                 self.areaAttributes["num_kv"]), str(self.areaAttributes["num_vds"]), str(self.areaAttributes["area"]))
         )
         p.paragraph_format.first_line_indent = Inches(0.25)
+        p.paragraph_format.space_before = Pt(0)
 
         p = document.add_paragraph('Масштаб: 1:10000')
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -157,6 +160,9 @@ class Report:
             attrDict["fio"] = self.feature["fio"]
             attrDict["date"] = self.feature["date"]
             attrDict["info"] = self.feature["info"]
+            attrDict["leshos_text"] = self.feature["leshos_text"]
+            attrDict["lesnich_text"] = self.feature["lesnich_text"]
+
             return attrDict
         except Exception as e:
             QMessageBox.information(
