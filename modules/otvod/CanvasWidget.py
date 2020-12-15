@@ -198,6 +198,8 @@ class CanvasWidget(QgsMapCanvas):
         # self.tableWrapper.convertCoordFormat(self.coordType)
         self.omw.azimuth_radio_button.setChecked(True)
         self.table.makeTableFromCuttingArea(bindingPoint, cuttingArea)
+        self.table.deleteLastTemperatePoint()
+
         # self.omw.inclinationSlider.setValue(0)
         
 

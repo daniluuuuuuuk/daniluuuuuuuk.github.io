@@ -17,10 +17,11 @@ from functools import partial
 from PyQt5.QtGui import QColor
 from PyQt5.QtCore import QTimer
 from .tools.threading import InclinationCalculation
+from qgis.core import QgsProject
+from qgis.core import edit
+
 
 # Только в целях подсказки, нигде не используется:
-
-
 class TableType(Enum):
     COORDINATE = 0
     AZIMUTH = 1
@@ -670,6 +671,15 @@ class DataTableWrapper():
     def loadData(self, data):
         self.tableModel.importJSONData(data)
 
+    def deleteLastTemperatePoint(self):
+        layer = QgsProject.instance().mapLayersByName("Пикеты")[0]
+        idx = layer.fields().indexFromName('id')
+        lastPointIdValue = layer.maximumValue(idx)
+        features = layer.getFeatures("id = {}".format(lastPointIdValue))
+        with edit(layer):
+            for f in features:      
+                layer.deleteFeature(f.id())
+
     def makeTableFromCuttingArea(self, bindingPoint, cuttingArea):
         # self.tableModel.setMagneticInclination(0)
         currentTableType = self.tableModel.tabletype
@@ -710,13 +720,12 @@ class DataTableWrapper():
             distance = GeoOperations.calculateDistance(cuttingArea[key][0], cuttingArea[lastAnchorLinePoint][0])
             if azimuth <= 0.1 or distance <= 0.1:
                 row = azimuthTableList[-1]
-                row[0] = row[0].split('-')[0] + '-' + str(lastAnchorLinePoint)
+                row[0] = row[0].split('-')[0] + '-' + str(lastAnchorLinePoint + 1)
                 del azimuthTableList[-1]
                 azimuthTableList.append(row)   
                 self.refreshTable(azimuthTableList, cuttingArea)
                 return
             azimuthTableList.append([str(key + 1) + "-" + str(lastAnchorLinePoint + 1), str(azimuth), str(distance), cuttingArea[key][1]])
-
         self.refreshTable(azimuthTableList, cuttingArea)
     
     def validatedAzimuth(self, azimuth):
