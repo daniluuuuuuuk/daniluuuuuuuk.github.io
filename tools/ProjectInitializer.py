@@ -15,12 +15,9 @@ class QgsProjectInitializer:
             return
         self.setCrs()
         self.settings = None
-        self.layerDbNames = {'hidroline': 'Гидрография линейная', 'hidropoly': 'Гидрография площадная', 'compartment': 'Кварталы',
-                             'area': 'Лесосеки', 'settlements': 'Населенные пункты', 'area_line': 'Линия привязки', 'roads': 'Дороги', 'subcompartment': 'Выдела'}        
-        # self.layerDbNames = {'Gidroline': 'Гидрография линейная', 'Gidropoly': 'Гидрография площадная', 'Kvartaly': 'Кварталы',
-        #                      'Lesoseki': 'Лесосеки', 'Naspunkts': 'Населенные пункты', 'Privyazka': 'Линия привязки', 'Roads': 'Дороги', 'Vydela': 'Выдела'}
-        # self.layerDbNames = {'Гидрография линейная': 'Гидрография линейная', 'Гидрография площадная': 'Гидрография площадная', 'Кварталы': 'Кварталы',
-        #                      'Лесосеки': 'Лесосеки', 'Населенные пункты': 'Населенные пункты', 'Линия привязки': 'Линия привязки', 'Дороги': 'Дороги', 'Выдела': 'Выдела'}
+        self.layerDbNames = {'hidroline': 'Гидрография линейная', 'hidropoly': 'Гидрография площадная', 'compartments': 'Кварталы',
+                             'area': 'Лесосеки', 'settlements': 'Населенные пункты', 'area_line': 'Линия привязки', 'roads': 'Дороги', 'subcompartments': 'Выдела',
+                             'forestry_borders': 'Границы лесничеств'}        
         try:
             self.cf = config.Configurer('dbconnection')
             self.settings = self.cf.readConfigs()
@@ -28,7 +25,6 @@ class QgsProjectInitializer:
             QMessageBox.information(
                 None, 'Ошибка', "Проверьте подключение к базе данных" + e)
         if self.settings != None:
-            # print(task.status())
             self.loadLayersFromDb()
 
     def taskFinished(self):
@@ -72,9 +68,6 @@ class LoadLayersFromDbTask(QgsTask):
 
         for tablename in self.layerDbNames:
             geom = 'geom'
-            # geom = 'geometry'
-            # if tablename == 'Лесосеки' or tablename == 'Линия привязки':
-            #     geom = 'geom'
             uri.setDataSource("public", tablename, geom)
             vlayer = QgsVectorLayer(
                 uri.uri(False), self.layerDbNames[tablename], "postgres")
