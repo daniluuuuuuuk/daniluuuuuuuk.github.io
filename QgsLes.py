@@ -1,14 +1,3 @@
-# from qgis.PyQt.QtGui import QIcon
-# from qgis.PyQt.QtWidgets import QAction, QToolBar, QDialog, QMessageBox
-# from .gui import filterActionWidget, settingsDialog
-# from . import Filter, util, res, Settings, PostgisDB
-# from qgis.core import QgsProject
-# from .tools import module_errors as er
-# from .modules.otvod.OtvodModule import OtvodController
-# from .modules.otvod.tools.MapTools import RectangleMapTool
-# from .tools import CuttingAreaPeeker as peeker
-# from qgis.gui import QgsMapToolZoom
-
 import sys
 import traceback
 from PyQt5 import QtWidgets
@@ -27,43 +16,65 @@ from .modules.trees_accounting.src.restatements import Restatement
 from .modules.trees_accounting.src.areas_list import AreasList
 from .tools.ProjectInitializer import QgsProjectInitializer
 from .tools.TaxationLoader import Worker as taxWorker
+from .tools import config
 
+class DatabaseConnectionVerifier:
+    def __init__(self, iface):
+        super().__init__()
+        self.iface = iface
+
+    def verifyConfig(self):
+        if not self.configValid():
+            Settings.SettingsController()
+        if not PostgisDB.PostGisDB().setConnection():
+            return False
+        return True
+    
+    def configValid(self):
+        self.cf = config.Configurer('dbconnection')
+        btsettings = self.cf.readConfigs()
+        user = btsettings.get('user')
+        password = btsettings.get('password')
+        host = btsettings.get('host')
+        port = btsettings.get('port')
+        database = btsettings.get('database')
+        if not user or not password or not host or not port or not database:
+            return False
+        return True
+
+    def initGui(self):
+        pass
+
+    def unload(self):
+        del self
 
 class QgsLes:
-    def __init__(self, iface):
+    def __init__(self, iface, runnable):
         self.iface = iface
+        self.runnable = runnable
         self.canvas = self.iface.mapCanvas()
         QgsProject.instance().legendLayersAdded.connect(self.ifKvLayerReady)
         self.filter = None
 
     def ifKvLayerReady(self, layer):
-        if layer[0].name() == 'Кварталы' and self.filter == None:
+        if layer[0].name() == 'Кварталы' and self.filter == None and self.runnable:
             self.initFilter()
 
     def initFilter(self):
-        if not PostgisDB.PostGisDB().setConnection():
-            QMessageBox.information(
-                None, er.MODULE_ERROR, er.DATABASE_CONNECTION_ERROR + er.FILTER_DISABLED
-            )
-        else:
-            try:
-                self.filter = Filter.FilterWidget()
-                self.filterAction = self.filter.getFilterWidget()
-                self.qgsLesToolbar.addWidget(self.filterAction)
-                self.filterButtonAction = QAction(
-                    QIcon(util.resolvePath("res\\icon3.png")),
-                    "Поиск",
-                    self.iface.mainWindow(),
-                )
-                
-                self.filterAction.setDefaultAction(self.filterButtonAction)
-                self.ctrl = Filter.FilterWidgetController(self.filter, self.iface)
-
-            except Exception as e:
-                print(e)
+        self.filter = Filter.FilterWidget()
+        self.filterAction = self.filter.getFilterWidget()
+        self.qgsLesToolbar.addWidget(self.filterAction)
+        self.filterButtonAction = QAction(
+            QIcon(util.resolvePath("res\\icon3.png")),
+            "Поиск",
+            self.iface.mainWindow(),
+        )
+        
+        self.filterAction.setDefaultAction(self.filterButtonAction)
+        self.ctrl = Filter.FilterWidgetController(self.filter, self.iface)
 
     def initGui(self):
-        
+
         self.qgsLesToolbar = self.iface.mainWindow().findChild(
             QToolBar, "QGIS Отвод лесосек"
         )
@@ -71,6 +82,11 @@ class QgsLes:
         if not self.qgsLesToolbar:
             self.qgsLesToolbar = self.iface.addToolBar("QGIS Отвод лесосек")
             self.qgsLesToolbar.setObjectName("QGIS Отвод лесосек")
+
+        if not self.runnable:
+            self.iface.messageBar().pushMessage("Ошибка модуля отвода", "Отсутствует подключение к базе данных. Модуль отключен", level=Qgis.Critical, duration=15)
+            self.pluginIsActive = False
+            return
 
         self.otvodAction = QAction(
             QIcon(util.resolvePath("res\\icon2.png")),

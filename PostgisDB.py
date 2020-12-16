@@ -1,6 +1,7 @@
 import psycopg2
 import configparser
 from .tools import config
+
 class PostGisDB:
 
     def __init__(self):
@@ -28,9 +29,11 @@ class PostGisDB:
 
     def getQueryResult(self, query):
         connection = self.setConnection()
-        curPGSQL = connection.cursor()
-        curPGSQL.execute(query)
-        return curPGSQL.fetchall()
+        if connection:
+            curPGSQL = connection.cursor()
+            curPGSQL.execute(query)
+            return curPGSQL.fetchall()
+        return []
 
     def testConnection(self, *args, **kwargs):
         try:
@@ -44,15 +47,5 @@ class PostGisDB:
             return False
 
     def __del__(self):
-        self.connection.close()
-
-class QgsConnection:
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def createQgsConnection(self):
-        pass
-
-    def addLayersToProject(self):
-        pass
+        if self.connection:
+            self.connection.close()
