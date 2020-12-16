@@ -307,56 +307,63 @@ class OtvodController():
                           default=self.tableWrapper.encodeJSON, ensure_ascii=False, indent=4)
 
     def loadDataFromFile(self):
-        table = self.tableWrapper.tableModel
-        filename = QFileDialog.getOpenFileName(
-            None, 'Открыть файл отвода', '', "Файлы отвода (*.json)")[0]
-        if not filename:
-            return
-        else:
-            with open(filename, "r", encoding='utf8') as read_file:
-                data = json.load(read_file)
-        if data:
-            self.deleteCuttingArea()
-            for p in data:
-                for key, value in p.items():
-                    if key == "Table":
-                        self.tableType = data[0]['Table']['table_type']
-                        btn = self.radio_group.button(self.tableType)
-                        btn.setChecked(True)
-                        self.coordType = data[0]['Table']['coord_type']
-                        if self.coordType == 0:
-                            self.switch.setChecked(False)
-                        if self.coordType == 1:
-                            self.switch.setChecked(True)
-                        self.magneticInclination = data[0]['Table']['magnetic_inclination']
-                        self.omw.inclinationSlider.setValue(self.magneticInclination * 10)
-                        self.omw.sliderLabel.setText(str(self.magneticInclination))
-                        point35 = QgsPointXY(float(data[0]['Table']['BindingPointX']), float(
-                            data[0]['Table']['BindingPointY']))
-                        point = GeoOperations.convertToWgs(point35)
-                        self.omw.y_coord_LineEdit.setText(str(point.x()))
-                        self.omw.x_coord_LineEdit.setText(str(point.y()))
-                        self.canvas.setCenter(point35)
-                        self.tableWrapper.deleteRows()
-                        self.tableWrapper.tableModel.setParams(
-                            self.tableType, self.coordType, self.magneticInclination, self.bindingPoint)
-                        continue
-                    else:
-                        # print("Здесь что-то не так: может создаваться лишняя строка (трудновоспроизводимый баг)")
-                        self.tableWrapper.addRow()
-                        i = 0
-                        for k, v in value.items():
-                            if table.horizontalHeaderItem(i).text() == "Румб" or table.horizontalHeaderItem(i).text() == "Тип":
-                                comboboxCellWidget = table.cellWidget(
-                                    int(key), int(i))
-                                index = comboboxCellWidget.findText(
-                                    str(v), Qt.MatchFixedString)
-                                if index >= 0:
-                                    comboboxCellWidget.setCurrentIndex(index)
-                            item = QTableWidgetItem()
-                            item.setText(str(v))
-                            table.setItem(int(key), int(i), item)
-                            i = i + 1
+        try:
+            self.tableWrapper.tableModel.setRerender(False)
+            table = self.tableWrapper.tableModel
+            filename = QFileDialog.getOpenFileName(
+                None, 'Открыть файл отвода', '', "Файлы отвода (*.json)")[0]
+            if not filename:
+                return
+            else:
+                with open(filename, "r", encoding='utf8') as read_file:
+                    data = json.load(read_file)
+            if data:
+                self.deleteCuttingArea()
+                for p in data:
+                    for key, value in p.items():
+                        if key == "Table":
+                            self.tableType = data[0]['Table']['table_type']
+                            btn = self.radio_group.button(self.tableType)
+                            btn.setChecked(True)
+                            self.coordType = data[0]['Table']['coord_type']
+                            if self.coordType == 0:
+                                self.switch.setChecked(False)
+                            if self.coordType == 1:
+                                self.switch.setChecked(True)
+                            self.magneticInclination = data[0]['Table']['magnetic_inclination']
+                            self.omw.inclinationSlider.setValue(self.magneticInclination * 10)
+                            self.omw.sliderLabel.setText(str(self.magneticInclination))
+                            point35 = QgsPointXY(float(data[0]['Table']['BindingPointX']), float(
+                                data[0]['Table']['BindingPointY']))
+                            point = GeoOperations.convertToWgs(point35)
+                            self.omw.y_coord_LineEdit.setText(str(point.x()))
+                            self.omw.x_coord_LineEdit.setText(str(point.y()))
+                            self.canvas.setCenter(point35)
+                            self.tableWrapper.deleteRows()
+                            self.tableWrapper.tableModel.setParams(
+                                self.tableType, self.coordType, self.magneticInclination, self.bindingPoint)
+                            continue
+                        else:
+                            self.tableWrapper.addRow()
+                            i = 0
+                            for k, v in value.items():
+                                if table.horizontalHeaderItem(i).text() == "Румб" or table.horizontalHeaderItem(i).text() == "Тип":
+                                    comboboxCellWidget = table.cellWidget(
+                                        int(key), int(i))
+                                    index = comboboxCellWidget.findText(
+                                        str(v), Qt.MatchFixedString)
+                                    if index >= 0:
+                                        comboboxCellWidget.setCurrentIndex(index)
+                                item = QTableWidgetItem()
+                                item.setText(str(v))
+                                table.setItem(int(key), int(i), item)
+                                i = i + 1            
+        except Exception as e:
+                print(e)
+        finally:
+            self.tableWrapper.tableModel.setRerender(True)
+            self.tableWrapper.tableModel.refreshData()
+
 
     def saveCuttingArea(self):
         if self.cuttingArea == None:

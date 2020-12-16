@@ -137,8 +137,8 @@ class CanvasWidget(QgsMapCanvas):
             self.omw.y_coord_LineEdit.setText(str(point.x()))
             self.omw.x_coord_LineEdit.setText(str(point.y()))
             self.table.appendTableFromMap(result[1:])
-            if btn.objectName() == "lesoseka_from_map_button":
-                self.buildLesosekaFromMap()
+            # if btn.objectName() == "lesoseka_from_map_button":
+            #     self.buildLesosekaFromMap()
             btn.toggle()
             
         if btnState == True:

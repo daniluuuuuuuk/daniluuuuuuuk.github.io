@@ -354,19 +354,7 @@ class DataTable(QTableWidget):
                     else:
                         return GeoOperations.parseRightAngleDMSRow
 
-    # def getInclinationDifference(self):
-    #     sliderValue = self.inclinationSlider.value() / 10
-    #     print(self.magneticInclination, sliderValue)
-    #     return self.magneticInclination - sliderValue
-        # print(sliderValue)
-        # print(self.magneticInclination)
-        # return 0 if self.magneticInclination == 2 else self.magneticInclination - sliderValue
-        # print(difference, '<<<')
-    
     def cellChangedHandler(self, row, column):
-        # inclination = self.inclinationDifference if self.inclinationDifference is not None else self.magneticInclination
-        # diff = self.getMagneticInclinationDifference()
-        # inclination = self.magneticInclination if diff is None else self.magneticInclination + diff
 
         if self.item(row, column) and self.item(row, column).text().find(",") != -1:
             currentText = self.item(row, column).text()
@@ -423,10 +411,6 @@ class DataTable(QTableWidget):
                             self.pointsDict[row - 1][0],
                             self, row, self.magneticInclination
                         )
-
-            # если редактируется имеющаяся точка - удалить ее
-            # if row in self.pointsDict:
-            #     del self.pointsDict[row]
 
             self.pointsDict[row] = [point, self.getPointType(row)]
             
@@ -710,7 +694,7 @@ class DataTableWrapper():
                 row = azimuthTableList[-1]
                 row[0] = row[0].split('-')[0] + '-' + '0'
                 del azimuthTableList[-1]
-                azimuthTableList.append(row)      
+                azimuthTableList.append(row)   
                 self.refreshTable(azimuthTableList, cuttingArea)
                 return
             azimuthTableList.append([str(key + 1) + "-" + "0", str(azimuth), str(distance), cuttingArea[key][1]])
@@ -758,10 +742,10 @@ class DataTableWrapper():
 
     def populateTable(self, tableList):
         self.deleteRows()
+        self.tableModel.setRerender(False)
         if self.tableModel.tabletype == 0:
             self.populateCoordTable(tableList)
         elif self.tableModel.tabletype == 1:
-            # print(tableList)
             self.populateAzimuthTable(tableList)
         elif self.tableModel.tabletype == 2:
             self.populateRumbTable(tableList)
@@ -769,6 +753,8 @@ class DataTableWrapper():
             self.populateAzimuthTable(tableList)
         elif self.tableModel.tabletype == 4:
             self.populateAzimuthTable(tableList)
+        self.tableModel.setRerender(True)
+        self.tableModel.refreshData()
 
     def populateCoordTable(self, tableList):
 
@@ -844,7 +830,6 @@ class DataTableWrapper():
             populateDMSRows()
 
     def populateRumbTable(self, tableList):
-        # print(tableList)
         def populateDDRows():
             row = 0
             for item in tableList:
@@ -1016,6 +1001,7 @@ class DataTableWrapper():
         return self.tableModel.getParams()
 
     def appendTableFromMap(self, tableList):
+        self.tableModel.setRerender(False)
         for ptTuple in tableList:
             self.addRow()
             row = self.getRowsCount()-1
@@ -1031,6 +1017,8 @@ class DataTableWrapper():
             lineWidget = self.tableModel.cellWidget(row, 4)
             index = lineWidget.findText(ptTuple[1])
             lineWidget.setCurrentIndex(index)
+        self.tableModel.setRerender(True)
+        self.tableModel.refreshData()
 
     def updateTableDataInclination(self, inclinationDifference):
 
