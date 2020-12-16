@@ -245,9 +245,7 @@ class DataTable(QTableWidget):
             self.pointsDict.pop(self.getRowCount() - 1)
         except Exception as e:
             print(e)
-        row = self.currentRow()
-        self.removeRow(row)
-        # self.removeRow(self.getRowCount() - 1)
+        self.removeRow(self.getRowCount() - 1)
         self.signal.emit(self.pointsDict)
         self.update_row_numbers()
 
@@ -509,61 +507,6 @@ class DataTable(QTableWidget):
         gpsButton.setMaximumSize(QSize(70, 50))
         self.setCellWidget(row, column, gpsButton)
 
-    def move_row_up(self):
-        row = self.currentRow()
-        column = self.currentColumn()
-        if row > 0:
-            self.insertRow(row-1)
-            for i in range(self.columnCount()):
-                if i == self.columnCount() - 1:
-                    cellWidget = self.cellWidget(row + 1, i)
-                    index = cellWidget.currentIndex()
-                    self.set_line_type_widget(row-1, i, index)
-                else:
-                    if self.tabletype == 0 and self.coordType == 0 and i == 3:
-                        self.set_gps_button(row-1, i)
-                    elif self.tabletype == 2 and self.coordType == 0 and i == 3 or self.tabletype == 2 and self.coordType == 1 and i == 5:
-                        cellWidget = self.cellWidget(row + 1, i)
-                        index = cellWidget.currentIndex()
-                        self.set_rumb_combobox(row-1, i, index)
-                    else:
-                        self.setItem(row-1, i, self.takeItem(row + 1, i))
-                        self.setCurrentCell(row-1, column)
-            self.removeRow(row+1)
-            self.update_row_numbers()
-            if self.rowCount() < len(self.pointsDict):
-                self.pointsDict.pop(self.getRowCount())
-            self.refreshData()
-            # print(self.pointsDict)
-            # self.refreshData()
-
-    def move_row_down(self):
-        row = self.currentRow()
-        column = self.currentColumn()
-        if row < self.rowCount()-1 and row > -1:
-            self.insertRow(row+2)
-            for i in range(self.columnCount()):
-                if i == self.columnCount() - 1:
-                    cellWidget = self.cellWidget(row, i)
-                    index = cellWidget.currentIndex()
-                    self.set_line_type_widget(row + 2, i, index)
-                else:
-                    if self.tabletype == 0 and self.coordType == 0 and i == 3:
-                        self.set_gps_button(row+2, i)
-                    elif self.tabletype == 2 and self.coordType == 0 and i == 3 or self.tabletype == 2 and self.coordType == 1 and i == 5:
-                        cellWidget = self.cellWidget(row, i)
-                        index = cellWidget.currentIndex()
-                        self.set_rumb_combobox(row + 2, i, index)
-                    self.setItem(row + 2, i, self.takeItem(row, i))
-                    self.setCurrentCell(row + 2, column)
-            self.removeRow(row)
-            self.update_row_numbers()
-            if self.rowCount() < len(self.pointsDict):
-                self.pointsDict.pop(self.getRowCount())
-            self.refreshData()
-            # print(self.pointsDict)
-
-            # self.refreshData()
     def getTableAsList(self):
         tableAsList = []
         for row in range(0, self.rowCount()):
@@ -628,12 +571,6 @@ class DataTableWrapper():
 
     def getRowsCollection(self):
         self.i = self.i + 1
-
-    def move_row_up(self):
-        self.tableModel.move_row_up()
-
-    def move_row_down(self):
-        self.tableModel.move_row_down()
 
     def add_line_node(self):
         self.tableModel.add_line_node_row()

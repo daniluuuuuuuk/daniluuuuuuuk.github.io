@@ -99,6 +99,10 @@ class MainWindow(QMainWindow, otvodMainWindow):
         self.addNode.setKey(QKeySequence('Ctrl++'))
         self.addNode.activated.connect(lambda: self.addNode_button.click())
 
+        self.deleteNode = QShortcut(self)
+        self.deleteNode.setKey(QKeySequence('Ctrl+-'))
+        self.deleteNode.activated.connect(lambda: self.deleteNode_button.click())        
+
     def incrementInclination(self, value):
         if self.controller.tableType == 0:
             return

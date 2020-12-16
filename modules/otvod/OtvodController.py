@@ -41,8 +41,6 @@ class OtvodController():
         
         IconSet(self.omw)
 
-        self.omw.otvodSettingsAction.triggered.connect(
-            lambda: self.otvodMenuSettings())
         self.omw.saveData_action.triggered.connect(
             lambda: self.saveDataToFile())
         self.omw.loadData_action.triggered.connect(
@@ -61,6 +59,9 @@ class OtvodController():
             partial(self.build_from_map_clicked, self.omw.lesoseka_from_map_points_button))
         self.omw.lesoseka_from_map_points_button.toggled.connect(
             partial(self.build_from_map_toggled, self.omw.lesoseka_from_map_points_button))
+
+        self.omw.saveData_pushButton.clicked.connect(lambda: self.saveDataToFile())
+        self.omw.loadData_pushButton.clicked.connect(lambda: self.loadDataFromFile())
 
         self.omw.inclinationSlider.valueChanged.connect(self.inclinationValueChanged)
         self.omw.inclinationSlider.sliderMoved.connect(self.updateSliderLabel)
@@ -258,8 +259,8 @@ class OtvodController():
         self.omw.addNode_button.clicked.connect(datatable.addRow)
         self.omw.deleteNode_button.clicked.connect(datatable.deleteRow)
         self.omw.clearNodes_button.clicked.connect(datatable.deleteRows)
-        self.omw.move_node_up_button.clicked.connect(datatable.move_row_up)
-        self.omw.move_node_down_button.clicked.connect(datatable.move_row_down)
+        # self.omw.move_node_up_button.clicked.connect(datatable.move_row_up)
+        # self.omw.move_node_down_button.clicked.connect(datatable.move_row_down)
         # self.omw.add_line_node_button.clicked.connect(datatable.add_line_node)
         # self.omw.add_lesoseka_node_button.clicked.connect(datatable.add_lesoseka_node)
         return datatable
