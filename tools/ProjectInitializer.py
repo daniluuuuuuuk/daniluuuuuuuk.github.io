@@ -1,23 +1,25 @@
 from . import config
 from qgis.core import QgsProject
 from qgis.PyQt.QtWidgets import QMessageBox, QDialog
-from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import QgsApplication, QgsCoordinateReferenceSystem, QgsVectorLayer, QgsDataSourceUri, QgsTask, QgsMessageLog, Qgis
-import random
-from time import sleep
+from qgis.PyQt.QtXml import QDomDocument
 
 
 class QgsProjectInitializer:
 
-    def __init__(self):
+    def __init__(self, iface):
         super().__init__()
         if self.clearCurrentProject() == False:
             return
+        self.iface = iface
         self.setCrs()
         self.settings = None
         self.layerDbNames = {'hidroline': 'Гидрография линейная', 'hidropoly': 'Гидрография площадная', 'compartments': 'Кварталы',
                              'area': 'Лесосеки', 'settlements': 'Населенные пункты', 'area_line': 'Линия привязки', 'roads': 'Дороги', 'subcompartments': 'Выдела',
-                             'forestry_borders': 'Границы лесничеств'}        
+                             'forestry_borders': 'Границы лесничеств'}
+        self.layerStyleNames = {'hidroline': 'Hidroline', 'hidropoly': 'Hidropoly', 'compartments': 'Kvartaly',
+                             'area': 'Lesoseki', 'settlements': 'Nas punkt', 'area_line': 'Privyazka', 'roads': 'Dorogi', 'subcompartments': 'Vydela',
+                             'forestry_borders': 'Granitsy lesnich'}
         try:
             self.cf = config.Configurer('dbconnection')
             self.settings = self.cf.readConfigs()
@@ -43,16 +45,18 @@ class QgsProjectInitializer:
         QgsProject.instance().setCrs(QgsCoordinateReferenceSystem(32635))
 
     def loadLayersFromDb(self):
-        self.loadTask = LoadLayersFromDbTask(self.settings, self.layerDbNames)
+        self.loadTask = LoadLayersFromDbTask(self.settings, self.layerDbNames, self.layerStyleNames, self.iface)
         QgsApplication.taskManager().addTask(self.loadTask)
 
 
 class LoadLayersFromDbTask(QgsTask):
 
-    def __init__(self, settings, layerDbNames):
+    def __init__(self, settings, layerDbNames, layerStyleNames, iface):
         super().__init__("Layers from db", QgsTask.CanCancel)
+        self.iface = iface
         self.settings = settings
         self.layerDbNames = layerDbNames
+        self.layerStyleNames = layerStyleNames
         self.layers = []
 
     def run(self):
@@ -74,9 +78,21 @@ class LoadLayersFromDbTask(QgsTask):
             self.layers.append(vlayer)
         return True
 
+    def setLayerStyle(self, vlayer, tablename):
+        styles = vlayer.listStylesInDatabase()
+        styledoc = QDomDocument()
+        styleIndex = styles[2].index(self.layerStyleNames[tablename])
+        styleTuple = vlayer.getStyleFromDatabase(str(styles[1][styleIndex]))
+        styleqml = styleTuple[0]
+        styledoc.setContent(styleqml)
+        vlayer.importNamedStyle(styledoc)
+        self.iface.layerTreeView().refreshLayerSymbology(vlayer.id())
+
     def finished(self, result):
         if result:
             for layer in self.layers:
                 QgsProject.instance().addMapLayer(layer)
+                tableName = [k for k,v in self.layerDbNames.items() if v == layer.name()]
+                self.setLayerStyle(layer, tableName[0])
         else:
             pass

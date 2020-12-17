@@ -1,17 +1,13 @@
-import sys
-import traceback
 from PyQt5 import QtWidgets
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QToolBar, QDialog, QMessageBox
-from .gui import filterActionWidget, settingsDialog
-from . import Filter, util, res, Settings, PostgisDB
+from qgis.PyQt.QtWidgets import QAction, QToolBar
+from . import Filter, util, Settings, PostgisDB
 from qgis.core import QgsProject
-from .tools import module_errors as er
 from .modules.otvod.OtvodController import OtvodController
 from .modules.otvod.tools.mapTools.RectangleMapTool import RectangleMapTool
 from .tools import CuttingAreaPeeker as peeker
 from qgis.gui import QgsMapToolZoom
-from qgis.core import QgsMessageLog, Qgis
+from qgis.core import Qgis
 from .modules.trees_accounting.src.restatements import Restatement
 from .modules.trees_accounting.src.areas_list import AreasList
 from .tools.ProjectInitializer import QgsProjectInitializer
@@ -132,7 +128,7 @@ class QgsLes:
             self.initFilter()
 
     def initProjectClicked(self):
-        self.initializer = QgsProjectInitializer()
+        self.initializer = QgsProjectInitializer(self.iface)
 
     def unload(self):
         del self.qgsLesToolbar
