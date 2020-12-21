@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QToolBar
+from qgis.PyQt.QtWidgets import QAction, QToolBar, QDialog, QLabel, QVBoxLayout
 from . import Filter, util, Settings, PostgisDB
 from qgis.core import QgsProject
 from .modules.otvod.OtvodController import OtvodController
@@ -13,6 +13,8 @@ from .modules.trees_accounting.src.areas_list import AreasList
 from .tools.ProjectInitializer import QgsProjectInitializer
 from .tools.TaxationLoader import Worker as taxWorker
 from .tools import config
+from .gui.taxationDescription import Ui_Dialog as TaxationDialog
+
 
 class DatabaseConnectionVerifier:
     def __init__(self, iface):
@@ -134,10 +136,16 @@ class QgsLes:
         del self.qgsLesToolbar
 
     def taxationButtonClicked(self):
+
         def getResult(feature):
+            
+            def showTaxationDetails(details):
+                print(details)
+                self.showTaxation(details)
 
             if feature:
                 txwrker = taxWorker(feature)
+                txwrker.finished.connect(showTaxationDetails)
                 txwrker.run()
 
             zoomTool = QgsMapToolZoom(self.canvas, False)
@@ -206,3 +214,70 @@ class QgsLes:
         self.pkr = peeker.PeekStratumFromMap(self.canvas, 'Лесосеки')
         self.canvas.setMapTool(self.pkr)
         self.pkr.signal.connect(getResult)
+
+    def showTaxation(self, taxation):
+        if not taxation[0]:
+            return
+            
+        layout = QVBoxLayout()
+
+        def appendForestryInfo(info, dialog):
+            label = QLabel(dialog)
+            label.setText(str(info[0]) + ', ' + str(info[1]) + ' лесничество, ' +
+            'квартал: ' + str(info[2]) + ' выдел: ' + str(info[3]))
+            label.adjustSize()
+            layout.addWidget(label);
+            print(info)
+
+        def appendTaxationBase(tax, dialog):
+
+            def prepareTaxBase(taxBaseList):
+                return ['Бонитет: ' + str(taxBaseList[1]),
+                        ', тип леса: ' + str(taxBaseList[2]),
+                        ', ТУМ: ' + str(taxBaseList[3])]
+                    
+            label = QLabel(dialog)
+            tax = prepareTaxBase(tax)
+            label.setText(str(tax[0]) + str(tax[1]) + str(tax[2]))
+            label.adjustSize()
+            layout.addWidget(label);
+            print(tax)
+
+        def appendTaxation(tax, dialog):
+
+            def prepareTax(tx):
+                taxList = list(tx)
+                for i, item in enumerate(taxList):
+                    if item is None:
+                        taxList[i] = '-'
+
+                return [str(taxList[1]),
+                        ', диаметр: ' + str(taxList[2]),
+                        ', полнота: ' + str(taxList[4]),
+                        ', высота: ' + str(taxList[5]),
+                        ', возраст: ' + str(taxList[6]),
+                        ', ярус: ' + str(taxList[7]),
+                        ', запас: ' + str(taxList[8])]
+
+            for x in tax:
+                taxLine = prepareTax(x)
+                label = QLabel(dialog)
+                label.setText(str(taxLine[0]) + str(taxLine[1]) + str(taxLine[2]) +
+                str(taxLine[3]) + str(taxLine[4]) + str(taxLine[5]) +
+                str(taxLine[6]))
+                label.adjustSize()
+                layout.addWidget(label);
+            print(tax)
+
+        dialog = QDialog()
+        window = TaxationDialog()
+        window.setupUi(dialog)
+
+        appendForestryInfo(taxation[2], dialog)
+        appendTaxationBase(taxation[0][0], dialog)
+        appendTaxation(taxation[1], dialog)
+        dialog.setLayout(layout)
+
+        if (dialog.exec_() == QDialog.Accepted):
+            return True
+        return False

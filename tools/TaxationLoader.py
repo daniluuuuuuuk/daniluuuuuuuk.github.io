@@ -1,13 +1,6 @@
-# import traceback
-# import time
-from qgis.gui import QgsMapToolEmitPoint
-from PyQt5.QtCore import pyqtSignal, QObject
-from qgis.PyQt.QtWidgets import QMessageBox
 from .. import PostgisDB
-from time import sleep
 from qgis.core import *
-# from .ForestObjectLoader import ForestObjectLoader
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore
 
 
 MESSAGE_CATEGORY = 'Taxation Loader Task'
@@ -22,23 +15,23 @@ class Worker(QtCore.QObject):
         self.loader = Loader('Load Taxation Info')
 
     def generateIdentity(self, feature):
-        num_lhz = feature['num_lhz']
-        num_lch = feature['num_lch']
-        num_kv = feature['num_kv']
-        num_vd = feature['num_vd']
-        return (1000000000 * num_lhz) + (10000000 * num_lch) + (1000 * num_kv ) + num_vd
+        self.num_lhz = feature['num_lhz']
+        self.num_lch = feature['num_lch']
+        self.num_kv = feature['num_kv']
+        self.num_vd = feature['num_vd']
+        return (1000000000 * self.num_lhz) + (10000000 * self.num_lch) + (1000 * self.num_kv ) + self.num_vd
 
     def run(self):
         ret = None
         try:
-            self.loader.run(self.identity)
+            self.loader.run(self.identity, self.num_lhz, self.num_lch)
             self.loader.waitForFinished()
-            ret = [self.loader.taxDetails]
+            ret = [self.loader.taxDetails, self.loader.taxDetailsM10, 
+            [self.loader.lh_name, self.loader.lch_name,
+            self.num_kv, self.num_vd]]
 
         except Exception as e:
             raise e
-            # self.error.emit(e, traceback.format_exc())
-        print(ret)
         self.finished.emit(ret)
 
     def kill(self):
@@ -52,22 +45,47 @@ class Loader(QgsTask):
         super().__init__(description, QgsTask.CanCancel)
 
         self.taxDetails = None
+        self.taxDetailsM10 = None
+        self.lh_name = None
+        self.lch_name = None
 
         self.total = 0
         self.iterations = 0
         self.exception = None
 
 
-    def run(self, identity):
+    def run(self, identity, lh, lch):
         QgsMessageLog.logMessage('Started task "{}"'.format(
             self.description()), MESSAGE_CATEGORY, Qgis.Info)
-        self.loadTaxation(identity)
+        self.loadTaxation(identity, lh, lch)
         return True
 
-    def loadTaxation(self, identity):
+    def loadTaxation(self, identity, lh, lch):
+
+        if lch < 10:
+            num_lch = '0' + str(lch)
+        else:
+            num_lch = str(lch)  
+
         postgisConnection = PostgisDB.PostGisDB()
+
+        self.lh_name = postgisConnection.getQueryResult(
+            """select name_organization 
+                from "dictionary".organization
+                where substring(code_organization::varchar(255) from 6 for 3) = '{}'""".format(lh))[0][0]
+
+        self.lch_name = postgisConnection.getQueryResult(
+            """select name_organization 
+                from "dictionary".organization
+                where substring(code_organization::varchar(255) from 6 for 3) = '{}' 
+                and substring(code_organization::varchar(255) from 9 for 2) = '{}'""".format(lh, num_lch))[0][0]
+
         self.taxDetails = postgisConnection.getQueryResult(
-            """select * from "public".compartment_taxation_description where identity = '{}'""".format(identity))
+            """select * from "public".subcompartment_taxation where identity = '{}'""".format(identity))
+
+        self.taxDetailsM10 = postgisConnection.getQueryResult(
+            """select * from "public".subcompartment_taxation_m10 where identity = '{}'""".format(identity))    
+
         postgisConnection.__del__()
 
     def finished(self, result):
