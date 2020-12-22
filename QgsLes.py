@@ -59,6 +59,34 @@ class QgsLes:
             self.initFilter()
 
     def initFilter(self):
+
+        def checkNumLhzConfig():
+
+            def writeConfigs(cf):
+                lr = QgsProject.instance().mapLayersByName("Кварталы")[0]
+                try:
+                    feature = lr.getFeature(1)
+                    num_lhz = str(feature['num_lhz'])          
+                    gplho = settings.get('gplho')
+                    leshoz = settings.get('leshoz')
+                    lesnich = settings.get('lesnich')
+
+                    settingsDict = {'num_lhz' : num_lhz, 
+                    'gplho' : gplho, 'leshoz': leshoz, 'lesnich':lesnich}
+                    cf = config.Configurer('enterprise', settingsDict)
+                    cf.writeConfigs()                              
+                except Exception as e:
+                    print(e)
+
+            cf = config.Configurer('enterprise')
+            settings = cf.readConfigs()
+            numLhz = settings.get('num_lhz')
+            if not numLhz:
+                writeConfigs(cf)
+               
+        
+        checkNumLhzConfig()
+
         self.filter = Filter.FilterWidget()
         self.filterAction = self.filter.getFilterWidget()
         self.qgsLesToolbar.addWidget(self.filterAction)
@@ -140,7 +168,6 @@ class QgsLes:
         def getResult(feature):
             
             def showTaxationDetails(details):
-                print(details)
                 self.showTaxation(details)
 
             if feature:
@@ -153,7 +180,7 @@ class QgsLes:
 
         self.pkr = peeker.PeekStratumFromMap(self.canvas, 'Выдела')
         self.canvas.setMapTool(self.pkr)
-        self.pkr.signal.connect(getResult)        
+        self.pkr.signal.connect(getResult)
 
     def otvodButtonClicked(self):
         
@@ -227,7 +254,6 @@ class QgsLes:
             'квартал: ' + str(info[2]) + ' выдел: ' + str(info[3]))
             label.adjustSize()
             layout.addWidget(label);
-            print(info)
 
         def appendTaxationBase(tax, dialog):
 
@@ -241,7 +267,6 @@ class QgsLes:
             label.setText(str(tax[0]) + str(tax[1]) + str(tax[2]))
             label.adjustSize()
             layout.addWidget(label);
-            print(tax)
 
         def appendTaxation(tax, dialog):
 
@@ -267,7 +292,6 @@ class QgsLes:
                 str(taxLine[6]))
                 label.adjustSize()
                 layout.addWidget(label);
-            print(tax)
 
         dialog = QDialog()
         window = TaxationDialog()
