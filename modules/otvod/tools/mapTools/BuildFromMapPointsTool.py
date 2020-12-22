@@ -6,13 +6,14 @@ from qgis.core import QgsWkbTypes, QgsSnappingUtils, QgsPointLocator, QgsToleran
 from ...tools import GeoOperations
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QToolTip, QWidget, QApplication
+from decimal import *
 
 
 class BuildFromMapPointsTool(QgsMapToolEmitPoint, QWidget):
 
     signal = pyqtSignal(object)
 
-    def __init__(self, canvas):
+    def __init__(self, canvas, inclination):
         self.canvas = canvas
         QgsMapToolEmitPoint.__init__(self, self.canvas)
         # print("____________________________________")
@@ -23,6 +24,8 @@ class BuildFromMapPointsTool(QgsMapToolEmitPoint, QWidget):
         self.snapConfig.setType(2)
         # print(self.snapConfig.type())
         self.snapUtils.setConfig(self.snapConfig)
+
+        self.inclination = inclination
 
         self.aimMarker = []
         self.vertexMarkers = []
@@ -60,10 +63,18 @@ class BuildFromMapPointsTool(QgsMapToolEmitPoint, QWidget):
         self.showAimPoint(point)
 
     def drawToolTip(self, dist, az):
+        magnAz = self.validatedAzimuth(float(az) + self.inclination)
         if self.canvas.underMouse():  # Only if mouse is over the map
             QToolTip.showText(self.canvas.mapToGlobal(self.canvas.mouseLastXY(
-            )), "Расстояние: " + dist + " м\n" + "Азимут: " + az + "°", self.canvas)
-            # QToolTip.hideText()
+            )), "Расстояние: " + dist + " м\n" + "Аз. истин.: " + az + "°\nАз. магнитн.: " + str(round(magnAz, 1)) + "°", self.canvas)
+
+    def validatedAzimuth(self, azimuth):
+        if azimuth > 360:
+            return azimuth - 360
+        elif azimuth < 0:
+            return 360 - abs(azimuth)
+        else:
+            return azimuth
 
     def drawMeasureLine(self, point):
         if not point:

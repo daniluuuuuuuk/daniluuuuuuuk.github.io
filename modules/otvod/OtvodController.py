@@ -24,15 +24,15 @@ from .icons.initIcons import IconSet
 from qgis.core import Qgis, QgsSnappingConfig, QgsTolerance
 
 
-class OtvodController:
+class OtvodController():
     def __init__(self, layerList, rct):
         self.layers = layerList
         self.rct = rct
 
-        self.omw = MainWindow()
+        self.omw = MainWindow(self)
 
-        self.tableType = 0
-        self.coordType = 0
+        self.tableType = self.getConfigTableType()
+        self.coordType = self.getConfigCoordType()
         self.magneticInclination = 0.0
 
         self.bindingPoint = QgsPointXY(0, 0)
@@ -41,8 +41,6 @@ class OtvodController:
         
         IconSet(self.omw)
 
-        self.omw.otvodSettingsAction.triggered.connect(
-            lambda: self.otvodMenuSettings())
         self.omw.saveData_action.triggered.connect(
             lambda: self.saveDataToFile())
         self.omw.loadData_action.triggered.connect(
@@ -62,7 +60,11 @@ class OtvodController:
         self.omw.lesoseka_from_map_points_button.toggled.connect(
             partial(self.build_from_map_toggled, self.omw.lesoseka_from_map_points_button))
 
+        self.omw.saveData_pushButton.clicked.connect(lambda: self.saveDataToFile())
+        self.omw.loadData_pushButton.clicked.connect(lambda: self.loadDataFromFile())
+
         self.omw.inclinationSlider.valueChanged.connect(self.inclinationValueChanged)
+        self.omw.inclinationSlider.sliderMoved.connect(self.updateSliderLabel)
 
         self.omw.editAttributes_button.clicked.connect(self.editAreaAttributes)
 
@@ -77,7 +79,6 @@ class OtvodController:
         self.omw.peekFromGPSPushButton.clicked.connect(self.getGPSCoords)
         self.omw.generateReport_Button.clicked.connect(self.generateReport)
 
-        # self.omw.buildLesoseka_Button.clicked.connect(self.buildTempCuttingArea)
         self.omw.buildLesoseka_Button.clicked.connect(
             self.canvasWidget.buildLesosekaFromMap)
         self.omw.saveLesoseka_Button.clicked.connect(self.saveCuttingArea)
@@ -91,7 +92,7 @@ class OtvodController:
         self.radio_group = self.setup_radio_buttons()
         self.radio_group.buttonClicked.connect(self.radio_clicked)
         self.radio_group.buttonToggled.connect(self.radio_clicked)
-        self.omw.coord_radio_button.toggle()
+        # self.omw.coord_radio_button.toggle()
 
         self.canvas = self.canvasWidget.getCanvas()
         self.omw.show()
@@ -102,7 +103,27 @@ class OtvodController:
 
         self.omw.manageLayers_button.clicked.connect(self.manageCanvasLayers)
         
+        self.turnOnTableAndCoords()
+
         self.initSnapping()
+
+    def turnOnTableAndCoords(self):
+        tableTypeButton = self.radio_group.button(self.tableType)
+        tableTypeButton.toggle()
+        if self.coordType:
+            self.switch.setChecked(True)
+        else:
+            self.switch.setChecked(False)
+
+    def getConfigTableType(self):
+        cf = config.Configurer('otvod')
+        settings = cf.readConfigs()
+        return int(settings.get('tabletype', 'No data'))
+
+    def getConfigCoordType(self):
+        cf = config.Configurer('otvod')
+        settings = cf.readConfigs()
+        return int(settings.get('coordtype', 'No data'))
 
     def initSnapping(self):
         my_snap_config = QgsSnappingConfig()
@@ -120,13 +141,22 @@ class OtvodController:
     def initHandTool(self):
         self.canvas.setMapTool(self.panTool)
 
+    def updateSliderLabel(self, value):
+        self.omw.sliderLabel.setText(str(value / 10))
+
     def inclinationValueChanged(self, value):
+        if self.tableWrapper.getRowsCount() > 0 and self.tableType != 0:
+            currentMagneticInclination = self.tableWrapper.getMagneticInclination()
+            inclinationDifference = currentMagneticInclination - value / 10
+            self.tableWrapper.tableModel.setMagneticInclinationDifference(inclinationDifference)
+            # self.tableWrapper.updateTableDataInclination(inclinationDifference)
+
         self.magneticInclination = value / 10
         self.tableWrapper.tableModel.setMagneticInclination(
             self.magneticInclination)
+
         self.tableWrapper.tableModel.refreshData()
         self.omw.sliderLabel.setText(str(self.magneticInclination))
-        print('~~~~', value / 10)
 
     def initSwitchButton(self):
         s4 = Switch(thumb_radius=6, track_radius=8)
@@ -185,7 +215,7 @@ class OtvodController:
             currentTableType = self.tableType
             self.tableType = buttonId
             self.tableWrapper.convertCells(currentTableType, buttonId, self.tableType, self.coordType, float(
-                self.magneticInclination), self.bindingPoint)
+                self.tableWrapper.getMagneticInclination()), self.bindingPoint)
         else:           
             for btn in self.radio_group.buttons():
                 if self.tableType == self.radio_group.id(btn):
@@ -224,13 +254,13 @@ class OtvodController:
 
     def loadDataTable(self):
         datatable = DataTableWrapper(self.omw.tableWidget, int(
-            self.tableType), int(self.coordType), 0, self.bindingPoint)
+            self.tableType), int(self.coordType), 0, self.bindingPoint, self.omw.inclinationSlider)
         datatable.deleteRows()
         self.omw.addNode_button.clicked.connect(datatable.addRow)
         self.omw.deleteNode_button.clicked.connect(datatable.deleteRow)
         self.omw.clearNodes_button.clicked.connect(datatable.deleteRows)
-        self.omw.move_node_up_button.clicked.connect(datatable.move_row_up)
-        self.omw.move_node_down_button.clicked.connect(datatable.move_row_down)
+        # self.omw.move_node_up_button.clicked.connect(datatable.move_row_up)
+        # self.omw.move_node_down_button.clicked.connect(datatable.move_row_down)
         # self.omw.add_line_node_button.clicked.connect(datatable.add_line_node)
         # self.omw.add_lesoseka_node_button.clicked.connect(datatable.add_lesoseka_node)
         return datatable
@@ -278,56 +308,63 @@ class OtvodController:
                           default=self.tableWrapper.encodeJSON, ensure_ascii=False, indent=4)
 
     def loadDataFromFile(self):
-        table = self.tableWrapper.tableModel
-        filename = QFileDialog.getOpenFileName(
-            None, 'Открыть файл отвода', '', "Файлы отвода (*.json)")[0]
-        if not filename:
-            return
-        else:
-            with open(filename, "r", encoding='utf8') as read_file:
-                data = json.load(read_file)
-        if data:
-            self.deleteCuttingArea()
-            for p in data:
-                for key, value in p.items():
-                    if key == "Table":
-                        self.tableType = data[0]['Table']['table_type']
-                        btn = self.radio_group.button(self.tableType)
-                        btn.setChecked(True)
-                        self.coordType = data[0]['Table']['coord_type']
-                        if self.coordType == 0:
-                            self.switch.setChecked(False)
-                        if self.coordType == 1:
-                            self.switch.setChecked(True)
-                        self.magneticInclination = data[0]['Table']['magnetic_inclination']
-                        self.omw.inclinationSlider.setValue(self.magneticInclination * 10)
-                        self.omw.sliderLabel.setText(str(self.magneticInclination))
-                        point35 = QgsPointXY(float(data[0]['Table']['BindingPointX']), float(
-                            data[0]['Table']['BindingPointY']))
-                        point = GeoOperations.convertToWgs(point35)
-                        self.omw.y_coord_LineEdit.setText(str(point.x()))
-                        self.omw.x_coord_LineEdit.setText(str(point.y()))
-                        self.canvas.setCenter(point35)
-                        self.tableWrapper.deleteRows()
-                        self.tableWrapper.tableModel.setParams(
-                            self.tableType, self.coordType, self.magneticInclination, self.bindingPoint)
-                        continue
-                    else:
-                        # print("Здесь что-то не так: может создаваться лишняя строка (трудновоспроизводимый баг)")
-                        self.tableWrapper.addRow()
-                        i = 0
-                        for k, v in value.items():
-                            if table.horizontalHeaderItem(i).text() == "Румб" or table.horizontalHeaderItem(i).text() == "Тип":
-                                comboboxCellWidget = table.cellWidget(
-                                    int(key), int(i))
-                                index = comboboxCellWidget.findText(
-                                    str(v), Qt.MatchFixedString)
-                                if index >= 0:
-                                    comboboxCellWidget.setCurrentIndex(index)
-                            item = QTableWidgetItem()
-                            item.setText(str(v))
-                            table.setItem(int(key), int(i), item)
-                            i = i + 1
+        try:
+            self.tableWrapper.tableModel.setRerender(False)
+            table = self.tableWrapper.tableModel
+            filename = QFileDialog.getOpenFileName(
+                None, 'Открыть файл отвода', '', "Файлы отвода (*.json)")[0]
+            if not filename:
+                return
+            else:
+                with open(filename, "r", encoding='utf8') as read_file:
+                    data = json.load(read_file)
+            if data:
+                self.deleteCuttingArea()
+                for p in data:
+                    for key, value in p.items():
+                        if key == "Table":
+                            self.tableType = data[0]['Table']['table_type']
+                            btn = self.radio_group.button(self.tableType)
+                            btn.setChecked(True)
+                            self.coordType = data[0]['Table']['coord_type']
+                            if self.coordType == 0:
+                                self.switch.setChecked(False)
+                            if self.coordType == 1:
+                                self.switch.setChecked(True)
+                            self.magneticInclination = data[0]['Table']['magnetic_inclination']
+                            self.omw.inclinationSlider.setValue(self.magneticInclination * 10)
+                            self.omw.sliderLabel.setText(str(self.magneticInclination))
+                            point35 = QgsPointXY(float(data[0]['Table']['BindingPointX']), float(
+                                data[0]['Table']['BindingPointY']))
+                            point = GeoOperations.convertToWgs(point35)
+                            self.omw.y_coord_LineEdit.setText(str(point.x()))
+                            self.omw.x_coord_LineEdit.setText(str(point.y()))
+                            self.canvas.setCenter(point35)
+                            self.tableWrapper.deleteRows()
+                            self.tableWrapper.tableModel.setParams(
+                                self.tableType, self.coordType, self.magneticInclination, self.bindingPoint)
+                            continue
+                        else:
+                            self.tableWrapper.addRow()
+                            i = 0
+                            for k, v in value.items():
+                                if table.horizontalHeaderItem(i).text() == "Румб" or table.horizontalHeaderItem(i).text() == "Тип":
+                                    comboboxCellWidget = table.cellWidget(
+                                        int(key), int(i))
+                                    index = comboboxCellWidget.findText(
+                                        str(v), Qt.MatchFixedString)
+                                    if index >= 0:
+                                        comboboxCellWidget.setCurrentIndex(index)
+                                item = QTableWidgetItem()
+                                item.setText(str(v))
+                                table.setItem(int(key), int(i), item)
+                                i = i + 1            
+        except Exception as e:
+                print(e)
+        finally:
+            self.tableWrapper.tableModel.setRerender(True)
+            self.tableWrapper.tableModel.refreshData()
+
 
     def saveCuttingArea(self):
         if self.cuttingArea == None:
@@ -336,23 +373,9 @@ class OtvodController:
             QMessageBox.information(None, "Ошибка модуля QGISLes",
                                     "Отсутствует лесосека. Постройте лесосеку, после чего будет возможность ее сохранить")
         else:
-            self.cuttingArea.save()
+            self.cuttingArea.save(self.tableWrapper.getSerializableData())
             self.canvasWidget.btnControl.unlockReportBotton()
             self.omw.outputLabel.setText("Лесосека сохранена")
-
-    # def rotateCuttingArea(self, btn):
-    #     try:
-    #         rotate_value = float(self.omw.rotate_inclination.text())
-    #         if (btn.text() == '<'):
-    #             self.magneticInclination -= rotate_value
-    #         elif(btn.text()) == ">":
-    #             self.magneticInclination += rotate_value
-    #     except:
-    #         QMessageBox.information(
-    #             None, "Ошибка модуля QGISLes", "Некорректное значение в поле магнитного склонения")
-    #     self.tableWrapper.tableModel.setMagneticInclination(
-    #         self.magneticInclination)
-    #     self.tableWrapper.tableModel.refreshData()
 
     def deleteCuttingArea(self):
         try:
@@ -382,9 +405,9 @@ class OtvodController:
             QgsProject.instance().removeMapLayers([layer.id()])
         except Exception as e:
             print(str(e) + "Ошибка при удалении слоя Пикеты")
-        self.omw.outputLabel.setText("Лесосека удалена")
+        # self.omw.outputLabel.setText("Лесосека удалена")
         self.magneticInclination = 0.0
-        self.omw.inclinationSlider.setValue(0)
+        # self.omw.inclinationSlider.setValue(0)
         self.canvasWidget.btnControl.lockLesosekaButtons()
         self.tableWrapper.deleteRows()
         self.omw.y_coord_LineEdit.clear()

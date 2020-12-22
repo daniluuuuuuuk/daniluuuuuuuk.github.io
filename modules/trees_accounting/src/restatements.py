@@ -586,10 +586,10 @@ class AreaProperty(area_property_main_window.MainWindow):
         if self.comboBox_3.currentText() == "":
             self.label_3.setStyleSheet("color: red;")
             return False
-        if self.spinBox.value() <= 0:
+        if self.lineEdit.text() == "":
             self.label_4.setStyleSheet("color: red;")
             return False
-        if self.spinBox_2.value() <= 0:
+        if self.lineEdit_2.text() == "":
             self.label_5.setStyleSheet("color: red;")
             return False
         if self.spinBox_3.value() <= 0:
@@ -620,8 +620,8 @@ class AreaProperty(area_property_main_window.MainWindow):
             "geom": None,
             "uuid": None,
             "num_forestry": num_forestry,
-            "compartment": str(self.spinBox.value()),
-            "sub_compartment": str(self.spinBox_2.value()),
+            "compartment": self.lineEdit.text(),
+            "sub_compartment": self.lineEdit_2.text(),
             "area": str(
                 Decimal(self.doubleSpinBox.value()).quantize(
                     Decimal("1.00"), ROUND_HALF_UP

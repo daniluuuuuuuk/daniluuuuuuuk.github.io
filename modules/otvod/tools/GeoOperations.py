@@ -181,7 +181,7 @@ def parseRightAngleDMSRow(point, azimuth, table, row, magnIncl):
 
 def parseAzimuthDDRow(point, table, row, magnIncl):
     # rs = ["№", "Угол, °", "Длина линии, м", "Тип"]
-    angle = float(table.item(row, 1).text()) + magnIncl
+    angle = float(table.item(row, 1).text()) - magnIncl
     distance = table.item(row, 2).text()
     return pointFromAzimuthDD(point, float(angle), float(distance))
 
@@ -253,3 +253,4 @@ def convertToDMS(dd):
     mnt, sec = divmod(dd*3600, 60)
     deg, mnt = divmod(mnt, 60)
     return [deg, mnt, sec]
+

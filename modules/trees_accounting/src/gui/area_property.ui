@@ -113,11 +113,11 @@
        </widget>
       </item>
       <item>
-       <widget class="QSpinBox" name="spinBox">
-        <property name="minimumSize">
+       <widget class="QLineEdit" name="lineEdit">
+        <property name="maximumSize">
          <size>
           <width>250</width>
-          <height>0</height>
+          <height>16777215</height>
          </size>
         </property>
        </widget>
@@ -134,11 +134,11 @@
        </widget>
       </item>
       <item>
-       <widget class="QSpinBox" name="spinBox_2">
-        <property name="minimumSize">
+       <widget class="QLineEdit" name="lineEdit_2">
+        <property name="maximumSize">
          <size>
           <width>250</width>
-          <height>0</height>
+          <height>16777215</height>
          </size>
         </property>
        </widget>

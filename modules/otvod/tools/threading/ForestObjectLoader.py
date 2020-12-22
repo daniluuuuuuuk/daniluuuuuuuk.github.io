@@ -23,10 +23,32 @@ class ForestObjectLoader(QgsTask):
     def getAllRestatements(self):
         postgisConnection = PostgisDB.PostGisDB()
         allRestatements = postgisConnection.getQueryResult(
-            """select compartment, sub_compartment from "restatement".areas_bak""")
-        self.allRestatements = dict((str(idObject), str(nameObject))
-                             for (idObject, nameObject) in allRestatements)
-        print(allRestatements, '<=')
+            """select uid, num_lch, num_kv, num_vd, num, leshos from "public".area where geom is NULL""")
+        
+        tupleToList = []
+        for x in allRestatements:
+            tupleToList.append(list(x))
+
+        for x in tupleToList:
+            num_lch = x[1]
+            leshos = x[-1]
+
+            code = '00'
+            if len(str(num_lch)) == 2:
+                code = str(num_lch)
+            else:
+                code = '0' + str(num_lch)
+
+            forestry = postgisConnection.getQueryResult(
+                """select name_organization 
+                from "dictionary".organization
+                where substring(code_organization::varchar(255) from 6 for 3) = '{}'
+                and substring(code_organization::varchar(255) from 9 for 2) = '{}'""".format(str(leshos), code))[0][0]
+
+            x[1] = forestry
+
+        self.allRestatements = tupleToList
+            
         postgisConnection.__del__()
 
     def getAllGPLHO(self):
