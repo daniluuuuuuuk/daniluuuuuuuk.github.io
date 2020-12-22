@@ -4,11 +4,12 @@ import decimal
 
 class CoordinateConverter:
 
-    def __init__(self, tableList, tableType, coordType):
+    def __init__(self, tableList, tableType, coordType, inclination):
         super().__init__()
         self.tableList = tableList
         self.tableType = tableType
         self.coordType = coordType
+        self.inclination = decimal.Decimal(inclination).quantize(decimal.Decimal('.1'))
 
     def decdeg2dms(self, dd, roundUp):
         mnt, sec = divmod(float(dd) * 3600, 60)
@@ -73,7 +74,9 @@ class CoordinateConverter:
                 firstPoint = pointsDict[row - 1][0]
                 secondPoint = point
             i += 1
-            azimuth = GeoOperations.calculateAzimuth(firstPoint, secondPoint)
+            azimuth = GeoOperations.calculateAzimuth(firstPoint, secondPoint) + self.inclination
+            azimuth = self.validatedAzimuth(azimuth)
+            # azimuth = GeoOperations.calculateAzimuth(firstPoint, secondPoint)
             distance = GeoOperations.calculateDistance(firstPoint, secondPoint)
             convertedValues.append([str(str(row)+"-"+str(row+1)), str(azimuth), str(distance), pointsDict[row][1]])
         return convertedValues
@@ -90,7 +93,9 @@ class CoordinateConverter:
                 firstPoint = pointsDict[row - 1][0]
                 secondPoint = point
             i += 1
-            azimuth = GeoOperations.calculateAzimuth(firstPoint, secondPoint)
+            azimuth = GeoOperations.calculateAzimuth(firstPoint, secondPoint) + self.inclination
+            azimuth = self.validatedAzimuth(azimuth)
+            # azimuth = GeoOperations.calculateAzimuth(firstPoint, secondPoint)
             distance = GeoOperations.calculateDistance(firstPoint, secondPoint)
             rumb = GeoOperations.azimuthToRumb(azimuth)[0]
             distRounded = decimal.Decimal(distance).quantize(decimal.Decimal('.1'))
@@ -109,7 +114,9 @@ class CoordinateConverter:
                 firstPoint = pointsDict[row - 1][0]
                 secondPoint = point
             i += 1
-            azimuth = GeoOperations.calculateAzimuth(firstPoint, secondPoint)
+            # azimuth = GeoOperations.calculateAzimuth(firstPoint, secondPoint)
+            azimuth = GeoOperations.calculateAzimuth(firstPoint, secondPoint) + self.inclination
+            azimuth = self.validatedAzimuth(azimuth)
             distance = GeoOperations.calculateDistance(firstPoint, secondPoint)
             azRounded = decimal.Decimal(azimuth).quantize(decimal.Decimal('.1'))
             distRounded = decimal.Decimal(distance).quantize(decimal.Decimal('.1'))
@@ -129,7 +136,9 @@ class CoordinateConverter:
                 firstPoint = pointsDict[row - 1][0]
                 secondPoint = point
             i += 1
-            azimuth = GeoOperations.calculateAzimuth(firstPoint, secondPoint)
+            azimuth = GeoOperations.calculateAzimuth(firstPoint, secondPoint) + self.inclination
+            azimuth = self.validatedAzimuth(azimuth)
+            # azimuth = GeoOperations.calculateAzimuth(firstPoint, secondPoint)
             rumb = GeoOperations.azimuthToRumb(azimuth)[0]
             distance = GeoOperations.calculateDistance(firstPoint, secondPoint)
             rumbRounded = decimal.Decimal(rumb[0]).quantize(decimal.Decimal('.1'))
@@ -193,7 +202,9 @@ class CoordinateConverter:
             else:
                 firstPoint = pointsDict[row - 1][0]
 
-            azimuth = GeoOperations.calculateAzimuth(firstPoint, secondPoint)
+            azimuth = GeoOperations.calculateAzimuth(firstPoint, secondPoint) + self.inclination
+            azimuth = self.validatedAzimuth(azimuth)
+            # azimuth = GeoOperations.calculateAzimuth(firstPoint, secondPoint)
             distance = GeoOperations.calculateDistance(firstPoint, secondPoint)
 
             if (firstPointOfArea == None or row <= firstPointOfArea):
@@ -207,9 +218,13 @@ class CoordinateConverter:
                     convertedValues.append([str(str(row)+"-"+str(row+1)), str(azDMS[0]), str(azDMS[1]), str(azDMS[2]), str(distRounded), pointsDict[row][1]])
             else:
                 if row < 2:
-                    previousAzimuth = GeoOperations.calculateAzimuth(bindingPoint, firstPoint)
+                    previousAzimuth = GeoOperations.calculateAzimuth(bindingPoint, firstPoint) + self.inclination
+                    previousAzimuth = self.validatedAzimuth(previousAzimuth)
+                    # previousAzimuth = GeoOperations.calculateAzimuth(bindingPoint, firstPoint)
                 else:
-                    previousAzimuth = GeoOperations.calculateAzimuth(pointsDict[row - 2][0], firstPoint)
+                    previousAzimuth = GeoOperations.calculateAzimuth(pointsDict[row - 2][0], firstPoint) + self.inclination
+                    previousAzimuth = self.validatedAzimuth(previousAzimuth)
+                    # previousAzimuth = GeoOperations.calculateAzimuth(pointsDict[row - 2][0], firstPoint)
                 angle = self.azimuthToAngle(previousAzimuth, azimuth, angleType)
                 if (coordType == 0):
                     an = decimal.Decimal(angle).quantize(decimal.Decimal('.1'))
@@ -302,3 +317,11 @@ class CoordinateConverter:
                     angleDMS = self.decdeg2dms(angleDD, True)
                     convertedValues.append([row[0], str(angleDMS[0]), str(angleDMS[1]), str(angleDMS[2]), row[4], row[5]])
         return convertedValues
+    
+    def validatedAzimuth(self, azimuth):
+        if azimuth > 360:
+            return azimuth - 360
+        elif azimuth < 0:
+            return 360 - abs(azimuth)
+        else:
+            return azimuth

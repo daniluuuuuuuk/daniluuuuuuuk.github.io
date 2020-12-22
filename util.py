@@ -22,27 +22,26 @@ def setLayer(name, iface, QgsProject):
 
 def zoomToForestry(number, QgsProject, iface):
   clearAllSelections(iface)
-  setLayer('Кварталы', iface, QgsProject)
-  currentLayer = iface.mapCanvas().currentLayer()
+  layer = QgsProject.instance().mapLayersByName("Кварталы")[0]
+  iface.setActiveLayer(layer)
   expr = "\"num_lch\"='{}'".format(number)
-  currentLayer.selectByExpression(expr)
+  layer.selectByExpression(expr)
   iface.mapCanvas().zoomToSelected()
 
 def zoomToQuarter(forestry, quarter, QgsProject, iface):
   clearAllSelections(iface)
-  setLayer('Кварталы', iface, QgsProject)
-  currentLayer = iface.mapCanvas().currentLayer()
+  layer = QgsProject.instance().mapLayersByName("Кварталы")[0]
+  iface.setActiveLayer(layer)
   expr = "\"num_lch\" = '{}' AND \"num_kv\" = '{}'".format(forestry, quarter)
-  currentLayer.selectByExpression(expr)
+  layer.selectByExpression(expr)
   iface.mapCanvas().zoomToSelected()
 
 def zoomToStratum(forestry, quarter, stratum, QgsProject, iface):
   clearAllSelections(iface)
-  setLayer('Выдела', iface, QgsProject)
-  currentLayer = iface.mapCanvas().currentLayer()
-  fieldId = str((int(forestry) * 10000000) + (int(quarter) * 100) + int(stratum))
-  expr = "\"fieldid\"='{}'".format(fieldId)
-  currentLayer.selectByExpression(expr)
+  layer = QgsProject.instance().mapLayersByName("Выдела")[0]
+  iface.setActiveLayer(layer)
+  expr = "\"num_lch\" = '{}' AND \"num_kv\" = '{}' AND \"num_vd\" = '{}'".format(forestry, quarter, stratum)
+  layer.selectByExpression(expr)
   iface.mapCanvas().zoomToSelected()
 
 class TableType(Enum):

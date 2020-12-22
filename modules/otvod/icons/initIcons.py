@@ -10,8 +10,8 @@ class IconSet:
             QIcon(self.resolve('pick_from_map_icon.png')))
         self.omw.peekFromGPSPushButton.setIcon(
             QIcon(self.resolve('pick_from_gps_icon.png')))
-        self.omw.addRangeFinderNode_button.setIcon(
-            QIcon(self.resolve('range_finder_icon.png')))
+        # self.omw.addRangeFinderNode_button.setIcon(
+        #     QIcon(self.resolve('range_finder_icon.png')))
         self.omw.azimuthTool_pushButton.setIcon(
             QIcon(self.resolve('azimuth_icon.png')))
         self.omw.buildLesoseka_Button.setIcon(
@@ -36,6 +36,10 @@ class IconSet:
             QIcon(self.resolve('hand_tool.png')))
         self.omw.manageLayers_button.setIcon(
             QIcon(self.resolve('layers.png')))
+        self.omw.saveData_pushButton.setIcon(
+            QIcon(self.resolve('save.png')))
+        self.omw.loadData_pushButton.setIcon(
+            QIcon(self.resolve('upload.png')))               
 
 
     def resolve(self, name, basepath=None):

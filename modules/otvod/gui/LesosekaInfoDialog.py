@@ -7,7 +7,7 @@ from ..tools.threading.ForestObjectWorker import Worker as ForestObjWorker
 from ..tools.threading.ForestObjectLoader import ForestObjectLoader
 from ..tools.threading.RestatementWorker import Worker as RestatementWorker
 from ..tools.threading.RestatementLoader import RestatementLoader
-from functools import partial
+from ....tools import config
 
 
 class LesosekaInfo(QDialog):
@@ -18,12 +18,21 @@ class LesosekaInfo(QDialog):
         self.ui.setupUi(self)
         self.forestObjectCode = None
         self.guidItems = None
-        
+
+        self.gplho, self.leshoz, self.lesnich = self.getEnterpriseConfig()
+
         if not editMode:
             self.ui.gplho.currentTextChanged.connect(self.gplhoChanged)
             self.ui.leshos.currentTextChanged.connect(self.leshozChanged)
             self.ui.lesnich.currentTextChanged.connect(self.lesnichChanged)
             self.ui.restatement_comboBox.currentTextChanged.connect(self.restatementChanged)
+
+    def getEnterpriseConfig(self):
+        cf = config.Configurer('enterprise')
+        settings = cf.readConfigs()
+        return [settings.get('gplho', ''),
+            settings.get('leshoz', ''),
+            settings.get('lesnich', '')]
 
     def restatementChanged(self):
 
@@ -36,12 +45,6 @@ class LesosekaInfo(QDialog):
             thread.quit()
             thread.wait()
             thread.deleteLater()
-
-            # self.comboboxClear(self.ui.leshos, self.ui.lesnich)
-            # self.clearComboboxIndex(self.ui.leshos, self.ui.lesnich)
-
-            # self.ui.num_kv.setText(str(result[0]))
-            print(result)
             populateData(result)
 
         def populateData(data):
@@ -122,8 +125,13 @@ class LesosekaInfo(QDialog):
 
             self.comboboxClear(self.ui.leshos, self.ui.lesnich)
             self.clearComboboxIndex(self.ui.leshos, self.ui.lesnich)
-
+            self.ui.leshos.addItem("")
             self.ui.leshos.addItems(result[1].values())
+
+            if self.leshoz:
+                index = self.ui.leshos.findText(self.leshoz)
+                if index >= 0:
+                    self.ui.leshos.setCurrentIndex(index)
 
         thread = QtCore.QThread()
         worker = ForestObjWorker()
@@ -149,6 +157,11 @@ class LesosekaInfo(QDialog):
             self.clearComboboxIndex(self.ui.lesnich)
 
             self.ui.lesnich.addItems(result[2].values())
+
+            if self.lesnich:
+                index = self.ui.lesnich.findText(self.lesnich)
+                if index >= 0:
+                    self.ui.lesnich.setCurrentIndex(index)
 
         thread = QtCore.QThread()
         worker = ForestObjWorker()
@@ -186,7 +199,6 @@ class LesosekaInfo(QDialog):
         worker.leshoz = self.ui.leshos.currentText()
         thread.started.connect(worker.run)
         thread.start()
-        print(self.forestObjectCode)
 
     def setUpValues(self):
 
@@ -199,6 +211,12 @@ class LesosekaInfo(QDialog):
 
             self.ui.gplho.addItem("")
             self.ui.gplho.addItems(result[0].values())
+
+            if self.gplho:
+                index = self.ui.gplho.findText(self.gplho)
+                if index >= 0:
+                    self.ui.gplho.setCurrentIndex(index)
+
             self.ui.restatement_comboBox.addItem("")
             items = []
             self.guidItems = {}
