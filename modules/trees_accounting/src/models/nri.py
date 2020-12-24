@@ -76,10 +76,10 @@ class Organization(BaseModel):
     name_organization = TextField(null=False)
 
     @classmethod
-    def convert_org_id(self, id_forestry: int, id_forestry_enterprise: int):
+    def convert_org_id(self, id_forestry: int, id_forestry_enterprise: int) -> dict:
         """
         Преобразовываю код лесхоза и код лесничества
-        из картографии в названия организаций
+        из картографии в словарь названия организаций и его кода
         """
         if id_forestry < 10:
             id_forestry = "0" + str(id_forestry)
@@ -105,25 +105,38 @@ class Organization(BaseModel):
                     .where(self.code_organization == id.code_organization)
                     .get()
                 )
+                forestry_code = forestry_row.code_organization
                 forestry_name = forestry_row.name_organization
-                forestry_enterprise_row = (
+
+                forestry_enterprise = (
                     self.select()
                     .where(self.id_organization == forestry_row.parent_id_organization)
                     .get()
                 )
-                forestry_enterprise_name = forestry_enterprise_row.name_organization
-                gplho_name = (
+                forestry_enterprise_code = forestry_enterprise.code_organization
+                forestry_enterprise_name = forestry_enterprise.name_organization
+
+                gplho = (
                     self.select()
                     .where(
                         self.id_organization
-                        == forestry_enterprise_row.parent_id_organization
+                        == forestry_enterprise.parent_id_organization
                     )
                     .get()
-                    .name_organization
                 )
+                gplho_code = gplho.code_organization
+                gplho_name = gplho.name_organization
 
-                return gplho_name, forestry_enterprise_name, forestry_name
-        return "МЛХ", "МЛХ", "МЛХ"  # Совпадений не найдено
+                return {
+                    gplho_code: gplho_name,
+                    forestry_enterprise_code: forestry_enterprise_name,
+                    forestry_code: forestry_name,
+                }
+        return {
+            "1500100000": "МЛХ",
+            "1500100000": "МЛХ",
+            "1500100000": "МЛХ",
+        }  # Совпадений не найдено
 
 
 class Rgn_meth(BaseModel):

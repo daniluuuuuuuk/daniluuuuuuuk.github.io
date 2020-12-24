@@ -16,7 +16,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>ПО &quot;Пробы&quot;. Перечёт деревьев</string>
+   <string>Модуль отводов для QGIS. Перечёт деревьев</string>
   </property>
   <property name="styleSheet">
    <string notr="true"/>
@@ -401,8 +401,8 @@
    <widget class="QMenu" name="menu">
     <property name="geometry">
      <rect>
-      <x>281</x>
-      <y>197</y>
+      <x>323</x>
+      <y>138</y>
       <width>274</width>
       <height>134</height>
      </rect>
@@ -424,7 +424,15 @@
     <addaction name="action"/>
     <addaction name="action_2"/>
    </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>Экспорт</string>
+    </property>
+    <addaction name="action_4"/>
+    <addaction name="action_3"/>
+   </widget>
    <addaction name="menu"/>
+   <addaction name="menu_2"/>
   </widget>
   <action name="action">
    <property name="text">
@@ -439,6 +447,26 @@
   <action name="action_2">
    <property name="text">
     <string>Мерная вилка</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>15</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="action_4">
+   <property name="text">
+    <string>Форма пробных площадей (xls)</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>15</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="action_3">
+   <property name="text">
+    <string>АРМ Лесопользование-3 (JSON)</string>
    </property>
    <property name="font">
     <font>

@@ -21,6 +21,8 @@ class MainWindow(
         self.action_2.triggered.connect(
             lambda: settings_caliper.Settings_caliper().exec()
         )
+        self.action_4.triggered.connect(lambda: self.export_to_xls())
+        self.action_3.triggered.connect(lambda: self.export_to_json_lp())
 
         """Атрибуты кнопок"""
         self.pushButton.clicked.connect(self.save_to_db)
@@ -55,6 +57,7 @@ class MainWindow(
             QtGui.QIcon(BasicDir().get_basic_dir("gui/images/minus_60.png"))
         )
         self.pushButton_4.setIconSize(QtCore.QSize(60, 60))
+        self.pushButton_8.hide()  # Спрятал временно работу с XLS
         self.pushButton_7.hide()  # Спрятал временно работу с JSON
         self.pushButton_6.hide()  # Спрятал временно работу с JSON
 

@@ -17,19 +17,25 @@ class Data(QtCore.QThread):
     def get_att_area_data(self):
         """Получаю атрибутивные данные для пробной площади"""
         area = Area.select().where(Area.uuid == self.uuid).get()
-        gplho, forestry_enterprise, forestry = Organization().convert_org_id(
+        organizations = Organization().convert_org_id(
             id_forestry=area.num_forestry, id_forestry_enterprise=area.num_enterprise
         )
+        gplho, forestry_enterprise, forestry = list(organizations.values())
+        code_gplho, code_forestry_enterprise, code_forestry = list(organizations.keys())
 
         att_data = {
-            "area_uuid": area.uuid,
+            "uuid_area": area.uuid,
+            "code_gplho": code_gplho,
             "gplho": gplho,
+            "code_enterprise": code_forestry_enterprise,
             "enterprise": forestry_enterprise,
+            "code_forestry": code_forestry,
             "forestry": forestry,
-            "compartment": str(area.compartment),
-            "sub_compartment": str(area.sub_compartment),
-            "area_square": str(area.area),
+            "num_compartment": str(area.compartment),
+            "num_sub_compartment": str(area.sub_compartment),
+            "area": str(area.area),
             "num_cutting_area": area.num_cutting_area,
+            "date_offset": area.date_trial,
         }
         return att_data
 

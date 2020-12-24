@@ -16,6 +16,7 @@ from .services import (
     export_to_xls,
     add_by_hand,
     area_property_main_window,
+    export_to_json_lp,
 )
 from .services.config import Settings
 
@@ -166,10 +167,10 @@ class Restatement(restatement_main_window.MainWindow):
         self.att_data = att_data
         self.label_4.setText(att_data["enterprise"])
         self.label_6.setText(att_data["forestry"])
-        self.label_7.setText(att_data["compartment"])
-        self.label_8.setText(att_data["sub_compartment"])
+        self.label_7.setText(att_data["num_compartment"])
+        self.label_8.setText(att_data["num_sub_compartment"])
         self.label_12.setText(att_data["num_cutting_area"])
-        self.lineEdit.setText(att_data["area_square"])
+        self.lineEdit.setText(att_data["area"])
 
     def add_table_new_species(self, data):
         self.tableWidget.insertColumn(data["column"] + 1)
@@ -454,6 +455,28 @@ class Restatement(restatement_main_window.MainWindow):
         else:
             self.crit_message("Отсутствуют данные для экспорта.", "", "")
 
+    def export_to_json_lp(self):
+        if self.tableWidget.columnCount() > 1 and self.att_data:
+            export_file = QtWidgets.QFileDialog.getSaveFileName(
+                caption="Сохранение файла",
+                directory=os.path.expanduser("~") + "/Documents/" + self.uuid + ".json",
+                filter="JSON (*.json)",
+            )
+            if export_file[0]:
+                self.object_export_to_json_lp = export_to_json_lp.OutputData(
+                    uuid=self.uuid,
+                    table=self.tableWidget,
+                    export_file=export_file[0],
+                    attribute_data=self.att_data,
+                )
+                self.object_export_to_json_lp.start()
+                self.object_export_to_json_lp.signal_status.connect(
+                    lambda x: self.crit_message(**x), QtCore.Qt.QueuedConnection,
+                )
+
+        else:
+            self.crit_message("Отсутствуют данные для экспорта.", "", "")
+
     def import_from_json(self):
         if self.tableWidget.columnCount() > 1:
             q = QtWidgets.QMessageBox.warning(
@@ -544,13 +567,13 @@ class Restatement(restatement_main_window.MainWindow):
         else:
             self.crit_message("Отсутствуют данные для экспорта.", "", "")
 
-    def crit_message(self, error, info, detailed_text):
+    def crit_message(self, head, body, detailed_text):
         dlg = QtWidgets.QMessageBox(self)
         dlg.setIcon(QtWidgets.QMessageBox.Warning)
         dlg.setWindowModality(QtCore.Qt.WindowModal)
         dlg.setWindowTitle('ПО "Пробы". Перечёт деревьев.')
-        dlg.setText(error)
-        dlg.setInformativeText(str(info))
+        dlg.setText(head)
+        dlg.setInformativeText(str(body))
         dlg.setDetailedText(str(detailed_text))
         dlg.setStandardButtons(QtWidgets.QMessageBox.Ok)
         dlg.show()
