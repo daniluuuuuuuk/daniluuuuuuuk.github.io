@@ -49,7 +49,7 @@ class ForestObjectLoader(QgsTask):
 
         self.allRestatements = tupleToList
             
-        postgisConnection.__del__()
+        # postgisConnection.__del__()
 
     def getAllGPLHO(self):
         postgisConnection = PostgisDB.PostGisDB()
@@ -57,7 +57,7 @@ class ForestObjectLoader(QgsTask):
             """select id_organization, name_organization from "dictionary".organization where type_organization = 'ГПЛХО'""")
         self.allGplho = dict((idObject, nameObject)
                              for (idObject, nameObject) in gplhos)
-        postgisConnection.__del__()
+        # postgisConnection.__del__()
 
     def getLeshozyByGPLHO(self, gplhoName):
         postgisConnection = PostgisDB.PostGisDB()
@@ -67,7 +67,7 @@ class ForestObjectLoader(QgsTask):
             """select code_organization, name_organization from "dictionary".organization where parent_id_organization = '{}'""".format(gplhoId[0][0]))
         self.allLeshozy = dict((idObject, nameObject)
                                for (idObject, nameObject) in leshozy)
-        postgisConnection.__del__()
+        # postgisConnection.__del__()
 
     def getLesnichestvaByLeshoz(self, leshozName):
         postgisConnection = PostgisDB.PostGisDB()
@@ -77,7 +77,7 @@ class ForestObjectLoader(QgsTask):
             """select code_organization, name_organization from "dictionary".organization where parent_id_organization = {}""".format(leshozId[0][0]))
         self.allLesnichestva = dict((idObject, nameObject)
                                     for (idObject, nameObject) in lesnichestva)
-        postgisConnection.__del__()
+        # postgisConnection.__del__()
 
     def run(self, gplho, leshoz):
         QgsMessageLog.logMessage('Started task "{}"'.format(

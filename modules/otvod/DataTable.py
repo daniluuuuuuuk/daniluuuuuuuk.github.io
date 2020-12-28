@@ -663,7 +663,7 @@ class DataTableWrapper():
         self.tableModel.pointsDict = cuttingArea.copy()
 
     def convertCoordFormat(self, coordType):
-        self.tableModel.setRerender(False)
+        # self.tableModel.setRerender(False)
         currentTableType = self.tableModel.tabletype
         params = self.tableModel.getParams()
         tableList = self.copyTableData()
@@ -675,7 +675,7 @@ class DataTableWrapper():
         elif coordType == 1:
             convertedTableList = cvt.convertToDMS()
         self.populateTable(convertedTableList)
-        self.tableModel.setRerender(True)
+        # self.tableModel.setRerender(True)
 
     def populateTable(self, tableList):
         self.deleteRows()

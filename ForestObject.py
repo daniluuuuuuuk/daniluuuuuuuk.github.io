@@ -201,7 +201,7 @@ class DatabaseQueryTask(QgsTask):
             self.description()), MESSAGE_CATEGORY, Qgis.Info)
         postgisConnection = PostgisDB.PostGisDB()
         self.result = postgisConnection.getQueryResult(query)
-        postgisConnection.__del__()
+        # postgisConnection.__del__()
         return True
 
     def finished(self, result):

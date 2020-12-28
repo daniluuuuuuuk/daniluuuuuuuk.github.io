@@ -86,7 +86,7 @@ class Loader(QgsTask):
         self.taxDetailsM10 = postgisConnection.getQueryResult(
             """select * from "public".subcompartment_taxation_m10 where identity = '{}'""".format(identity))    
 
-        postgisConnection.__del__()
+        # postgisConnection.__del__()
 
     def finished(self, result):
         if result:

@@ -23,7 +23,7 @@ class RestatementLoader(QgsTask):
             """select leshos, num_lch, num_kv, num_vd, area, num, uid, date from "public".area where uid = '{}'""".format(guid))
         self.restatementData = self.unwrapRestatementData(restatementData)
         print(self.restatementData)
-        postgisConnection.__del__()
+        # postgisConnection.__del__()
 
     def unwrapRestatementData(self, data):
         postgisConnection = PostgisDB.PostGisDB()
@@ -58,7 +58,7 @@ class RestatementLoader(QgsTask):
             where substring(code_organization::varchar(255) from 6 for 3) = '{}'
             and substring(code_organization::varchar(255) from 9 for 2) = '{}'""".format(data[0][0], code))[0][0]            
 
-        postgisConnection.__del__()
+        # postgisConnection.__del__()
 
         return {
             'ГПЛХО': [gplhoName, gplhoNumber],

@@ -155,10 +155,9 @@ class CoordinateConverter:
             x = self.decdeg2dms(point.x(), False)
             y = self.decdeg2dms(point.y(), False)
             convertedValues.append([str(str(row)+"-"+str(row+1)),
-            str(y[0]), str(y[1]), str(x[2]),            
+            str(y[0]), str(y[1]), str(y[2]),            
             str(x[0]), str(x[1]), str(x[2]),
             lineType])
-
         return convertedValues
 
     def convert2DDCoords(self, pointsDict):
