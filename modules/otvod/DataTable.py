@@ -374,40 +374,40 @@ class DataTable(QTableWidget):
                     angle = True
                 if not self.pointsDict:
                     point = self.builder(
-                        self.bindingPoint, self, row, self.magneticInclination)
+                        self.bindingPoint, self, row, -self.magneticInclination)
                 else:
                     if angle:
                         if row == 1:
                             azimuth = GeoOperations.calculateAzimuth(
                                 self.bindingPoint, self.pointsDict[row-1][0])
                             point = self.builder(
-                                self.pointsDict[row-1][0], azimuth, self, row, self.magneticInclination)
+                                self.pointsDict[row-1][0], azimuth, self, row, -self.magneticInclination)
                         elif row > 1:
                             azimuth = GeoOperations.calculateAzimuth(
                                 self.pointsDict[row-2][0], self.pointsDict[row-1][0])
                             point = self.builder(
-                                self.pointsDict[row-1][0], azimuth, self, row, self.magneticInclination)
+                                self.pointsDict[row-1][0], azimuth, self, row, -self.magneticInclination)
                     else:
                         if row == 0:
                             point = self.builder(
-                                self.bindingPoint, self, row, self.magneticInclination)
+                                self.bindingPoint, self, row, -self.magneticInclination)
                         else:
                             point = self.builder(
                                 self.pointsDict[row - 1][0],
-                                self, row, self.magneticInclination
+                                self, row, -self.magneticInclination
                             )
             else:
                 if not self.pointsDict:
                     point = self.builder(
-                        self.bindingPoint, self, row, self.magneticInclination)
+                        self.bindingPoint, self, row, -self.magneticInclination)
                 else:
                     if row == 0:
                         point = self.builder(
-                            self.bindingPoint, self, row, self.magneticInclination)
+                            self.bindingPoint, self, row, -self.magneticInclination)
                     else:
                         point = self.builder(
                             self.pointsDict[row - 1][0],
-                            self, row, self.magneticInclination
+                            self, row, -self.magneticInclination
                         )
 
             self.pointsDict[row] = [point, self.getPointType(row)]
@@ -614,17 +614,17 @@ class DataTableWrapper():
             if cuttingArea[key][1] == "Привязка":
                 lastAnchorLinePoint = key
             if key == 0:
-                azimuth = GeoOperations.calculateAzimuth(bindingPoint, cuttingArea[key][0]) + inclination
+                azimuth = GeoOperations.calculateAzimuth(bindingPoint, cuttingArea[key][0]) - inclination
                 azimuth = self.validatedAzimuth(azimuth)
                 distance = GeoOperations.calculateDistance(bindingPoint, cuttingArea[key][0])
             else:
-                azimuth = GeoOperations.calculateAzimuth(cuttingArea[key-1][0], cuttingArea[key][0]) + inclination
+                azimuth = GeoOperations.calculateAzimuth(cuttingArea[key-1][0], cuttingArea[key][0]) - inclination
                 azimuth = self.validatedAzimuth(azimuth)
                 distance = GeoOperations.calculateDistance(cuttingArea[key-1][0], cuttingArea[key][0])
             
             azimuthTableList.append([str(key) + "-" + str(key + 1), str(azimuth), str(distance), cuttingArea[key][1]])
         if lastAnchorLinePoint is None:
-            azimuth = GeoOperations.calculateAzimuth(cuttingArea[key][0], bindingPoint) + inclination
+            azimuth = GeoOperations.calculateAzimuth(cuttingArea[key][0], bindingPoint) - inclination
             azimuth = self.validatedAzimuth(azimuth)
             distance = GeoOperations.calculateDistance(cuttingArea[key][0], bindingPoint)
             if azimuth <= 0.1 or distance <= 0.1:
@@ -636,7 +636,7 @@ class DataTableWrapper():
                 return
             azimuthTableList.append([str(key + 1) + "-" + "0", str(azimuth), str(distance), cuttingArea[key][1]])
         else:
-            azimuth = GeoOperations.calculateAzimuth(cuttingArea[key][0], cuttingArea[lastAnchorLinePoint][0]) + inclination
+            azimuth = GeoOperations.calculateAzimuth(cuttingArea[key][0], cuttingArea[lastAnchorLinePoint][0]) - inclination
             azimuth = self.validatedAzimuth(azimuth)
             distance = GeoOperations.calculateDistance(cuttingArea[key][0], cuttingArea[lastAnchorLinePoint][0])
             if azimuth <= 0.1 or distance <= 0.1:
