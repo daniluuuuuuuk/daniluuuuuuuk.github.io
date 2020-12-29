@@ -106,9 +106,11 @@ class AreasData(QtCore.QThread):
         all_areas_data = []
 
         for _area in all_areas_db:
-            full_organization_name = org.convert_org_id(
-                id_forestry=int(_area.num_forestry),
-                id_forestry_enterprise=int(_area.num_enterprise),
+            full_organization_name = list(
+                org.convert_org_id(
+                    id_forestry=int(_area.num_forestry),
+                    id_forestry_enterprise=int(_area.num_enterprise),
+                ).values()
             )
             area_data = {
                 "enterprise": full_organization_name[1],

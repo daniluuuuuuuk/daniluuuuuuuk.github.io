@@ -166,9 +166,9 @@ class Data(QtCore.QThread):
         ws["O9"] = self.att_data["gplho"]
         ws["D9"] = self.att_data["enterprise"]
         ws["D10"] = self.att_data["forestry"]
-        ws["D11"] = self.att_data["compartment"]
-        ws["D12"] = self.att_data["sub_compartment"]
-        ws["O11"] = float(self.att_data["area_square"])
+        ws["D11"] = self.att_data["num_compartment"]
+        ws["D12"] = self.att_data["num_sub_compartment"]
+        ws["O11"] = float(self.att_data["area"])
 
     def run(self):
         file = BasicDir().get_basic_dir("templates/template_restatement.xlsx")

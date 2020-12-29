@@ -16,7 +16,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>ПО &quot;Пробы&quot;. Список пробных площадей.</string>
+   <string>Модуль отводов для QGIS. Список площадей.</string>
   </property>
   <property name="styleSheet">
    <string notr="true"/>

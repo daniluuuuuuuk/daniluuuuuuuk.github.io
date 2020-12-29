@@ -16,7 +16,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>ПО &quot;Пробы&quot;</string>
+   <string>Модуль отводов для QGIS</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -34,7 +34,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Карточка пробной площади</string>
+         <string>Карточка площади</string>
         </property>
        </widget>
       </item>
