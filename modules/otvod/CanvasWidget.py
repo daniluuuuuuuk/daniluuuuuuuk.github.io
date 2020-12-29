@@ -107,7 +107,7 @@ class CanvasWidget(QgsMapCanvas):
     def findAzimuth(self, btn, btnState):
 
         def getResult(result):
-            magnAz = self.validatedAzimuth(float(round(result[0], 1)) + self.table.getMagneticInclination())
+            magnAz = self.validatedAzimuth(float(round(result[0], 1)) - self.table.getMagneticInclination())
             self.omw.outputLabel.setText(
                 "Аз. истин.: " + str(round(result[0], 1)) + "°, магн.: " + str(round(magnAz, 1)) + "°. Расст.: " + str(round(result[1], 1)) + "м.")
 

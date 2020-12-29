@@ -63,7 +63,7 @@ class BuildFromMapPointsTool(QgsMapToolEmitPoint, QWidget):
         self.showAimPoint(point)
 
     def drawToolTip(self, dist, az):
-        magnAz = self.validatedAzimuth(float(az) + self.inclination)
+        magnAz = self.validatedAzimuth(float(az) - self.inclination)
         if self.canvas.underMouse():  # Only if mouse is over the map
             QToolTip.showText(self.canvas.mapToGlobal(self.canvas.mouseLastXY(
             )), "Расстояние: " + dist + " м\n" + "Аз. истин.: " + az + "°\nАз. магнитн.: " + str(round(magnAz, 1)) + "°", self.canvas)

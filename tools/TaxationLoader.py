@@ -68,6 +68,8 @@ class Loader(QgsTask):
             num_lch = str(lch)  
 
         postgisConnection = PostgisDB.PostGisDB()
+        if len(str(int(lh))) == 2:
+            lh = '0' + str(int(lh))
 
         self.lh_name = postgisConnection.getQueryResult(
             """select name_organization 
@@ -81,12 +83,12 @@ class Loader(QgsTask):
                 and substring(code_organization::varchar(255) from 9 for 2) = '{}'""".format(lh, num_lch))[0][0]
 
         self.taxDetails = postgisConnection.getQueryResult(
-            """select * from "public".subcompartment_taxation where identity = '{}'""".format(identity))
+            """select * from "public".subcompartment_taxation where identity = '{}'""".format(int(identity)))
 
         self.taxDetailsM10 = postgisConnection.getQueryResult(
-            """select * from "public".subcompartment_taxation_m10 where identity = '{}'""".format(identity))    
+            """select * from "public".subcompartment_taxation_m10 where identity = '{}'""".format(int(identity)))
 
-        postgisConnection.__del__()
+        # postgisConnection.__del__()
 
     def finished(self, result):
         if result:

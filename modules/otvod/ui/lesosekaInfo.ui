@@ -125,13 +125,13 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>40</y>
-     <width>47</width>
-     <height>13</height>
+     <y>43</y>
+     <width>91</width>
+     <height>16</height>
     </rect>
    </property>
    <property name="text">
-    <string>Лесхоз</string>
+    <string>Учреждение</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_8">
@@ -229,14 +229,14 @@
   <widget class="QLabel" name="gplhoLabel">
    <property name="geometry">
     <rect>
-     <x>11</x>
+     <x>10</x>
      <y>14</y>
-     <width>47</width>
-     <height>13</height>
+     <width>101</width>
+     <height>16</height>
     </rect>
    </property>
    <property name="text">
-    <string>ГПЛХО</string>
+    <string>ГПЛХО/ Ведомство</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_11">
