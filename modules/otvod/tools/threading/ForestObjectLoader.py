@@ -34,10 +34,14 @@ class ForestObjectLoader(QgsTask):
             leshos = x[-1]
 
             code = '00'
+            
             if len(str(num_lch)) == 2:
                 code = str(num_lch)
             else:
                 code = '0' + str(num_lch)
+            
+            if len(str(int(leshos))) == 2:
+                leshos = '0' + str(int(leshos))
 
             forestry = postgisConnection.getQueryResult(
                 """select name_organization 
@@ -54,17 +58,20 @@ class ForestObjectLoader(QgsTask):
     def getAllGPLHO(self):
         postgisConnection = PostgisDB.PostGisDB()
         gplhos = postgisConnection.getQueryResult(
-            """select id_organization, name_organization from "dictionary".organization where type_organization = 'ГПЛХО'""")
+            """select id_organization, name_organization from "dictionary".organization where type_organization = 'ГПЛХО' or code_organization = '1500300000'""")
         self.allGplho = dict((idObject, nameObject)
                              for (idObject, nameObject) in gplhos)
         # postgisConnection.__del__()
 
     def getLeshozyByGPLHO(self, gplhoName):
         postgisConnection = PostgisDB.PostGisDB()
-        gplhoId = postgisConnection.getQueryResult(
-            """select id_organization from "dictionary".organization where name_organization = '{}' and type_organization = 'ГПЛХО'""".format(gplhoName))
+        if gplhoName == 'Управление делами Президента РБ':
+            gplhoId = 966
+        else:
+            gplhoId = postgisConnection.getQueryResult(
+                """select id_organization from "dictionary".organization where name_organization = '{}' and type_organization = 'ГПЛХО'""".format(gplhoName))[0][0]
         leshozy = postgisConnection.getQueryResult(
-            """select code_organization, name_organization from "dictionary".organization where parent_id_organization = '{}'""".format(gplhoId[0][0]))
+            """select code_organization, name_organization from "dictionary".organization where parent_id_organization = '{}'""".format(gplhoId))
         self.allLeshozy = dict((idObject, nameObject)
                                for (idObject, nameObject) in leshozy)
         # postgisConnection.__del__()

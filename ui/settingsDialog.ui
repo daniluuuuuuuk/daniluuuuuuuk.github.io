@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>380</width>
-    <height>263</height>
+    <height>256</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -48,7 +48,7 @@
     <bool>false</bool>
    </property>
    <property name="currentIndex">
-    <number>2</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="otvodSettings">
     <attribute name="title">
@@ -165,12 +165,12 @@
       <rect>
        <x>10</x>
        <y>20</y>
-       <width>91</width>
+       <width>101</width>
        <height>16</height>
       </rect>
      </property>
      <property name="text">
-      <string>ГПЛХО</string>
+      <string>ГПЛХО/ Ведомство</string>
      </property>
     </widget>
     <widget class="QLabel" name="leshoz_label">
@@ -183,7 +183,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Лесхоз</string>
+      <string>Учреждение</string>
      </property>
     </widget>
     <widget class="QLabel" name="lesnich_label">

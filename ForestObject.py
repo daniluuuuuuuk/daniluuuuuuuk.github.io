@@ -91,6 +91,9 @@ class ForestEnterprise(QtCore.QObject):
             thread.deleteLater()
             self.nameLoaded.emit(result)
         
+        if len(str(int(self._number))) == 2:
+            self._number = '0' + str(int(self._number))
+
         thread = QtCore.QThread()
         worker = DbQueryWorker(
                 """select name_organization 
