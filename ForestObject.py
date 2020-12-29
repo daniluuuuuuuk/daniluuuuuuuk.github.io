@@ -62,7 +62,7 @@ class ForestEnterprise(QtCore.QObject):
             num_lhz = settings.get('num_lhz')  
             self._number = num_lhz
         except Exception as e:
-            print(e)
+            # print(e)
             self._number = -1
             self._name = ""
 
