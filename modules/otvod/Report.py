@@ -9,6 +9,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from qgis.PyQt.QtCore import QSize
 from PIL import Image, ImageOps
 from ...tools import config
+from ... import util
 
 class Report:
 
@@ -68,6 +69,18 @@ class Report:
         last_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
         p = document.add_paragraph('Условные обозначения:')
+        r = p.add_run()
+        r.add_picture((util.resolvePath("res\\binding_point.png")))
+        r.add_text(' точка привязки')
+        r = p.add_run()
+        r.add_picture((util.resolvePath("res\\anchor_point.png")))
+        r.add_text(' узел хода')
+        r = p.add_run()
+        r.add_picture((util.resolvePath("res\\anchor_line.png")))
+        r.add_text(' линия привязки')        
+        r = p.add_run()
+        r.add_picture((util.resolvePath("res\\area.png")))
+        r.add_text(' лесосека')
 
         p = document.add_paragraph(
             'Экспликация или координаты поворотных точек лесосеки:')
