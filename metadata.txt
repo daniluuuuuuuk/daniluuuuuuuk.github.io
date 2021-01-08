@@ -1,12 +1,12 @@
 ; the next section is mandatory
 
 [general]
-name=TrialArea
+name=ГисЛес для QGIS
 email=info@belgosles.by
 author=РУП "Белгослес"
 qgisMinimumVersion=3.0
-description=Создание карточки пробной площади
-about=Модуль пробной площади
+description=Отвод лесосек и перечет
+about=Отвод лесосек и перечет
 version=0.3
 tracker=http://belgosles.by/
 repository=http://rep.belgosles.by/ais_lesoseka

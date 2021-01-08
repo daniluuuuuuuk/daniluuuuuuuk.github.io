@@ -44,7 +44,7 @@ class SettingsController(QtCore.QObject):
 
         self.populateOtvodSettings()
 
-        self.num_lhz, self.gplho, self.leshoz, self.lesnich = self.getEnterpriseConfig()
+        self.location, self.num_lhz, self.gplho, self.leshoz, self.lesnich = self.getEnterpriseConfig()
 
         self.populateEnterprise()
 
@@ -74,6 +74,7 @@ class SettingsController(QtCore.QObject):
         cf = config.Configurer("enterprise")
         settings = cf.readConfigs()
         return [
+            settings.get("location", ""),
             settings.get("num_lhz", ""),
             settings.get("gplho", ""),
             settings.get("leshoz", ""),
@@ -83,6 +84,7 @@ class SettingsController(QtCore.QObject):
     def saveEnterpriseConfig(self):
         try:
             settingsDict = {
+                "location": self.tableUi.locationLineEdit.text(),
                 "num_lhz": self.num_lhz,
                 "gplho": self.tableUi.gplho_comboBox.currentText(),
                 "leshoz": self.tableUi.leshoz_comboBox.currentText(),

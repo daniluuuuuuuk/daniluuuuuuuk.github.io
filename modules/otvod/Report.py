@@ -39,7 +39,7 @@ class Report:
         header.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
         p = document.add_paragraph(
-            'Месторасположение лесосеки:\n'
+            'Месторасположение лесосеки: {} '.format(self.getLocation()) +
             'Юридическое лицо, ведущее лесное хозяйство: {}'.format(str(self.areaAttributes["leshos_text"]))
         )
         p.paragraph_format.left_indent = Inches(0.25)
@@ -105,6 +105,11 @@ class Report:
         cf = config.Configurer('report')
         settings = cf.readConfigs()
         return settings.get('path')
+
+    def getLocation(self):
+        cf = config.Configurer('enterprise')
+        settings = cf.readConfigs()
+        return settings.get('location')
 
     def extractColumnNames(self, columnNames):
         newColumns = []
