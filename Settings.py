@@ -46,6 +46,8 @@ class SettingsController(QtCore.QObject):
 
         self.location, self.num_lhz, self.gplho, self.leshoz, self.lesnich = self.getEnterpriseConfig()
 
+        self.populateLocation(self.location)
+
         self.populateEnterprise()
 
         self.populateBDSettings()
@@ -69,6 +71,9 @@ class SettingsController(QtCore.QObject):
         self.tableUi.toolButton.clicked.connect(self.chooseReportFolder)
         self.tableUi.saveOtvodSettingsButton.clicked.connect(self.saveOtvodSettings)
         self.sd.exec()
+
+    def populateLocation(self, location):
+        self.tableUi.locationLineEdit.setText(location)
 
     def getEnterpriseConfig(self):
         cf = config.Configurer("enterprise")
