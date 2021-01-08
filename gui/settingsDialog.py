@@ -158,7 +158,7 @@ class Ui_settingsDialog(object):
         self.settingsWidget.addTab(self.btSettings, "")
 
         self.retranslateUi(settingsDialog)
-        self.settingsWidget.setCurrentIndex(1)
+        self.settingsWidget.setCurrentIndex(2)
         self.buttonBox.accepted.connect(settingsDialog.accept)
         self.buttonBox.rejected.connect(settingsDialog.reject)
         QtCore.QMetaObject.connectSlotsByName(settingsDialog)

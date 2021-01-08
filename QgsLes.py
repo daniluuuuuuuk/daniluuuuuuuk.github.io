@@ -63,15 +63,16 @@ class QgsLes:
         def checkNumLhzConfig():
 
             def writeConfigs(cf):
-                lr = QgsProject.instance().mapLayersByName("Кварталы")[0]
+                lr = QgsProject.instance().mapLayersByName("Выдела")[0]
                 try:
                     feature = lr.getFeature(1)
+                    location = settings.get('location')
                     num_lhz = str(feature['num_lhz'])          
                     gplho = settings.get('gplho')
                     leshoz = settings.get('leshoz')
                     lesnich = settings.get('lesnich')
 
-                    settingsDict = {'num_lhz' : num_lhz, 
+                    settingsDict = {'location': location, 'num_lhz' : num_lhz, 
                     'gplho' : gplho, 'leshoz': leshoz, 'lesnich':lesnich}
                     cf = config.Configurer('enterprise', settingsDict)
                     cf.writeConfigs()                              
