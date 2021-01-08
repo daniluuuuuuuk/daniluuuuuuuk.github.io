@@ -51,11 +51,11 @@ class QgsLes:
         self.iface = iface
         self.runnable = runnable
         self.canvas = self.iface.mapCanvas()
-        QgsProject.instance().legendLayersAdded.connect(self.ifKvLayerReady)
+        QgsProject.instance().legendLayersAdded.connect(self.ifVydLayerReady)
         self.filter = None
 
-    def ifKvLayerReady(self, layer):
-        if layer[0].name() == 'Кварталы' and self.filter == None and self.runnable:
+    def ifVydLayerReady(self, layer):
+        if layer[0].name() == 'Выдела' and self.filter == None and self.runnable:
             self.initFilter()
 
     def initFilter(self):
