@@ -130,7 +130,7 @@ class OtvodController():
         my_snap_config.setEnabled(True)
         my_snap_config.setType(QgsSnappingConfig.VertexAndSegment)
         my_snap_config.setUnits(QgsTolerance.Pixels)
-        my_snap_config.setTolerance(10)
+        my_snap_config.setTolerance(20)
         my_snap_config.setIntersectionSnapping(True)
         my_snap_config.setMode(QgsSnappingConfig.AllLayers)        
         QgsProject.instance().setSnappingConfig(my_snap_config)

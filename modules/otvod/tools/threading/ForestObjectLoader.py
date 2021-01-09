@@ -23,7 +23,7 @@ class ForestObjectLoader(QgsTask):
     def getAllRestatements(self):
         postgisConnection = PostgisDB.PostGisDB()
         allRestatements = postgisConnection.getQueryResult(
-            """select uid, num_lch, num_kv, num_vd, num, leshos from "public".area where geom is NULL""")
+            """select uid, num_lch, num_kv, num_vds, num, leshos from "public".area where geom is NULL""")
         
         tupleToList = []
         for x in allRestatements:

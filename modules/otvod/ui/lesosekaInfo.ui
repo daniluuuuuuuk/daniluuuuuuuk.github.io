@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>322</width>
-    <height>407</height>
+    <height>468</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>370</y>
+     <y>430</y>
      <width>301</width>
      <height>32</height>
     </rect>
@@ -33,7 +33,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>190</y>
+     <y>250</y>
      <width>91</width>
      <height>16</height>
     </rect>
@@ -46,7 +46,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>220</y>
+     <y>280</y>
      <width>47</width>
      <height>13</height>
     </rect>
@@ -59,7 +59,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>290</y>
+     <y>350</y>
      <width>91</width>
      <height>16</height>
     </rect>
@@ -72,7 +72,7 @@
    <property name="geometry">
     <rect>
      <x>110</x>
-     <y>190</y>
+     <y>250</y>
      <width>191</width>
      <height>20</height>
     </rect>
@@ -82,7 +82,7 @@
    <property name="geometry">
     <rect>
      <x>110</x>
-     <y>290</y>
+     <y>350</y>
      <width>191</width>
      <height>71</height>
     </rect>
@@ -115,7 +115,7 @@
    <property name="geometry">
     <rect>
      <x>110</x>
-     <y>220</y>
+     <y>280</y>
      <width>191</width>
      <height>22</height>
     </rect>
@@ -243,7 +243,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>254</y>
+     <y>314</y>
      <width>47</width>
      <height>13</height>
     </rect>
@@ -256,7 +256,53 @@
    <property name="geometry">
     <rect>
      <x>110</x>
-     <y>255</y>
+     <y>315</y>
+     <width>191</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_12">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>190</y>
+     <width>91</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Пользование</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_13">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>220</y>
+     <width>91</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Вид рубки</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="useType">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>190</y>
+     <width>191</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="cuttingType">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>220</y>
      <width>191</width>
      <height>22</height>
     </rect>

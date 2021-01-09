@@ -174,7 +174,7 @@ class Report:
             attrDict["num"] = self.feature["num"]
             attrDict["useType"] = self.feature["usetype"]
             attrDict["cuttingType"] = self.feature["cuttingtyp"]
-            attrDict["plot"] = self.feature["plot"]
+            # attrDict["plot"] = self.feature["plot"]
             attrDict["fio"] = self.feature["fio"]
             attrDict["date"] = self.feature["date"]
             attrDict["info"] = self.feature["info"]

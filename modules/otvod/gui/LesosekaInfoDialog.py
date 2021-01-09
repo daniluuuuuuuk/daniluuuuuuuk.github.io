@@ -7,8 +7,9 @@ from ..tools.threading.ForestObjectWorker import Worker as ForestObjWorker
 from ..tools.threading.ForestObjectLoader import ForestObjectLoader
 from ..tools.threading.RestatementWorker import Worker as RestatementWorker
 from ..tools.threading.RestatementLoader import RestatementLoader
+from ..tools.threading.CuttingTypeWorker import Worker as CuttingTypeWorker
+from ..tools.threading.CuttingTypeLoader import CuttingTypeLoader
 from ....tools import config
-
 
 class LesosekaInfo(QDialog):
 
@@ -26,6 +27,34 @@ class LesosekaInfo(QDialog):
             self.ui.leshos.currentTextChanged.connect(self.leshozChanged)
             self.ui.lesnich.currentTextChanged.connect(self.lesnichChanged)
             self.ui.restatement_comboBox.currentTextChanged.connect(self.restatementChanged)
+
+        self.setUseTypes()
+
+    def setUseTypes(self):
+        self.ui.useType.currentTextChanged.connect(self.useTypeChanged)
+        useTypes = ['Рубки главного пользования', 'Рубки промежуточного пользования', 'Прочие рубки']
+        self.ui.useType.addItems(useTypes)
+
+    def useTypeChanged(self):
+        if self.ui.useType.currentText() == '':
+            return
+
+        def workerFinished(result):
+            worker.deleteLater()
+            thread.quit()
+            thread.wait()
+            thread.deleteLater()
+            self.comboboxClear(self.ui.cuttingType)
+            self.clearComboboxIndex(self.ui.cuttingType)
+            self.ui.cuttingType.addItems(result)
+
+        thread = QtCore.QThread()
+        worker = CuttingTypeWorker()
+        worker.moveToThread(thread)
+        worker.finished.connect(workerFinished)
+        worker.useType = self.ui.useType.currentIndex() + 1
+        thread.started.connect(worker.run)
+        thread.start()
 
     def getEnterpriseConfig(self):
         cf = config.Configurer('enterprise')
@@ -54,18 +83,6 @@ class LesosekaInfo(QDialog):
 
             self.comboboxClear(self.ui.gplho, self.ui.leshos, self.ui.lesnich)
             self.clearComboboxIndex(self.ui.gplho, self.ui.leshos, self.ui.lesnich)
-
-            # self.ui.gplho.addItem(data[0][0][0])
-            # self.ui.leshos.addItem(data[0][1][0])
-            # self.ui.lesnich.addItem(data[0][2][0])
-            # self.ui.num_kv.setText(data[0][3])
-            # self.ui.num_vds.setText(data[0][4])
-            # self.ui.num.setText(data[0][5])
-            # self.guid = data[0][6]
-            # self.ui.date.setDate(QDate.fromString(data[0][7], 'dd.MM.yyyy'))
-
-            # index = self.ui.gplho.findText(data.get('ГПЛХО')[0])
-            # if index >= 0:
 
             self.ui.gplho.addItem(data.get('ГПЛХО')[0])
             self.ui.leshos.addItem(data.get('Лесхоз')[0])
@@ -235,7 +252,7 @@ class LesosekaInfo(QDialog):
         self.ui.date.setDateTime(QDateTime.currentDateTime())
 
     def populateValues(self, attributes):
-        self.ui.gplho.addItem(str(attributes.get('gplho_text')))
+        self.ui.gplho.addItem(str(attributes.get('vedomstvo_text')))
         self.ui.leshos.addItem(str(attributes.get('leshos_text')))
         self.ui.lesnich.addItem(str(attributes.get('lesnich_text')))
         self.ui.num_kv.setText(str(attributes.get('num_kv')))
@@ -245,6 +262,11 @@ class LesosekaInfo(QDialog):
         self.ui.date.setDate(QDate.fromString(attributes.get('date'), 'dd.MM.yyyy'))
         self.ui.info.setText(str(attributes.get('info')))
 
+        self.ui.useType.addItem(str(attributes.get('useType')))
+        self.ui.cuttingType.addItem(str(attributes.get('cuttingType')))
+
         self.ui.gplho.setEnabled(False)
         self.ui.leshos.setEnabled(False)
         self.ui.lesnich.setEnabled(False)
+        self.ui.useType.setEnabled(False)
+        self.ui.cuttingType.setEnabled(False)
