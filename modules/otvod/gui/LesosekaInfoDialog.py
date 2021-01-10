@@ -10,6 +10,9 @@ from ..tools.threading.RestatementLoader import RestatementLoader
 from ..tools.threading.CuttingTypeWorker import Worker as CuttingTypeWorker
 from ..tools.threading.CuttingTypeLoader import CuttingTypeLoader
 from ....tools import config
+from qgis.core import QgsFeature, QgsDistanceArea, QgsGeometry, QgsUnitTypes
+from qgis.core import QgsCoordinateReferenceSystem, QgsCoordinateTransformContext
+
 
 class LesosekaInfo(QDialog):
 
@@ -27,6 +30,8 @@ class LesosekaInfo(QDialog):
             self.ui.leshos.currentTextChanged.connect(self.leshozChanged)
             self.ui.lesnich.currentTextChanged.connect(self.lesnichChanged)
             self.ui.restatement_comboBox.currentTextChanged.connect(self.restatementChanged)
+        else:
+            self.ui.label_15.setText('после увязки')
 
         self.setUseTypes()
 
@@ -217,7 +222,7 @@ class LesosekaInfo(QDialog):
         thread.started.connect(worker.run)
         thread.start()
 
-    def setUpValues(self):
+    def setUpValues(self, layer=None):
 
         def workerFinished(result):
 
@@ -250,6 +255,33 @@ class LesosekaInfo(QDialog):
         thread.start()
 
         self.ui.date.setDateTime(QDateTime.currentDateTime())
+        if layer:
+            self.ui.area.setText(str(self.precalculateArea(layer)))
+
+    def precalculateArea(self, layer):
+        
+        def getId(f):
+            return f['id']
+
+        cuttingAreaPoints = []
+        features = sorted(layer.getFeatures(), key=getId)
+        for x in features:
+            if x.attributes()[1] == "Лесосека":
+                cuttingAreaPoints.append(x.geometry().asPoint())
+        
+        feat = QgsFeature()
+
+        feat.setGeometry(QgsGeometry.fromPolygonXY(
+            [cuttingAreaPoints]))
+
+        da = QgsDistanceArea()
+        da.setEllipsoid("WGS84")
+        trctxt = QgsCoordinateTransformContext()
+        da.setSourceCrs(QgsCoordinateReferenceSystem(32635), trctxt)
+        tempArea = da.measurePolygon(feat.geometry().asPolygon()[0])
+
+        return round(da.convertAreaMeasurement(
+            tempArea, QgsUnitTypes.AreaHectares), 1)
 
     def populateValues(self, attributes):
         self.ui.gplho.addItem(str(attributes.get('vedomstvo_text')))
@@ -261,6 +293,7 @@ class LesosekaInfo(QDialog):
         self.ui.fio.setText(str(attributes.get('fio')))
         self.ui.date.setDate(QDate.fromString(attributes.get('date'), 'dd.MM.yyyy'))
         self.ui.info.setText(str(attributes.get('info')))
+        self.ui.area.setText(str(attributes.get('area')))
 
         self.ui.useType.addItem(str(attributes.get('useType')))
         self.ui.cuttingType.addItem(str(attributes.get('cuttingType')))

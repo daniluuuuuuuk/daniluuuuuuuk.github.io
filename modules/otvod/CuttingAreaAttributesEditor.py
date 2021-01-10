@@ -38,7 +38,7 @@ class CuttingAreaAttributesEditor:
             # dictAttr["num_lch"] = 0
             dictAttr["num_kv"] = ui.num_kv.text()
             # dictAttr["num_vd"] = 0
-            # dictAttr["area"] = 0
+            dictAttr["area"] = ui.area.text()
             # dictAttr["leshos"] = sw.lhNumber
             dictAttr["num"] = ui.num.text()
             dictAttr["useType"] = ui.useType.currentText()
@@ -65,6 +65,7 @@ class CuttingAreaAttributesEditor:
         for feature in features:
             feature['num_kv'] = attributesDict.get('num_kv')
             # feature['leshos'] = attributesDict.get('leshos')
+            feature['area'] = attributesDict.get('area')
             feature['num'] = attributesDict.get('num')
             feature['fio'] = attributesDict.get('fio')
             feature['date'] = attributesDict.get('date')

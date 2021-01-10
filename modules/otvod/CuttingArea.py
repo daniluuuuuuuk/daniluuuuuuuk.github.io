@@ -38,11 +38,10 @@ class CuttingArea:
             self.uid = str(uuid.uuid4())
             
     def getLesosekaProperties(self):
-
         dictAttr = {}
         self.sw = LesosekaInfo(False)
         ui = self.sw.ui
-        self.sw.setUpValues()
+        self.sw.setUpValues(self.layer)
         dialogResult = self.sw.exec()
         if dialogResult == QDialog.Accepted:
             self.btnControl.unlockSaveDeleteButtons()
