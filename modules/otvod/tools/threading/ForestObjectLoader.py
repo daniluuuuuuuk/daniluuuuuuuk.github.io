@@ -23,7 +23,7 @@ class ForestObjectLoader(QgsTask):
     def getAllRestatements(self):
         postgisConnection = PostgisDB.PostGisDB()
         allRestatements = postgisConnection.getQueryResult(
-            """select uid, num_lch, num_kv, num_vd, num, leshos from "public".area where geom is NULL""")
+            """select uid, num_lch, num_kv, num_vds, num, leshos from "public".area where geom is NULL""")
         
         tupleToList = []
         for x in allRestatements:
@@ -58,7 +58,13 @@ class ForestObjectLoader(QgsTask):
     def getAllGPLHO(self):
         postgisConnection = PostgisDB.PostGisDB()
         gplhos = postgisConnection.getQueryResult(
-            """select id_organization, name_organization from "dictionary".organization where type_organization = 'ГПЛХО' or code_organization = '1500300000'""")
+            """select id_organization, name_organization from "dictionary".organization where type_organization = 'ГПЛХО' 
+            or code_organization = '1500200000'
+            or code_organization = '1500300000'
+            or code_organization = '1500400000'
+            or code_organization = '1500500000'
+            or code_organization = '1500600000'
+            or code_organization = '1500700000'""")
         self.allGplho = dict((idObject, nameObject)
                              for (idObject, nameObject) in gplhos)
         # postgisConnection.__del__()
@@ -67,6 +73,16 @@ class ForestObjectLoader(QgsTask):
         postgisConnection = PostgisDB.PostGisDB()
         if gplhoName == 'Управление делами Президента РБ':
             gplhoId = 966
+        elif gplhoName == 'Министерство обороны РБ':
+            gplhoId = 955
+        elif gplhoName == 'Министерство по чрезвычайным ситуациям':
+            gplhoId = 1067
+        elif gplhoName == 'Местные исполнительные и распорядительные органы':
+            gplhoId = 1085
+        elif gplhoName == 'Министерство образования РБ':
+            gplhoId = 1102
+        elif gplhoName == 'Национальная академия наук Беларуси':
+            gplhoId = 1108
         else:
             gplhoId = postgisConnection.getQueryResult(
                 """select id_organization from "dictionary".organization where name_organization = '{}' and type_organization = 'ГПЛХО'""".format(gplhoName))[0][0]

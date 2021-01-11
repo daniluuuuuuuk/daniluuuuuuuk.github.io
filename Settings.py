@@ -44,7 +44,9 @@ class SettingsController(QtCore.QObject):
 
         self.populateOtvodSettings()
 
-        self.num_lhz, self.gplho, self.leshoz, self.lesnich = self.getEnterpriseConfig()
+        self.location, self.num_lhz, self.gplho, self.leshoz, self.lesnich = self.getEnterpriseConfig()
+
+        self.populateLocation(self.location)
 
         self.populateEnterprise()
 
@@ -70,10 +72,14 @@ class SettingsController(QtCore.QObject):
         self.tableUi.saveOtvodSettingsButton.clicked.connect(self.saveOtvodSettings)
         self.sd.exec()
 
+    def populateLocation(self, location):
+        self.tableUi.locationLineEdit.setText(location)
+
     def getEnterpriseConfig(self):
         cf = config.Configurer("enterprise")
         settings = cf.readConfigs()
         return [
+            settings.get("location", ""),
             settings.get("num_lhz", ""),
             settings.get("gplho", ""),
             settings.get("leshoz", ""),
@@ -83,6 +89,7 @@ class SettingsController(QtCore.QObject):
     def saveEnterpriseConfig(self):
         try:
             settingsDict = {
+                "location": self.tableUi.locationLineEdit.text(),
                 "num_lhz": self.num_lhz,
                 "gplho": self.tableUi.gplho_comboBox.currentText(),
                 "leshoz": self.tableUi.leshoz_comboBox.currentText(),
@@ -119,7 +126,7 @@ class SettingsController(QtCore.QObject):
                 if index >= 0:
                     self.tableUi.leshoz_comboBox.setCurrentIndex(index)
 
-        thread = QtCore.QThread()
+        thread = QtCore.QThread(iface.mainWindow())
         worker = ForestObjWorker()
         worker.moveToThread(thread)
         worker.finished.connect(workerFinished)
@@ -147,7 +154,7 @@ class SettingsController(QtCore.QObject):
                 if index >= 0:
                     self.tableUi.lesnich_comboBox.setCurrentIndex(index)
 
-        thread = QtCore.QThread()
+        thread = QtCore.QThread(iface.mainWindow())
         worker = ForestObjWorker()
         worker.moveToThread(thread)
         worker.finished.connect(workerFinished)

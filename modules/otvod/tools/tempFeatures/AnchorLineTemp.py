@@ -5,81 +5,29 @@ from PyQt5.QtCore import QVariant
 
 class AnchorLineTemp():
 
-    def __init__(self, canvas, point, features, feature, uid, dictAttr):
+    def __init__(self, canvas, point, features, uid):
 
         self.uid = uid
         self.canvas = canvas
-        self.feature = feature
         self.features = features
         self.point = point
         self.projectInstance = QgsProject.instance()
         self.symbol = self.setLayerSymbol()
-        self.properFields = ["num_lch", "num_kv", "num_vd", "area", "leshos"]
-        # self.attributes = self.feature.attributes()
-        self.dictAttr = dictAttr  # атрибуты лесосеки
 
-        self.fieldsString = self.fieldsToString(self.feature.fields())
+        self.attributes = [self.uid]
+        self.attributesDictionary = {**self.attrDict()}
 
-        self.attributes = [self.uid] + self.feature.attributes()
-        self.fields = self.feature.fields()
-        self.attributesDictionary = {**self.attrDict(), **self.dictAttr}
-        # self.feature = feature
-        # self.uid = uid
-        # self.point = point
-        # self.canvas = canvas
-        # self.features = features
-        # self.dictAttr = dictAttr
-        # self.projectInstance = QgsProject.instance()
-        # self.symbol = self.setLayerSymbol()
-        # self.attributes = self.feature.attributes()
-        # self.fieldsString = self.fieldsToString(self.feature.fields())
+        self.fieldsString = self.fieldsToString()
 
-        # self.attributes = [self.uid] + self.feature.attributes()
-        # self.fields = self.feature.fields()
-        # self.attributesDictionary = {**self.attrDict(), **self.dictAttr}
-
-    # def attrDict(self):
-    #     dictionary = {}
-    #     dictionary["uid"] = self.uid
-    #     for x in self.fields:
-    #         dictionary[x.name()] = self.feature.attribute(x.name())
-    #     return dictionary
 
     def attrDict(self):
         dictionary = {}
         dictionary["uid"] = self.uid
-        for x in self.fields:
-            if x.name() in self.properFields:
-                dictionary[x.name()] = self.feature.attribute(x.name())
         return dictionary
 
-    def fieldsToString(self, fields):
+    def fieldsToString(self):
         string = "&field=uid"
-        for field in fields:
-            if str(field.name()) in self.properFields:
-                qvariant = QVariant.typeToName(field.type())
-                if qvariant == "QString":
-                    typeName = "string"
-                else:
-                    typeName = qvariant
-                string = string + "&field=" + \
-                    str(field.name()) + ":" + typeName
-        for key in self.dictAttr:
-            string = string + "&field=" + str(key) + ":string"
         return string
-
-    # def fieldsToString(self, fields):
-    #     string = "&field=uid"
-    #     for field in fields:
-    #         qvariant = QVariant.typeToName(field.type())
-    #         if qvariant == "QString":
-    #             typeName = "string"
-    #         else:
-    #             typeName = qvariant
-    #         string = string + "&field=" + str(field.name()) + ":" + typeName
-    #     for key in self.dictAttr:
-    #         string = string + "&field=" + str(key) + ":string"
-    #     return string
 
     def setLayerSymbol(self):
         symbol = QgsFillSymbol.createSimple(

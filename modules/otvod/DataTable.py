@@ -19,6 +19,7 @@ from PyQt5.QtCore import QTimer
 from .tools.threading import InclinationCalculation
 from qgis.core import QgsProject
 from qgis.core import edit
+from qgis.utils import iface
 
 
 # Только в целях подсказки, нигде не используется:
@@ -969,7 +970,7 @@ class DataTableWrapper():
             self.populateTable(result)
 
         tableList = self.copyTableData()
-        thread = QtCore.QThread()
+        thread = QtCore.QThread(iface.mainWindow())
 
         worker = InclinationCalculation.Worker(tableList, self.tableModel.tabletype, self.tableModel.coordType, inclinationDifference)
         worker.moveToThread(thread)

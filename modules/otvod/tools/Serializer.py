@@ -4,7 +4,7 @@ import random
 from .... import PostgisDB
 from PyQt5.QtCore import pyqtSignal
 from qgis.PyQt.QtWidgets import QMessageBox
-
+from qgis.utils import iface
 
 MESSAGE_CATEGORY = 'Serializer Task'
 AREA_POINTS_TABLE_NAME = 'area_points'
@@ -26,7 +26,7 @@ class DbSerializer(QtCore.QObject):
             thread.wait()
             thread.deleteLater()
 
-        thread = QtCore.QThread()
+        thread = QtCore.QThread(iface.mainWindow())
         worker = Worker('Save')
         worker.moveToThread(thread)
         worker.finished.connect(workerFinished)
@@ -43,7 +43,7 @@ class DbSerializer(QtCore.QObject):
             thread.deleteLater()
             self.signal.emit(result[0][0], result[0][1])
 
-        thread = QtCore.QThread()
+        thread = QtCore.QThread(iface.mainWindow())
         worker = Worker('Load')
         worker.moveToThread(thread)
         worker.finished.connect(workerFinished)
