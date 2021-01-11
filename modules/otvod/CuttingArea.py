@@ -38,30 +38,29 @@ class CuttingArea:
             self.uid = str(uuid.uuid4())
             
     def getLesosekaProperties(self):
-
         dictAttr = {}
         self.sw = LesosekaInfo(False)
         ui = self.sw.ui
-        self.sw.setUpValues()
+        self.sw.setUpValues(self.layer)
         dialogResult = self.sw.exec()
         if dialogResult == QDialog.Accepted:
             self.btnControl.unlockSaveDeleteButtons()
             dictAttr["num_lch"] = self.sw.getLesnichNumber()
             dictAttr["num_kv"] = ui.num_kv.text()
-            dictAttr["num_vd"] = 0
+            # dictAttr["num_vd"] = 0
             dictAttr["area"] = 0
             dictAttr["leshos"] = self.sw.getLeshozNumber()
             dictAttr["num"] = ui.num.text()
-            dictAttr["useType"] = ""
-            dictAttr["cuttingType"] = ""
-            dictAttr["plot"] = ""
+            dictAttr["useType"] = ui.useType.currentText()
+            dictAttr["cuttingType"] = ui.cuttingType.currentText()
+            # dictAttr["plot"] = ""
             dictAttr["fio"] = ui.fio.text()
             dictAttr["date"] = ui.date.text()
             dictAttr["info"] = ui.info.toPlainText()
             dictAttr["num_vds"] = ui.num_vds.text()
             dictAttr["leshos_text"] = ui.leshos.currentText()
             dictAttr["lesnich_text"] = ui.lesnich.currentText()
-            dictAttr["gplho_text"] = ui.gplho.currentText()
+            dictAttr["vedomstvo_text"] = ui.gplho.currentText()
             return dictAttr
         else:
             return False
@@ -71,9 +70,6 @@ class CuttingArea:
 
     def getEmptyFeature(self):
         feature = QgsFeature()
-        # feature.initAttributes(2)
-        # attributes = [1, 2]
-        # feature.setAttributes(attributes)
         return feature
 
         """Построение лесосеки на основании точек
@@ -100,19 +96,14 @@ class CuttingArea:
                     self.tiedUpPointList = [
                         self.anchorLinePoints[-1]] + self.cuttingAreaPoints
                     self.cuttingAreaPoints = self.tieUp(self.tiedUpPointList)
-                # return self.buildLine()
                 self.buildLine()
-                # print(self.anchorLinePoints, self.tiedUpPointList)
                 return self.getTiedUpPointsWithNumbers(self.anchorLinePoints, self.cuttingAreaPoints)
             else:
                 if not self.isTiedUp(self.bindingPoint, self.cuttingAreaPoints[-1]):
                     self.tiedUpPointList = [
                         self.bindingPoint] + self.cuttingAreaPoints
                     self.cuttingAreaPoints = self.tieUp(self.tiedUpPointList)
-                    # return self.buildPoly(self.bindingPoint)
-                # return self.buildPoly(self.bindingPoint)
                 self.buildPoly(self.bindingPoint)
-                # print(self.tiedUpPointList)
                 return self.getTiedUpPointsWithNumbers(None, self.cuttingAreaPoints)
 
     def showDiscrepancyWindow(self):
@@ -170,11 +161,6 @@ class CuttingArea:
         if not anchorLinePoints:
             i = 0
             pairNumberPoint = {}
-            # if not cuttingAreaTiedUpPoints:
-            #     for point in self.cuttingAreaPoints:
-            #         pairNumberPoint[i] = [point, "Лесосека"]
-            #         i += 1
-            # else:
             for point in cuttingAreaTiedUpPoints:
                 pairNumberPoint[i] = [point, "Лесосека"]
                 i += 1
@@ -187,10 +173,6 @@ class CuttingArea:
                 pairNumberPoint[i] = [point, "Привязка"]
                 i += 1
             for point in cuttingAreaTiedUpPoints:
-                # print('point', point, 'pairnumber' ,pairNumberPoint[i - 1][0])
-                # if point == pairNumberPoint[i - 1][0]:
-                #     print(True)
-                #     continue
                 pairNumberPoint[i] = [point, "Лесосека"]
                 i += 1
             if not self.isAlreadyTiedUp:
@@ -209,9 +191,7 @@ class CuttingArea:
         """
 
     def tieUp(self, pointList):
-        # print('originals=>', self.cuttingAreaPoints)
         tieUpPolygon = TieUpObject.Polygon(pointList)
-        # print('tiedup====>', tieUpPolygon.getTiedUpFeature())
         return tieUpPolygon.getTiedUpFeature()
 
         """Построение лесосеки с линией привязки
@@ -219,7 +199,7 @@ class CuttingArea:
 
     def buildLine(self):
         tempLineBuilder = AnchorLineTemp(
-            self.canvas, self.bindingPoint, self.anchorLinePoints, self.feature, self.uid, self.dictAttr)
+            self.canvas, self.bindingPoint, self.anchorLinePoints, self.uid)
         tempLineBuilder.makeFeature()
 
         tempCuttingAreaBuilder = CuttingAreaTemp(
@@ -230,7 +210,6 @@ class CuttingArea:
         """
 
     def buildPoly(self, point):
-        # print("cuttingareapoint", self.cuttingAreaPoints)
         tempCuttingAreaBuilder = CuttingAreaTemp(
             self.canvas, point, self.cuttingAreaPoints, self.feature, self.uid, self.dictAttr)
         return tempCuttingAreaBuilder.makeFeature()
@@ -253,34 +232,15 @@ class CuttingArea:
         """
 
     def copyOnLayer(self, sourceLYRName, destLYRName):
-        # print("CopyOnLayer", sourceLYRName, destLYRName)
         sourceLYR = QgsProject.instance().mapLayersByName(sourceLYRName)[0]
         destLYR = QgsProject.instance().mapLayersByName(destLYRName)[0]
 
-        # features = destLYR.selectByExpression("\"uid\"='{}' ".format(self.uid))
-
-        # for feature in features:
-        #     destLYR.deleteFeature(feature.id())
         features = destLYR.getFeatures("uid = '{}'".format(self.uid))
-        # print(features)
-
-        # selection = destLYR.getFeatures(QgsFeatureRequest(QgsExpression("\"uid\ = '{}'".format(self.uid))))
+        print(self.uid)
         with edit(destLYR):
-            for f in features:         
+            for f in features:
+                print(f.id())
                 destLYR.deleteFeature(f.id())
-
-
-        # request = QgsFeatureRequest().setFilterExpression('"uid" = %s' % (self.uid))
-
-        # # print('"uid" == %s' % (self.uid))
-        # request.setSubsetOfAttributes([])
-        # request.setFlags(QgsFeatureRequest.NoGeometry)
-        # for f in destLYR.getFeatures(request):
-        #     # print("EST'")
-        #     # print(f.id())
-        #     destLYR.deleteFeature(f.id())
-
-        
 
         features = []
         for feature in sourceLYR.getFeatures():

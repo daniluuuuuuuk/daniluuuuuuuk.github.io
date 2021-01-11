@@ -143,5 +143,4 @@ class Calculator(QgsTask):
         QgsMessageLog.logMessage(
             'Task "{name}" was cancelled'.format(name=self.description()),
             MESSAGE_CATEGORY, Qgis.Info)
-        print('cancelled')
         super().cancel()

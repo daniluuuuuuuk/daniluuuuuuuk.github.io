@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>380</width>
-    <height>263</height>
+    <height>256</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -164,26 +164,26 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>20</y>
-       <width>91</width>
+       <y>40</y>
+       <width>101</width>
        <height>16</height>
       </rect>
      </property>
      <property name="text">
-      <string>ГПЛХО</string>
+      <string>ГПЛХО/ Ведомство</string>
      </property>
     </widget>
     <widget class="QLabel" name="leshoz_label">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>60</y>
+       <y>70</y>
        <width>91</width>
        <height>16</height>
       </rect>
      </property>
      <property name="text">
-      <string>Лесхоз</string>
+      <string>Учреждение</string>
      </property>
     </widget>
     <widget class="QLabel" name="lesnich_label">
@@ -216,7 +216,7 @@
      <property name="geometry">
       <rect>
        <x>120</x>
-       <y>60</y>
+       <y>70</y>
        <width>211</width>
        <height>22</height>
       </rect>
@@ -236,9 +236,32 @@
      <property name="geometry">
       <rect>
        <x>120</x>
-       <y>20</y>
+       <y>40</y>
        <width>211</width>
        <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="location_label">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>101</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Местоположение</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="locationLineEdit">
+     <property name="geometry">
+      <rect>
+       <x>120</x>
+       <y>10</y>
+       <width>211</width>
+       <height>20</height>
       </rect>
      </property>
     </widget>

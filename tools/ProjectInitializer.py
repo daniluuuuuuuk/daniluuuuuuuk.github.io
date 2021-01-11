@@ -30,7 +30,7 @@ class QgsProjectInitializer:
             self.loadLayersFromDb()
 
     def taskFinished(self):
-        print("task finished")
+        pass
 
     def clearCurrentProject(self):
         reply = QMessageBox.question(QDialog(), 'Инициализация проекта',

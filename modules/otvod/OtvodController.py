@@ -258,12 +258,16 @@ class OtvodController():
         datatable.deleteRows()
         self.omw.addNode_button.clicked.connect(datatable.addRow)
         self.omw.deleteNode_button.clicked.connect(datatable.deleteRow)
-        self.omw.clearNodes_button.clicked.connect(datatable.deleteRows)
+        self.omw.clearNodes_button.clicked.connect(partial(self.clearNodes, datatable))
         # self.omw.move_node_up_button.clicked.connect(datatable.move_row_up)
         # self.omw.move_node_down_button.clicked.connect(datatable.move_row_down)
         # self.omw.add_line_node_button.clicked.connect(datatable.add_line_node)
         # self.omw.add_lesoseka_node_button.clicked.connect(datatable.add_lesoseka_node)
         return datatable
+
+    def clearNodes(self, datatable):
+        datatable.deleteRows()
+        self.deleteCuttingArea()
 
     def parseConfig(self):
         cf = config.Configurer('otvod')

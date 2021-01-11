@@ -7,7 +7,7 @@ from .modules.otvod.OtvodController import OtvodController
 from .modules.otvod.tools.mapTools.RectangleMapTool import RectangleMapTool
 from .tools import CuttingAreaPeeker as peeker
 from qgis.gui import QgsMapToolZoom
-from qgis.core import Qgis
+from qgis.core import Qgis, QgsApplication
 from .modules.trees_accounting.src.restatements import Restatement
 from .modules.trees_accounting.src.areas_list import AreasList
 from .tools.ProjectInitializer import QgsProjectInitializer
@@ -51,11 +51,18 @@ class QgsLes:
         self.iface = iface
         self.runnable = runnable
         self.canvas = self.iface.mapCanvas()
-        QgsProject.instance().legendLayersAdded.connect(self.ifKvLayerReady)
+        QgsProject.instance().legendLayersAdded.connect(self.ifVydLayerReady)
         self.filter = None
 
-    def ifKvLayerReady(self, layer):
-        if layer[0].name() == 'Кварталы' and self.filter == None and self.runnable:
+        QgsApplication.messageLog().messageReceived.connect(self.write_log_message)                
+
+
+    def write_log_message(self, message, tag, level):
+        with open(util.resolvePath("tmp/qgis.log"), 'a') as logfile:
+            logfile.write('{tag}({level}): {message}'.format(tag=tag, level=level, message=message))
+
+    def ifVydLayerReady(self, layer):
+        if layer[0].name() == 'Выдела' and self.filter == None and self.runnable:
             self.initFilter()
 
     def initFilter(self):
@@ -63,15 +70,16 @@ class QgsLes:
         def checkNumLhzConfig():
 
             def writeConfigs(cf):
-                lr = QgsProject.instance().mapLayersByName("Кварталы")[0]
+                lr = QgsProject.instance().mapLayersByName("Выдела")[0]
                 try:
                     feature = lr.getFeature(1)
+                    location = settings.get('location')
                     num_lhz = str(feature['num_lhz'])          
                     gplho = settings.get('gplho')
                     leshoz = settings.get('leshoz')
                     lesnich = settings.get('lesnich')
 
-                    settingsDict = {'num_lhz' : num_lhz, 
+                    settingsDict = {'location': location, 'num_lhz' : num_lhz, 
                     'gplho' : gplho, 'leshoz': leshoz, 'lesnich':lesnich}
                     cf = config.Configurer('enterprise', settingsDict)
                     cf.writeConfigs()                              

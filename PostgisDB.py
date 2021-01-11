@@ -1,6 +1,8 @@
 import psycopg2
 import configparser
 from .tools import config
+from qgis.PyQt.QtWidgets import QMessageBox
+
 
 class PostGisDB:
 
@@ -17,7 +19,9 @@ class PostGisDB:
             self.port = btsettings.get('port')
             self.database = btsettings.get('database')
         except Exception as e:
-            print(str(e))
+            QMessageBox.information(None, 'Ошибка', e)
+            # raise e
+            # print(str(e))
         try:
             return psycopg2.connect(user = self.user,
                         password = self.password,

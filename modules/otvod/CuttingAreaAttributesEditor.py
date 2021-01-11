@@ -38,11 +38,11 @@ class CuttingAreaAttributesEditor:
             # dictAttr["num_lch"] = 0
             dictAttr["num_kv"] = ui.num_kv.text()
             # dictAttr["num_vd"] = 0
-            # dictAttr["area"] = 0
+            dictAttr["area"] = ui.area.text()
             # dictAttr["leshos"] = sw.lhNumber
             dictAttr["num"] = ui.num.text()
-            # dictAttr["useType"] = ""
-            # dictAttr["cuttingType"] = ""
+            dictAttr["useType"] = ui.useType.currentText()
+            dictAttr["cuttingType"] = ui.cuttingType.currentText()
             # dictAttr["plot"] = ""
             dictAttr["fio"] = ui.fio.text()
             dictAttr["date"] = ui.date.text()
@@ -50,7 +50,7 @@ class CuttingAreaAttributesEditor:
             dictAttr["num_vds"] = ui.num_vds.text()
             dictAttr["leshos_text"] = ui.leshos.currentText()
             dictAttr["lesnich_text"] = ui.lesnich.currentText()
-            dictAttr["gplho_text"] = ui.gplho.currentText()
+            dictAttr["vedomstvo_text"] = ui.gplho.currentText()
             self.refreshAttributes(dictAttr)
         else:
             return
@@ -60,14 +60,12 @@ class CuttingAreaAttributesEditor:
         layer = QgsProject.instance().mapLayersByName(
             "Лесосека временный слой")[0]
 
-        # layer2 = QgsProject.instance().mapLayersByName(
-        #     "Привязка временный слой")[0]
-
         layer.startEditing()
         features = layer.getFeatures()
         for feature in features:
             feature['num_kv'] = attributesDict.get('num_kv')
             # feature['leshos'] = attributesDict.get('leshos')
+            feature['area'] = attributesDict.get('area')
             feature['num'] = attributesDict.get('num')
             feature['fio'] = attributesDict.get('fio')
             feature['date'] = attributesDict.get('date')
@@ -75,11 +73,8 @@ class CuttingAreaAttributesEditor:
             feature['num_vds'] = attributesDict.get('num_vds')
             feature['leshos_text'] = attributesDict.get('leshos_text')
             feature['lesnich_text'] = attributesDict.get('lesnich_text')
-            feature['gplho_text'] = attributesDict.get('gplho_text')
+            feature['vedomstvo_text'] = attributesDict.get('vedomstvo_text')
+            feature['useType'] = attributesDict.get('useType')
+            feature['cuttingType'] = attributesDict.get('cuttingType')            
             layer.updateFeature(feature)
         layer.commitChanges()
-
-        # reply = QMessageBox.question(QDialog(), 'Временный слой изменен',
-        #                              'Сохранить изменения в базу?', QMessageBox.Yes, QMessageBox.No)
-        # if reply == QMessageBox.Yes:
-        #     self.cuttingArea.save()

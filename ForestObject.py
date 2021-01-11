@@ -6,6 +6,7 @@ from PyQt5 import QtCore
 from .tools import config
 import re
 from PyQt5.QtCore import pyqtSignal, QObject
+from qgis.utils import iface
 
 MESSAGE_CATEGORY = 'DB query task'
 
@@ -62,7 +63,6 @@ class ForestEnterprise(QtCore.QObject):
             num_lhz = settings.get('num_lhz')  
             self._number = num_lhz
         except Exception as e:
-            print(e)
             self._number = -1
             self._name = ""
 
@@ -91,7 +91,10 @@ class ForestEnterprise(QtCore.QObject):
             thread.deleteLater()
             self.nameLoaded.emit(result)
         
-        thread = QtCore.QThread()
+        if len(str(int(self._number))) == 2:
+            self._number = '0' + str(int(self._number))
+
+        thread = QtCore.QThread(iface.mainWindow())
         worker = DbQueryWorker(
                 """select name_organization 
                 from "dictionary".organization
@@ -201,7 +204,7 @@ class DatabaseQueryTask(QgsTask):
             self.description()), MESSAGE_CATEGORY, Qgis.Info)
         postgisConnection = PostgisDB.PostGisDB()
         self.result = postgisConnection.getQueryResult(query)
-        postgisConnection.__del__()
+        # postgisConnection.__del__()
         return True
 
     def finished(self, result):

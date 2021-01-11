@@ -16,13 +16,10 @@ class BuildFromMapPointsTool(QgsMapToolEmitPoint, QWidget):
     def __init__(self, canvas, inclination):
         self.canvas = canvas
         QgsMapToolEmitPoint.__init__(self, self.canvas)
-        # print("____________________________________")
         self.snapUtils = self.canvas.snappingUtils()
         self.prj = QgsProject.instance()
         self.snapConfig = self.prj.snappingConfig()
-        print(self.snapConfig.setMode(3))
         self.snapConfig.setType(2)
-        # print(self.snapConfig.type())
         self.snapUtils.setConfig(self.snapConfig)
 
         self.inclination = inclination
@@ -63,7 +60,7 @@ class BuildFromMapPointsTool(QgsMapToolEmitPoint, QWidget):
         self.showAimPoint(point)
 
     def drawToolTip(self, dist, az):
-        magnAz = self.validatedAzimuth(float(az) + self.inclination)
+        magnAz = self.validatedAzimuth(float(az) - self.inclination)
         if self.canvas.underMouse():  # Only if mouse is over the map
             QToolTip.showText(self.canvas.mapToGlobal(self.canvas.mouseLastXY(
             )), "Расстояние: " + dist + " м\n" + "Аз. истин.: " + az + "°\nАз. магнитн.: " + str(round(magnAz, 1)) + "°", self.canvas)
@@ -95,24 +92,18 @@ class BuildFromMapPointsTool(QgsMapToolEmitPoint, QWidget):
         return self.pointList[-1][0]
 
     def showAimPoint(self, point):
-        # matchres = self.snapUtils.snapToMap(point)  # QgsPointLocator.Match
-        # if matchres.isValid():
         m = QgsVertexMarker(self.canvas)
         m.setColor(QColor(255, 0, 255))
         m.setIconSize(7)
-        # or ICON_CROSS, ICON_X, ICON_BOX
         m.setIconType(QgsVertexMarker.ICON_BOX)
         m.setPenWidth(2)
         m.setCenter(point)
         self.aimMarker.append(m)
         self.drawMeasureLine(point)
-        # else:
-        #   self.drawMeasureLine(point)
 
     def getVertexMarker(self):
         m = QgsVertexMarker(self.canvas)
         m.setIconSize(7)
-        # or ICON_CROSS, ICON_X, ICON_BOX
         m.setIconType(QgsVertexMarker.ICON_BOX)
         m.setPenWidth(1)
         m.setColor(QColor(255, 0, 0))
@@ -125,8 +116,6 @@ class BuildFromMapPointsTool(QgsMapToolEmitPoint, QWidget):
         elif e.button() == Qt.LeftButton:
             lineType = "Лесосека"
             point = self.toMapCoordinates(e.pos())
-            # matchres = self.snapUtils.snapToMap(point)  # QgsPointLocator.Match
-            # if matchres.isValid():
             m = self.getVertexMarker()
             m.setCenter(point)
             self.vertexMarkers.append(m)
@@ -142,7 +131,6 @@ class BuildFromMapPointsTool(QgsMapToolEmitPoint, QWidget):
                 self.pointList.append([point, lineType])
                 self.rubberBand.setToGeometry(
                     QgsGeometry.fromPolylineXY(self.getPointsFromList()), None)
-                # self.signal.emit(self.pointList)
 
     def setLineType(self, index):
         i = 0
@@ -192,7 +180,6 @@ class BuildFromMapPointsTool(QgsMapToolEmitPoint, QWidget):
             self.deletePointsFromCanvas()
             self.canvas.scene().removeItem(self.rubberBand)
             self.canvas.scene().removeItem(self.measureLineRubber)
-            # self.canvas.refresh()
             QgsMapTool.deactivate(self)
         except:
             print("Ошибка при деактивации инструмента выноса в натуру")
