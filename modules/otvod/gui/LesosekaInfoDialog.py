@@ -12,7 +12,7 @@ from ..tools.threading.CuttingTypeLoader import CuttingTypeLoader
 from ....tools import config
 from qgis.core import QgsFeature, QgsDistanceArea, QgsGeometry, QgsUnitTypes
 from qgis.core import QgsCoordinateReferenceSystem, QgsCoordinateTransformContext
-
+from qgis.utils import iface
 
 class LesosekaInfo(QDialog):
 
@@ -53,7 +53,7 @@ class LesosekaInfo(QDialog):
             self.clearComboboxIndex(self.ui.cuttingType)
             self.ui.cuttingType.addItems(result)
 
-        thread = QtCore.QThread()
+        thread = QtCore.QThread(iface.mainWindow())
         worker = CuttingTypeWorker()
         worker.moveToThread(thread)
         worker.finished.connect(workerFinished)
@@ -105,7 +105,7 @@ class LesosekaInfo(QDialog):
             self.ui.lesnich.blockSignals(False)
             
 
-        thread = QtCore.QThread()
+        thread = QtCore.QThread(iface.mainWindow())
         worker = RestatementWorker()
         worker.moveToThread(thread)
         worker.finished.connect(workerFinished)
@@ -155,7 +155,7 @@ class LesosekaInfo(QDialog):
                 if index >= 0:
                     self.ui.leshos.setCurrentIndex(index)
 
-        thread = QtCore.QThread()
+        thread = QtCore.QThread(iface.mainWindow())
         worker = ForestObjWorker()
         worker.moveToThread(thread)
         worker.finished.connect(workerFinished)
@@ -185,7 +185,7 @@ class LesosekaInfo(QDialog):
                 if index >= 0:
                     self.ui.lesnich.setCurrentIndex(index)
 
-        thread = QtCore.QThread()
+        thread = QtCore.QThread(iface.mainWindow())
         worker = ForestObjWorker()
         worker.moveToThread(thread)
         worker.finished.connect(workerFinished)
@@ -213,7 +213,7 @@ class LesosekaInfo(QDialog):
 
             self.forestObjectCode = getKey(result[2], self.ui.lesnich.currentText())
 
-        thread = QtCore.QThread()
+        thread = QtCore.QThread(iface.mainWindow())
         worker = ForestObjWorker()
         worker.moveToThread(thread)
         worker.finished.connect(workerFinished)
@@ -247,7 +247,7 @@ class LesosekaInfo(QDialog):
                 self.guidItems[items[-1]] = rst[0]
             self.ui.restatement_comboBox.addItems(items)
 
-        thread = QtCore.QThread()
+        thread = QtCore.QThread(iface.mainWindow())
         worker = ForestObjWorker()
         worker.moveToThread(thread)
         worker.finished.connect(workerFinished)

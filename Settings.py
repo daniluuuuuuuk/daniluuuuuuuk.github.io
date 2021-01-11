@@ -126,7 +126,7 @@ class SettingsController(QtCore.QObject):
                 if index >= 0:
                     self.tableUi.leshoz_comboBox.setCurrentIndex(index)
 
-        thread = QtCore.QThread()
+        thread = QtCore.QThread(iface.mainWindow())
         worker = ForestObjWorker()
         worker.moveToThread(thread)
         worker.finished.connect(workerFinished)
@@ -154,7 +154,7 @@ class SettingsController(QtCore.QObject):
                 if index >= 0:
                     self.tableUi.lesnich_comboBox.setCurrentIndex(index)
 
-        thread = QtCore.QThread()
+        thread = QtCore.QThread(iface.mainWindow())
         worker = ForestObjWorker()
         worker.moveToThread(thread)
         worker.finished.connect(workerFinished)
