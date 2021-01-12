@@ -82,7 +82,7 @@ class QgsLes:
                     settingsDict = {'location': location, 'num_lhz' : num_lhz, 
                     'gplho' : gplho, 'leshoz': leshoz, 'lesnich':lesnich}
                     cf = config.Configurer('enterprise', settingsDict)
-                    cf.writeConfigs()                              
+                    cf.writeConfigs()
                 except Exception as e:
                     print(e)
 

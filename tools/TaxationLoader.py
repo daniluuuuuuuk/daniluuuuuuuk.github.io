@@ -1,7 +1,7 @@
 from .. import PostgisDB
 from qgis.core import *
 from PyQt5 import QtCore
-
+from . import config
 
 MESSAGE_CATEGORY = 'Taxation Loader Task'
 
@@ -11,20 +11,26 @@ class Worker(QtCore.QObject):
         QtCore.QObject.__init__(self)
         self.killed = False
         self.feature = feature
-        self.identity = self.generateIdentity(feature)
+        self.identity = int(self.generateIdentity(feature))
+        self.lh_type = self.getLhType()
         self.loader = Loader('Load Taxation Info')
 
+    def getLhType(self):
+        cf = config.Configurer('enterprise')
+        settings = cf.readConfigs()
+        return settings.get('type')
+    
     def generateIdentity(self, feature):
-        self.num_lhz = feature['num_lhz']
-        self.num_lch = feature['num_lch']
-        self.num_kv = feature['num_kv']
-        self.num_vd = feature['num_vd']
+        self.num_lhz = int(feature['num_lhz'])
+        self.num_lch = int(feature['num_lch'])
+        self.num_kv = int(feature['num_kv'])
+        self.num_vd = int(feature['num_vd'])
         return (1000000000 * self.num_lhz) + (10000000 * self.num_lch) + (1000 * self.num_kv ) + self.num_vd
 
     def run(self):
         ret = None
         try:
-            self.loader.run(self.identity, self.num_lhz, self.num_lch)
+            self.loader.run(self.identity, self.num_lhz, self.num_lch, self.lh_type)
             self.loader.waitForFinished()
             ret = [self.loader.taxDetails, self.loader.taxDetailsM10, 
             [self.loader.lh_name, self.loader.lch_name,
@@ -48,33 +54,36 @@ class Loader(QgsTask):
         self.taxDetailsM10 = None
         self.lh_name = None
         self.lch_name = None
+        self.lh_type = None
 
         self.total = 0
         self.iterations = 0
         self.exception = None
 
 
-    def run(self, identity, lh, lch):
+    def run(self, identity, lh, lch, lh_type):
         QgsMessageLog.logMessage('Started task "{}"'.format(
             self.description()), MESSAGE_CATEGORY, Qgis.Info)
-        self.loadTaxation(identity, lh, lch)
+        self.loadTaxation(identity, lh, lch, lh_type)
         return True
 
-    def loadTaxation(self, identity, lh, lch):
-
+    def loadTaxation(self, identity, lh, lch, lh_type):
         if lch < 10:
             num_lch = '0' + str(lch)
         else:
             num_lch = str(lch)  
 
         postgisConnection = PostgisDB.PostGisDB()
+        if len(str(int(lh))) == 1:
+            lh = '00' + str(int(lh))        
         if len(str(int(lh))) == 2:
             lh = '0' + str(int(lh))
 
         self.lh_name = postgisConnection.getQueryResult(
             """select name_organization 
                 from "dictionary".organization
-                where substring(code_organization::varchar(255) from 6 for 3) = '{}'""".format(lh))[0][0]
+                where substring(code_organization::varchar(255) from 6 for 3) = '{}'
+                and type_organization='{}'""".format(lh, lh_type))[0][0]
 
         self.lch_name = postgisConnection.getQueryResult(
             """select name_organization 

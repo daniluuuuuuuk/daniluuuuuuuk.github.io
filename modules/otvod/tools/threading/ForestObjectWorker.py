@@ -19,7 +19,7 @@ class Worker(QtCore.QObject):
         try:
             self.loader.run(self.gplho, self.leshoz)
             self.loader.waitForFinished()
-            ret = [self.loader.allGplho, self.loader.allLeshozy, self.loader.allLesnichestva, self.loader.allRestatements]
+            ret = [self.loader.allGplho, self.loader.allLeshozy, self.loader.allLesnichestva, self.loader.allRestatements, self.loader.lhTypesAndNames]
 
         except Exception as e:
             raise e

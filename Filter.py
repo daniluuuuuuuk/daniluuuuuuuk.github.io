@@ -30,10 +30,10 @@ class FilterWidgetController:
 
     def setEnterpriseName(result):
       if result:
-        self.enterprise.name = result[0][0]
+        self.enterprise.name = result[0][0][0]
         self.view.ui.leshoz_combobox_3.setCurrentText(self.enterprise.name)
         self.view.ui.leshoz_combobox_3.lineEdit().setCursorPosition(0)
-        self.view.ui.lch_combobox_3.addItems(self.loadForestries(result[1:]))
+        self.view.ui.lch_combobox_3.addItems(self.loadForestries(result[1][0:]))
       else:
         QMessageBox.information(None, 'Ошибка', "Лесхоз не найден. Проверьте файл конфигурации. Фильтр отключен")
 

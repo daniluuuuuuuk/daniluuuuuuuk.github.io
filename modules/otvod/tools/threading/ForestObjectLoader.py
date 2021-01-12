@@ -15,6 +15,7 @@ class ForestObjectLoader(QgsTask):
         self.allLeshozy = None
         self.allLesnichestva = None
         self.allRestatements = None
+        self.lhTypesAndNames = None
 
         self.total = 0
         self.iterations = 0
@@ -40,6 +41,8 @@ class ForestObjectLoader(QgsTask):
             else:
                 code = '0' + str(num_lch)
             
+            if len(str(int(leshos))) == 1:
+                leshos = '00' + str(int(leshos))
             if len(str(int(leshos))) == 2:
                 leshos = '0' + str(int(leshos))
 
@@ -87,9 +90,11 @@ class ForestObjectLoader(QgsTask):
             gplhoId = postgisConnection.getQueryResult(
                 """select id_organization from "dictionary".organization where name_organization = '{}' and type_organization = 'ГПЛХО'""".format(gplhoName))[0][0]
         leshozy = postgisConnection.getQueryResult(
-            """select code_organization, name_organization from "dictionary".organization where parent_id_organization = '{}'""".format(gplhoId))
+            """select code_organization, type_organization, name_organization from "dictionary".organization where parent_id_organization = '{}'""".format(gplhoId))
         self.allLeshozy = dict((idObject, nameObject)
-                               for (idObject, nameObject) in leshozy)
+                               for (idObject, lhType, nameObject) in leshozy)
+        self.lhTypesAndNames = dict((nameObject, lhType) 
+                                for (idObject, lhType, nameObject) in leshozy)
         # postgisConnection.__del__()
 
     def getLesnichestvaByLeshoz(self, leshozName):
@@ -106,7 +111,6 @@ class ForestObjectLoader(QgsTask):
         QgsMessageLog.logMessage('Started task "{}"'.format(
             self.description()), MESSAGE_CATEGORY, Qgis.Info)
 
-
         if gplho is None:
             self.getAllRestatements()
             self.getAllGPLHO()
@@ -117,7 +121,6 @@ class ForestObjectLoader(QgsTask):
         elif gplho is not None and leshoz is not None:
             self.getLesnichestvaByLeshoz(leshoz)
         
-
         return True
 
     def finished(self, result):
