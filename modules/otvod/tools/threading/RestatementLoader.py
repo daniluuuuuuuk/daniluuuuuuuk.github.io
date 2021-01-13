@@ -23,7 +23,7 @@ class RestatementLoader(QgsTask):
     def getLhCod(self):
         cf = config.Configurer('enterprise')
         settings = cf.readConfigs()
-        return settings.get('code_lh')
+        return str(int(float(settings.get('code_lh'))))
 
     def getRestatementData(self, guid):
         postgisConnection = PostgisDB.PostGisDB()
