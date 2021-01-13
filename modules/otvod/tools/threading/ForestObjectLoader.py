@@ -2,6 +2,7 @@ import random
 from ..... import PostgisDB
 from time import sleep
 from qgis.core import (QgsMessageLog, QgsTask, QgsApplication, Qgis)
+from .....tools import config
 
 MESSAGE_CATEGORY = 'Forest Object Loader Task'
 
@@ -15,16 +16,23 @@ class ForestObjectLoader(QgsTask):
         self.allLeshozy = None
         self.allLesnichestva = None
         self.allRestatements = None
+        self.lhTypesAndNames = None
+
+        self.lhCode = self.getLhCode()
 
         self.total = 0
         self.iterations = 0
         self.exception = None
 
+    def getLhCode(self):
+        cf = config.Configurer('enterprise')
+        settings = cf.readConfigs()
+        return str(settings.get('code_lh'))
+
     def getAllRestatements(self):
         postgisConnection = PostgisDB.PostGisDB()
         allRestatements = postgisConnection.getQueryResult(
             """select uid, num_lch, num_kv, num_vds, num, leshos from "public".area where geom is NULL""")
-        
         tupleToList = []
         for x in allRestatements:
             tupleToList.append(list(x))
@@ -40,15 +48,11 @@ class ForestObjectLoader(QgsTask):
             else:
                 code = '0' + str(num_lch)
             
-            if len(str(int(leshos))) == 2:
-                leshos = '0' + str(int(leshos))
-
             forestry = postgisConnection.getQueryResult(
-                """select name_organization 
-                from "dictionary".organization
-                where substring(code_organization::varchar(255) from 6 for 3) = '{}'
-                and substring(code_organization::varchar(255) from 9 for 2) = '{}'""".format(str(leshos), code))[0][0]
-
+                """select name_organization from (select id_organization from "dictionary".organization
+                where code_organization = '{}') typed
+                join "dictionary".organization org on org.parent_id_organization = typed.id_organization
+                where substring(code_organization::varchar(255) from 9 for 2) = '{}'""".format(self.lhCode, code))[0][0]
             x[1] = forestry
 
         self.allRestatements = tupleToList
@@ -87,9 +91,11 @@ class ForestObjectLoader(QgsTask):
             gplhoId = postgisConnection.getQueryResult(
                 """select id_organization from "dictionary".organization where name_organization = '{}' and type_organization = 'ГПЛХО'""".format(gplhoName))[0][0]
         leshozy = postgisConnection.getQueryResult(
-            """select code_organization, name_organization from "dictionary".organization where parent_id_organization = '{}'""".format(gplhoId))
+            """select code_organization, type_organization, name_organization from "dictionary".organization where parent_id_organization = '{}'""".format(gplhoId))
         self.allLeshozy = dict((idObject, nameObject)
-                               for (idObject, nameObject) in leshozy)
+                               for (idObject, lhType, nameObject) in leshozy)
+        self.lhTypesAndNames = dict((nameObject, lhType) 
+                                for (idObject, lhType, nameObject) in leshozy)
         # postgisConnection.__del__()
 
     def getLesnichestvaByLeshoz(self, leshozName):
@@ -106,7 +112,6 @@ class ForestObjectLoader(QgsTask):
         QgsMessageLog.logMessage('Started task "{}"'.format(
             self.description()), MESSAGE_CATEGORY, Qgis.Info)
 
-
         if gplho is None:
             self.getAllRestatements()
             self.getAllGPLHO()
@@ -117,7 +122,6 @@ class ForestObjectLoader(QgsTask):
         elif gplho is not None and leshoz is not None:
             self.getLesnichestvaByLeshoz(leshoz)
         
-
         return True
 
     def finished(self, result):

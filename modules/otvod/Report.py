@@ -41,7 +41,7 @@ class Report:
 
         p = document.add_paragraph(
             'Месторасположение лесосеки: {} '.format(self.getLocation()) +
-            'Юридическое лицо, ведущее лесное хозяйство: {}'.format(str(self.areaAttributes["leshos_text"]))
+            'Юридическое лицо, ведущее лесное хозяйство: {} "{}"'.format(str(self.getLhType()), str(self.areaAttributes["leshos_text"]))
         )
         p.paragraph_format.left_indent = Inches(0.25)
         p.paragraph_format.space_before = Pt(0)
@@ -113,6 +113,11 @@ class Report:
         path = path.replace(" ", "%20")
 
         return path
+    
+    def getLhType(self):
+        cf = config.Configurer('enterprise')
+        settings = cf.readConfigs()
+        return settings.get('type')
 
     def getReportFolder(self):
         cf = config.Configurer('report')

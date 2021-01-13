@@ -7,10 +7,11 @@ from qgis.PyQt.QtXml import QDomDocument
 
 class QgsProjectInitializer:
 
-    def __init__(self, iface):
+    def __init__(self, iface, qgsLesToolbar):
         super().__init__()
         if self.clearCurrentProject() == False:
             return
+        self.deleteFilterWidget(qgsLesToolbar)
         self.iface = iface
         self.setCrs()
         self.settings = None
@@ -28,6 +29,11 @@ class QgsProjectInitializer:
                 None, 'Ошибка', "Проверьте подключение к базе данных" + e)
         if self.settings != None:
             self.loadLayersFromDb()
+
+    def deleteFilterWidget(self, qgsLesToolbar):
+        for action in qgsLesToolbar.actions():
+            if not action.text():
+                qgsLesToolbar.removeAction(action)
 
     def taskFinished(self):
         pass

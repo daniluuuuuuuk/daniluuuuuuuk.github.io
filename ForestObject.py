@@ -60,8 +60,8 @@ class ForestEnterprise(QtCore.QObject):
         try:
             cf = config.Configurer('enterprise')
             settings = cf.readConfigs()
-            num_lhz = settings.get('num_lhz')  
-            self._number = num_lhz
+            self._number = settings.get('num_lhz')
+            self.lhCode = settings.get('code_lh')  
         except Exception as e:
             self._number = -1
             self._name = ""
@@ -90,15 +90,21 @@ class ForestEnterprise(QtCore.QObject):
             thread.wait()
             thread.deleteLater()
             self.nameLoaded.emit(result)
-        
-        if len(str(int(self._number))) == 2:
-            self._number = '0' + str(int(self._number))
+
+        # if len(str(int(self._number))) == 1:
+        #     self._number = '00' + str(int(self._number))
+        # if len(str(int(self._number))) == 2:
+        #     self._number = '0' + str(int(self._number))
 
         thread = QtCore.QThread(iface.mainWindow())
         worker = DbQueryWorker(
-                """select name_organization 
+                ["""select name_organization 
                 from "dictionary".organization
-                where substring(code_organization::varchar(255) from 6 for 3) = '{}'""".format(self._number))
+                where code_organization = '{}'""".format(str(self.lhCode)),
+
+                """select name_organization from (select id_organization from "dictionary".organization
+                where code_organization = '{}') typed
+                join "dictionary".organization org on org.parent_id_organization = typed.id_organization""".format(self.lhCode)])
         worker.moveToThread(thread)
         worker.finished.connect(workerFinished)
         thread.started.connect(worker.run)
@@ -203,7 +209,9 @@ class DatabaseQueryTask(QgsTask):
         QgsMessageLog.logMessage('Started task "{}"'.format(
             self.description()), MESSAGE_CATEGORY, Qgis.Info)
         postgisConnection = PostgisDB.PostGisDB()
-        self.result = postgisConnection.getQueryResult(query)
+        self.result = []
+        for q in query:
+            self.result.append(postgisConnection.getQueryResult(q))
         # postgisConnection.__del__()
         return True
 

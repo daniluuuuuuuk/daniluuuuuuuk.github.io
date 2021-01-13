@@ -2,8 +2,9 @@ import random
 from ..... import PostgisDB
 from time import sleep
 from qgis.core import (QgsMessageLog, QgsTask, QgsApplication, Qgis)
+from .....tools import config
 
-MESSAGE_CATEGORY = 'Forest Object Loader Task'
+MESSAGE_CATEGORY = 'Restatement Object Loader Task'
 
 
 class RestatementLoader(QgsTask):
@@ -17,10 +18,17 @@ class RestatementLoader(QgsTask):
         self.iterations = 0
         self.exception = None
 
+        self.lhCode = self.getLhCode()
+
+    def getLhCod(self):
+        cf = config.Configurer('enterprise')
+        settings = cf.readConfigs()
+        return settings.get('code_lh')
+
     def getRestatementData(self, guid):
         postgisConnection = PostgisDB.PostGisDB()
         restatementData = postgisConnection.getQueryResult(
-            """select leshos, num_lch, num_kv, num_vd, area, num, uid, date from "public".area where uid = '{}'""".format(guid))
+            """select leshos, num_lch, num_kv, num_vds, area, num, uid, date from "public".area where uid = '{}'""".format(guid))
         self.restatementData = self.unwrapRestatementData(restatementData)
         # postgisConnection.__del__()
 
@@ -29,9 +37,8 @@ class RestatementLoader(QgsTask):
 
         leshozName = postgisConnection.getQueryResult(
             """select name_organization 
-            from "dictionary".organization
-            where substring(code_organization::varchar(255) from 6 for 3) = '{}'
-            and substring(code_organization::varchar(255) from 9 for 2) = '00'""".format(data[0][0]))[0][0]
+                from "dictionary".organization
+                where code_organization = '{}'""".format(self.lhCode))[0][0]            
 
         gplhoNumber = postgisConnection.getQueryResult(
             """select parent_id_organization from "dictionary".organization where name_organization = '{}'""".format(leshozName))[0][0]
@@ -46,16 +53,16 @@ class RestatementLoader(QgsTask):
             code = '0' + str(data[0][1])
 
         forestry = postgisConnection.getQueryResult(
-            """select name_organization 
-            from "dictionary".organization
-            where substring(code_organization::varchar(255) from 6 for 3) = '{}'
-            and substring(code_organization::varchar(255) from 9 for 2) = '{}'""".format(data[0][0], code))[0][0]
+            """select name_organization from (select id_organization from "dictionary".organization
+                where code_organization = '{}') typed
+                join "dictionary".organization org on org.parent_id_organization = typed.id_organization
+                where substring(code_organization::varchar(255) from 9 for 2) = '{}'""".format(self.lhCode, code))[0][0]            
 
         forestObjectCode = postgisConnection.getQueryResult(
-            """select code_organization 
-            from "dictionary".organization
-            where substring(code_organization::varchar(255) from 6 for 3) = '{}'
-            and substring(code_organization::varchar(255) from 9 for 2) = '{}'""".format(data[0][0], code))[0][0]            
+            """select code_organization from (select id_organization from "dictionary".organization
+                where code_organization = '{}') typed
+                join "dictionary".organization org on org.parent_id_organization = typed.id_organization
+                where substring(code_organization::varchar(255) from 9 for 2) = '{}'""".format(self.lhCode, code))[0][0]            
 
         # postgisConnection.__del__()
 

@@ -44,7 +44,7 @@ class SettingsController(QtCore.QObject):
 
         self.populateOtvodSettings()
 
-        self.location, self.num_lhz, self.gplho, self.leshoz, self.lesnich = self.getEnterpriseConfig()
+        self.location, self.num_lhz, self.gplho, self.lh_type, self.leshoz, self.lesnich = self.getEnterpriseConfig()
 
         self.populateLocation(self.location)
 
@@ -72,6 +72,8 @@ class SettingsController(QtCore.QObject):
         self.tableUi.saveOtvodSettingsButton.clicked.connect(self.saveOtvodSettings)
         self.sd.exec()
 
+        self.lhTypesAndNames = None
+
     def populateLocation(self, location):
         self.tableUi.locationLineEdit.setText(location)
 
@@ -82,17 +84,21 @@ class SettingsController(QtCore.QObject):
             settings.get("location", ""),
             settings.get("num_lhz", ""),
             settings.get("gplho", ""),
+            settings.get("type", ""),
             settings.get("leshoz", ""),
             settings.get("lesnich", ""),
         ]
 
     def saveEnterpriseConfig(self):
         try:
+            leshoz = self.tableUi.leshoz_comboBox.currentText()
+            lhType = self.lhTypesAndNames.get(leshoz, '')
             settingsDict = {
                 "location": self.tableUi.locationLineEdit.text(),
                 "num_lhz": self.num_lhz,
                 "gplho": self.tableUi.gplho_comboBox.currentText(),
-                "leshoz": self.tableUi.leshoz_comboBox.currentText(),
+                "type": lhType,
+                "leshoz": leshoz,
                 "lesnich": self.tableUi.lesnich_comboBox.currentText(),
             }
             cf = config.Configurer("enterprise", settingsDict)
@@ -107,7 +113,6 @@ class SettingsController(QtCore.QObject):
             return
 
         def workerFinished(result):
-
             worker.deleteLater()
             thread.quit()
             thread.wait()
@@ -121,6 +126,7 @@ class SettingsController(QtCore.QObject):
             )
             self.tableUi.leshoz_comboBox.addItem("")
             self.tableUi.leshoz_comboBox.addItems(result[1].values())
+            self.lhTypesAndNames = result[4]
             if self.leshoz:
                 index = self.tableUi.leshoz_comboBox.findText(self.leshoz)
                 if index >= 0:

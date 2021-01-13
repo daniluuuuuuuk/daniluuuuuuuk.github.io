@@ -236,10 +236,8 @@ class CuttingArea:
         destLYR = QgsProject.instance().mapLayersByName(destLYRName)[0]
 
         features = destLYR.getFeatures("uid = '{}'".format(self.uid))
-        print(self.uid)
         with edit(destLYR):
             for f in features:
-                print(f.id())
                 destLYR.deleteFeature(f.id())
 
         features = []
