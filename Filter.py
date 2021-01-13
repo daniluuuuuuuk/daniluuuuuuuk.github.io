@@ -45,7 +45,7 @@ class FilterWidgetController:
     self.fo = ForestObject()
 
     self.enterprise = ForestEnterprise()
-    self.forestry = Forestry()    
+    self.forestry = Forestry()
     self.quarter = Quarter()
     self.stratum = Stratum()
 

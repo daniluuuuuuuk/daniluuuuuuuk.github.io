@@ -62,7 +62,7 @@ class QgsLes:
             logfile.write('{tag}({level}): {message}'.format(tag=tag, level=level, message=message))
 
     def ifVydLayerReady(self, layer):
-        if layer[0].name() == 'Выдела' and self.filter == None and self.runnable:
+        if layer[0].name() == 'Выдела' and self.runnable:
             self.initFilter()
 
     def initFilter(self):
@@ -74,13 +74,14 @@ class QgsLes:
                 try:
                     feature = lr.getFeature(1)
                     location = settings.get('location')
-                    num_lhz = str(feature['num_lhz'])          
+                    num_lhz = str(int(feature['num_lhz']))
                     gplho = settings.get('gplho')
                     leshoz = settings.get('leshoz')
                     lesnich = settings.get('lesnich')
-
-                    settingsDict = {'location': location, 'num_lhz' : num_lhz, 
-                    'gplho' : gplho, 'leshoz': leshoz, 'lesnich':lesnich}
+                    lhType = settings.get('type')
+                    lhCode = str(feature['code_lh'])
+                    settingsDict = {'location': location, 'num_lhz' : num_lhz, 'type': lhType,
+                    'gplho' : gplho, 'leshoz': leshoz, 'lesnich':lesnich, 'code_lh': lhCode}
                     cf = config.Configurer('enterprise', settingsDict)
                     cf.writeConfigs()
                 except Exception as e:
@@ -88,9 +89,9 @@ class QgsLes:
 
             cf = config.Configurer('enterprise')
             settings = cf.readConfigs()
-            numLhz = settings.get('num_lhz')
-            if not numLhz:
-                writeConfigs(cf)
+            # numLhz = settings.get('num_lhz')
+            # if not numLhz:
+            writeConfigs(cf)
                
         
         checkNumLhzConfig()
@@ -103,7 +104,6 @@ class QgsLes:
             "Поиск",
             self.iface.mainWindow(),
         )
-        
         self.filterAction.setDefaultAction(self.filterButtonAction)
         self.ctrl = Filter.FilterWidgetController(self.filter, self.iface)
 
@@ -166,7 +166,9 @@ class QgsLes:
             self.initFilter()
 
     def initProjectClicked(self):
-        self.initializer = QgsProjectInitializer(self.iface)
+
+        # self.filter = None
+        self.initializer = QgsProjectInitializer(self.iface, self.qgsLesToolbar)
 
     def unload(self):
         del self.qgsLesToolbar
@@ -261,7 +263,7 @@ class QgsLes:
             label.setText(str(info[0]) + ', ' + str(info[1]) + ' лесничество, ' +
             'квартал: ' + str(info[2]) + ' выдел: ' + str(info[3]))
             label.adjustSize()
-            layout.addWidget(label);
+            layout.addWidget(label)
 
         def appendTaxationBase(tax, dialog):
 
@@ -274,7 +276,7 @@ class QgsLes:
             tax = prepareTaxBase(tax)
             label.setText(str(tax[0]) + str(tax[1]) + str(tax[2]))
             label.adjustSize()
-            layout.addWidget(label);
+            layout.addWidget(label)
 
         def appendTaxation(tax, dialog):
 
@@ -299,7 +301,7 @@ class QgsLes:
                 str(taxLine[3]) + str(taxLine[4]) + str(taxLine[5]) +
                 str(taxLine[6]))
                 label.adjustSize()
-                layout.addWidget(label);
+                layout.addWidget(label)
 
         dialog = QDialog()
         window = TaxationDialog()

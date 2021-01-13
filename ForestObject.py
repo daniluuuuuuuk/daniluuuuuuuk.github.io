@@ -61,7 +61,7 @@ class ForestEnterprise(QtCore.QObject):
             cf = config.Configurer('enterprise')
             settings = cf.readConfigs()
             self._number = settings.get('num_lhz')
-            self.lhType = settings.get('type')  
+            self.lhCode = settings.get('code_lh')  
         except Exception as e:
             self._number = -1
             self._name = ""
@@ -91,22 +91,20 @@ class ForestEnterprise(QtCore.QObject):
             thread.deleteLater()
             self.nameLoaded.emit(result)
 
-        if len(str(int(self._number))) == 1:
-            self._number = '00' + str(int(self._number))
-        if len(str(int(self._number))) == 2:
-            self._number = '0' + str(int(self._number))
+        # if len(str(int(self._number))) == 1:
+        #     self._number = '00' + str(int(self._number))
+        # if len(str(int(self._number))) == 2:
+        #     self._number = '0' + str(int(self._number))
 
         thread = QtCore.QThread(iface.mainWindow())
         worker = DbQueryWorker(
                 ["""select name_organization 
                 from "dictionary".organization
-                where substring(code_organization::varchar(255) from 6 for 3) = '{}'
-                and type_organization='{}'""".format(self._number, self.lhType),
+                where code_organization = '{}'""".format(str(self.lhCode)),
 
                 """select name_organization from (select id_organization from "dictionary".organization
-                where substring(code_organization::varchar(255) from 6 for 3) = '{}'
-                and type_organization='{}') typed
-                join "dictionary".organization org on org.parent_id_organization = typed.id_organization""".format(self._number, self.lhType)])
+                where code_organization = '{}') typed
+                join "dictionary".organization org on org.parent_id_organization = typed.id_organization""".format(self.lhCode)])
         worker.moveToThread(thread)
         worker.finished.connect(workerFinished)
         thread.started.connect(worker.run)
