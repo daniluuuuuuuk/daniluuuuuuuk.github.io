@@ -18,7 +18,7 @@ class Worker(QtCore.QObject):
     def getLhCode(self):
         cf = config.Configurer('enterprise')
         settings = cf.readConfigs()
-        return str(settings.get('code_lh'))
+        return str(int(float(settings.get('code_lh'))))
     
     def generateIdentity(self, feature):
         self.num_lhz = int(feature['num_lhz'])
