@@ -27,7 +27,12 @@ class ForestObjectLoader(QgsTask):
     def getLhCode(self):
         cf = config.Configurer('enterprise')
         settings = cf.readConfigs()
-        return str(int(float(settings.get('code_lh'))))
+        try:
+            #поле может быть пустым но определяться как с наличием значения
+            code = str(int(float(settings.get('code_lh'))))
+            return code
+        except:
+            return '0'
 
     def getAllRestatements(self):
         postgisConnection = PostgisDB.PostGisDB()
