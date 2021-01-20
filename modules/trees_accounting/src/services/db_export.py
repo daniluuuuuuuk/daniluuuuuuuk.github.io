@@ -37,7 +37,6 @@ class DBExportedData(QThread):
             return False
 
     def run(self):
-
         old_instances = [
             trees for trees in Trees.select().where(Trees.area_uuid == self.uuid)
         ]
@@ -49,7 +48,6 @@ class DBExportedData(QThread):
                 if old_instances is not None:
                     for instance in old_instances:
                         instance.delete_instance()
-
                 self.signal_message_result.emit(
                     {"main_text": "Данные успешно сохранены.", "detailed_text": None}
                 )

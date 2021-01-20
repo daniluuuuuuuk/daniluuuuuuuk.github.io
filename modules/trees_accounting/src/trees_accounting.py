@@ -30,6 +30,8 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
 
         self.db_import()
 
+        self.was_edited = False
+
         self.origin_closeEditor = self.tableView.closeEditor
         self.tableView.closeEditor = self.closeEditor
 
@@ -58,6 +60,7 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
         self.exported_data.signal_message_result.connect(
             lambda messages: self.message.show(**messages), QtCore.Qt.QueuedConnection
         )
+        self.was_edited = False
 
     def add_gui_species(self):
         """
@@ -162,6 +165,7 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
     def closeEditor(self, widget, hint):
         """Метод вызывается при окончании редактирования ячейки в таблице"""
         if widget.text() != "":
+            self.was_edited = True
             try:
                 int(widget.text())
                 self.tableView.model().summary_by_column(
@@ -189,6 +193,19 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
                     lambda messages: self.message.show(**messages),
                     QtCore.Qt.QueuedConnection,
                 )
+
+    def closeEvent(self, event):
+        if self.was_edited:
+            result = QtWidgets.QMessageBox.information(
+                self,
+                self.windowTitle(),
+                "Некоторые данные были изменены. Вы хотите сохранить изменения?",
+                buttons=QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+            )
+            if result == 16384:
+                event.ignore()
+                self.db_export()
+                self.was_edited = False
 
 
 class TaSelectSpecies(QtWidgets.QDialog, UI_SPECIES):
