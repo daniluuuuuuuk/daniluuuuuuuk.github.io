@@ -304,21 +304,6 @@ class SettingsController(QtCore.QObject):
             cf = config.Configurer("dbconnection", settingsDict)
             cf.writeConfigs()
 
-            Settings(group="Database", key="host").add_setting(
-                self.tableUi.connectionLineEdit.text()
-            )
-            Settings(group="Database", key="port").add_setting(
-                self.tableUi.portLineEdit.text()
-            )
-            Settings(group="Database", key="user").add_setting(
-                self.tableUi.usernameLineEdit.text()
-            )
-            Settings(group="Database", key="password").add_setting(
-                self.tableUi.passwordLineEdit.text()
-            )
-            Settings(group="Database", key="database").add_setting(
-                self.tableUi.BDNameLineEdit.text()
-            )
         except Exception as e:
             QMessageBox.information(
                 None, er.MODULE_ERROR, er.CONFIG_FILE_ERROR + str(e)
