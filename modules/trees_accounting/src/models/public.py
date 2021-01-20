@@ -1,11 +1,25 @@
+"""
+Модели перечёта
+Схема - dictionary
+"""
+
 from datetime import date
 
-from peewee import TextField, IntegerField, CharField, DecimalField
+from peewee import (
+    TextField,
+    IntegerField,
+    CharField,
+    DecimalField,
+    AutoField,
+    UUIDField,
+    ForeignKeyField,
+)
 
-from .database import Database
+from .database_connection import Connection
+from .dictionary import Species
 
 
-class BaseModel(Database):
+class BaseModel(Connection):
     class Meta:
         schema = "public"
 
@@ -31,6 +45,20 @@ class Area(BaseModel):
     leshos_text = CharField(column_name="leshos_text")
     lesnich_text = CharField(column_name="lesnich_text")
 
+    def __str__(self):
+        return self.uuid
+
     class Meta:
         primary_key = False
         table_name = "area"
+
+
+class Trees(BaseModel):
+    """Хранится записи о деревьях всех перечёток"""
+
+    id_enum = AutoField(null=False, primary_key=True)
+    area_uuid = UUIDField(null=False)
+    code_species = ForeignKeyField(Species, column_name="code_species", null=False)
+    dmr = IntegerField(null=False)
+    num_ind = IntegerField()
+    num_fuel = IntegerField()

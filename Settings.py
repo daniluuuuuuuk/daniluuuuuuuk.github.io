@@ -9,8 +9,6 @@ from .modules.otvod.tools.threading.ForestObjectWorker import Worker as ForestOb
 from .modules.otvod.tools.threading.ForestObjectLoader import ForestObjectLoader
 from qgis.utils import iface
 
-from .modules.trees_accounting.src.services.config import Settings
-
 
 class SettingsWindow(QDialog):
     def __init__(self, parent=None):
@@ -44,7 +42,14 @@ class SettingsController(QtCore.QObject):
 
         self.populateOtvodSettings()
 
-        self.location, self.num_lhz, self.gplho, self.lh_type, self.leshoz, self.lesnich = self.getEnterpriseConfig()
+        (
+            self.location,
+            self.num_lhz,
+            self.gplho,
+            self.lh_type,
+            self.leshoz,
+            self.lesnich,
+        ) = self.getEnterpriseConfig()
 
         self.populateLocation(self.location)
 
@@ -92,7 +97,7 @@ class SettingsController(QtCore.QObject):
     def saveEnterpriseConfig(self):
         try:
             leshoz = self.tableUi.leshoz_comboBox.currentText()
-            lhType = self.lhTypesAndNames.get(leshoz, '')
+            lhType = self.lhTypesAndNames.get(leshoz, "")
             settingsDict = {
                 "location": self.tableUi.locationLineEdit.text(),
                 "num_lhz": self.num_lhz,
