@@ -77,6 +77,7 @@ class TreesLiquid(QStandardItemModel):
 
         self.setItem(1, last_column + 1, QStandardItem("Дровяных"))
         self.item(1, last_column + 1).setTextAlignment(Qt.AlignHCenter)
+        self.item(1, last_column + 1).setEditable(False)
 
         self.setItem(self.rowCount() - 1, last_column, QStandardItem("0"))
         self.item(self.rowCount() - 1, last_column).setEditable(False)
