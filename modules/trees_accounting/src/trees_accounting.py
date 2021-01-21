@@ -1,10 +1,13 @@
 import os
+import platform
+import subprocess
 from PyQt5 import QtWidgets, uic, QtCore
 from PyQt5.QtGui import QIcon
 from .services.config import BasicDir, Config
 from .services.db_import import ImportedData
 from .services.db_export import DBExportedData
 from .services.lp_export import LPExportedData
+from .services.xlsx_export import XLSXExportedData
 from .services.trees_liquid import TreesLiquid
 from .models.dictionary import Species
 
@@ -35,8 +38,10 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
         self.origin_closeEditor = self.tableView.closeEditor
         self.tableView.closeEditor = self.closeEditor
 
-        self.action.triggered.connect(self.export_lp)
+        self.action.triggered.connect(self.lp_export)
         self.action.setIcon(QIcon(BasicDir.get_module_dir("img/lp.png")))
+        self.action_XLSX.triggered.connect(self.xls_export)
+        self.action_XLSX.setIcon(QIcon(BasicDir.get_module_dir("img/xls.png")))
 
         self.pushButton.clicked.connect(self.db_export)
         self.pushButton_2.clicked.connect(self.add_gui_species)
@@ -53,14 +58,62 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
         )
 
     def db_export(self):
-        # self.message.show("Операция успешно выполнена")
-
         self.exported_data = DBExportedData(self.uuid, self.tableView.model())
         self.exported_data.start()
         self.exported_data.signal_message_result.connect(
             lambda messages: self.message.show(**messages), QtCore.Qt.QueuedConnection
         )
         self.was_edited = False
+
+    def lp_export(self):
+        if self.tableView.model().columnCount() > 1:
+            export_file = QtWidgets.QFileDialog.getSaveFileName(
+                caption="Сохранение файла",
+                directory=os.path.expanduser("~") + "/Documents/" + self.uuid + ".json",
+                filter="JSON (*.json)",
+            )
+            if export_file[0]:
+                self.lp_exported_data = LPExportedData(
+                    self.att_data, self.tableView.model(), export_file[0]
+                )
+                self.lp_exported_data.start()
+                self.lp_exported_data.signal_message_result.connect(
+                    lambda messages: self.message.show(**messages),
+                    QtCore.Qt.QueuedConnection,
+                )
+
+    def xls_export(self):
+        if self.tableView.model().columnCount() > 1:
+            export_file = QtWidgets.QFileDialog.getSaveFileName(
+                caption="Сохранение файла",
+                directory=os.path.expanduser("~") + "/Documents/" + self.uuid + ".xlsx",
+                filter="XLS (*.xlsx)",
+            )
+            if export_file[0]:
+                self.xlsx_exported_data = XLSXExportedData(
+                    self.att_data, self.tableView.model(), export_file[0]
+                )
+                self.xlsx_exported_data.start()
+                self.xlsx_exported_data.signal_message_result.connect(
+                    lambda messages: self.xls_export_on_finish(
+                        message=messages, export_file=export_file[0]
+                    ),
+                    QtCore.Qt.QueuedConnection,
+                )
+
+    def xls_export_on_finish(self, message: dict, export_file: str):
+        """"""
+        result = QtWidgets.QMessageBox.information(
+            self,
+            self.windowTitle(),
+            message["main_text"],
+            buttons=QtWidgets.QMessageBox.Open,
+        )
+        if result == 8192:  # 8192 - вес кнопки (Открыть)
+            if platform.system() == "Windows":
+                os.startfile(export_file)
+            else:
+                subprocess.call(("xdg-open", export_file))
 
     def add_gui_species(self):
         """
@@ -176,23 +229,6 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
                     main_text="Ошибка вводимых данных. Введите целочисленное значение."
                 )
         self.origin_closeEditor(widget, hint)
-
-    def export_lp(self):
-        if self.tableView.model().columnCount() > 1:
-            export_file = QtWidgets.QFileDialog.getSaveFileName(
-                caption="Сохранение файла",
-                directory=os.path.expanduser("~") + "/Documents/" + self.uuid + ".json",
-                filter="JSON (*.json)",
-            )
-            if export_file[0]:
-                self.lp_exported_data = LPExportedData(
-                    self.att_data, self.tableView.model(), export_file[0]
-                )
-                self.lp_exported_data.start()
-                self.lp_exported_data.signal_message_result.connect(
-                    lambda messages: self.message.show(**messages),
-                    QtCore.Qt.QueuedConnection,
-                )
 
     def closeEvent(self, event):
         if self.was_edited:

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1283</width>
-    <height>928</height>
+    <width>1453</width>
+    <height>886</height>
    </rect>
   </property>
   <property name="font">
@@ -345,15 +345,22 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1283</width>
+     <width>1453</width>
      <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
+    <property name="maximumSize">
+     <size>
+      <width>16777215</width>
+      <height>16777215</height>
+     </size>
+    </property>
     <property name="title">
      <string>Экспорт</string>
     </property>
     <addaction name="action"/>
+    <addaction name="action_XLSX"/>
    </widget>
    <addaction name="menu"/>
   </widget>
@@ -365,6 +372,11 @@
    </property>
    <property name="text">
     <string>Экспорт в формате АРМ Лесопользование</string>
+   </property>
+  </action>
+  <action name="action_XLSX">
+   <property name="text">
+    <string>Экспорт в формате XLSX</string>
    </property>
   </action>
  </widget>
