@@ -7,6 +7,7 @@ from openpyxl import load_workbook
 
 class XLSXExportedData(QThread):
     """
+    ! Не обработаны ошибки
     Поток для сохранения данных в JSON для импорта в АРМ Лесопользование.
     """
 

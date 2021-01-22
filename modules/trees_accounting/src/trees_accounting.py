@@ -102,7 +102,9 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
                 )
 
     def xls_export_on_finish(self, message: dict, export_file: str):
-        """"""
+        """
+        Метод запускается после экспорта в XLSX
+        """
         result = QtWidgets.QMessageBox.information(
             self,
             self.windowTitle(),
