@@ -11,7 +11,7 @@ from qgis.core import Qgis, QgsApplication
 from .modules.trees_accounting.src.trees_accounting import TaMainWindow
 from .tools.ProjectInitializer import QgsProjectInitializer
 from .tools.TaxationLoader import Worker as taxWorker
-from .tools import config
+from .tools import config, AreaController
 from .gui.taxationDescription import Ui_Dialog as TaxationDialog
 
 
@@ -66,7 +66,8 @@ class QgsLes:
 
     def ifVydLayerReady(self, layer):
         if layer[0].name() == "Выдела" and self.runnable:
-            self.initFilter()
+            pass
+            # self.initFilter()
 
     def initFilter(self):
         def checkNumLhzConfig():
@@ -110,7 +111,7 @@ class QgsLes:
             QIcon(util.resolvePath("res\\icon3.png")), "Поиск", self.iface.mainWindow(),
         )
         self.filterAction.setDefaultAction(self.filterButtonAction)
-        self.ctrl = Filter.FilterWidgetController(self.filter, self.iface)
+        # self.ctrl = Filter.FilterWidgetController(self.filter, self.iface)
 
     def initGui(self):
 
@@ -138,6 +139,13 @@ class QgsLes:
             self.iface.mainWindow(),
         )
         self.otvodAction.triggered.connect(self.otvodButtonClicked)
+
+        self.controlAreaAction = QAction(
+            QIcon(util.resolvePath("res\\icon5.png")),
+            "Управление лесосекой",
+            self.iface.mainWindow(),
+        )
+        self.controlAreaAction.triggered.connect(self.controlAreaClicked)        
 
         self.taxationAction = QAction(
             QIcon(util.resolvePath("res\\info.png")),
@@ -168,16 +176,27 @@ class QgsLes:
 
         self.qgsLesToolbar.addAction(self.taxationAction)
         self.qgsLesToolbar.addAction(self.otvodAction)
+        self.qgsLesToolbar.addAction(self.controlAreaAction)
         self.qgsLesToolbar.addAction(self.countAction)
         self.qgsLesToolbar.addAction(self.settingsAction)
         self.qgsLesToolbar.addAction(self.initProjectAction)
 
-        if QgsProject.instance().mapLayersByName("Выдела"):
-            self.initFilter()
+        # if QgsProject.instance().mapLayersByName("Выдела"):
+        #     self.initFilter()
+
+    def controlAreaClicked(self):
+
+        def getResult(feature):
+            zoomTool = QgsMapToolZoom(self.canvas, False)
+            self.canvas.setMapTool(zoomTool)
+            
+            self.ctrlr = AreaController.AreaController(feature)
+
+        self.pkr = peeker.PeekStratumFromMap(self.canvas, "Лесосеки")
+        self.canvas.setMapTool(self.pkr)
+        self.pkr.signal.connect(getResult)
 
     def initProjectClicked(self):
-
-        # self.filter = None
         self.initializer = QgsProjectInitializer(self.iface, self.qgsLesToolbar)
 
     def unload(self):
