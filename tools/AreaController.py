@@ -1,5 +1,5 @@
 from .. import PostgisDB
-from qgis.core import *
+from qgis.core import Qgis, QgsTask, QgsMessageLog, QgsProject
 from PyQt5 import QtCore
 from . import config
 from ..gui import areaControllerDialog

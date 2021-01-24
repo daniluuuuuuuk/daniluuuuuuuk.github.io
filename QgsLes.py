@@ -11,9 +11,9 @@ from qgis.core import Qgis, QgsApplication
 from .modules.trees_accounting.src.trees_accounting import TaMainWindow
 from .tools.ProjectInitializer import QgsProjectInitializer
 from .tools.TaxationLoader import Worker as taxWorker
-from .tools import config, AreaController
+from .tools import config, AreaController, AreaFilter
 from .gui.taxationDescription import Ui_Dialog as TaxationDialog
-
+from qgis.PyQt.QtCore import Qt
 
 class DatabaseConnectionVerifier:
     def __init__(self, iface):
@@ -159,6 +159,11 @@ class QgsLes:
         )
         self.countAction.triggered.connect(self.countButtonClicked)
 
+        self.filterAreaAction = QAction(
+            QIcon(util.resolvePath("res\\icon6.png")), "Панель инструментов", self.iface.mainWindow()
+        )
+        self.filterAreaAction.triggered.connect(self.filterAreaButtonClicked)        
+
         self.settingsAction = QAction(
             QIcon(util.resolvePath("res\\settings.png")),
             "Настройки",
@@ -176,13 +181,22 @@ class QgsLes:
 
         self.qgsLesToolbar.addAction(self.taxationAction)
         self.qgsLesToolbar.addAction(self.otvodAction)
-        self.qgsLesToolbar.addAction(self.controlAreaAction)
         self.qgsLesToolbar.addAction(self.countAction)
+        self.qgsLesToolbar.addAction(self.controlAreaAction)
+        self.qgsLesToolbar.addAction(self.filterAreaAction)
         self.qgsLesToolbar.addAction(self.settingsAction)
         self.qgsLesToolbar.addAction(self.initProjectAction)
 
         # if QgsProject.instance().mapLayersByName("Выдела"):
         #     self.initFilter()
+
+    def filterAreaButtonClicked(self):
+        if not QgsProject.instance().mapLayersByName("Лесосеки"):
+            QtWidgets.QMessageBox.warning(None, "Ошибка", "Отсутствует слой лесосек.")
+            return
+        self.dockWidget = AreaFilter.AreaFilterDockWidget()
+        self.filgetAreaCtrlr = AreaFilter.AreaFilterController(self.dockWidget)
+        self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockWidget)
 
     def controlAreaClicked(self):
 
