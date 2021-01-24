@@ -52,9 +52,16 @@ class QgsLes:
         self.runnable = runnable
         self.canvas = self.iface.mapCanvas()
         QgsProject.instance().legendLayersAdded.connect(self.ifVydLayerReady)
+        QgsProject.instance().cleared.connect(self.removeFilterButton)
         self.filter = None
 
         QgsApplication.messageLog().messageReceived.connect(self.write_log_message)
+
+    def removeFilterButton(self):
+        if self.qgsLesToolbar:
+            for action in self.qgsLesToolbar.actions():
+                if not action.text():
+                    self.qgsLesToolbar.removeAction(action)
 
     def write_log_message(self, message, tag, level):
         with open(util.resolvePath("tmp/qgis.log"), "a") as logfile:
@@ -66,8 +73,7 @@ class QgsLes:
 
     def ifVydLayerReady(self, layer):
         if layer[0].name() == "Выдела" and self.runnable:
-            pass
-            # self.initFilter()
+            self.initFilter()
 
     def initFilter(self):
         def checkNumLhzConfig():
@@ -111,7 +117,7 @@ class QgsLes:
             QIcon(util.resolvePath("res\\icon3.png")), "Поиск", self.iface.mainWindow(),
         )
         self.filterAction.setDefaultAction(self.filterButtonAction)
-        # self.ctrl = Filter.FilterWidgetController(self.filter, self.iface)
+        self.ctrl = Filter.FilterWidgetController(self.filter, self.iface)
 
     def initGui(self):
 
@@ -187,8 +193,8 @@ class QgsLes:
         self.qgsLesToolbar.addAction(self.settingsAction)
         self.qgsLesToolbar.addAction(self.initProjectAction)
 
-        # if QgsProject.instance().mapLayersByName("Выдела"):
-        #     self.initFilter()
+        if QgsProject.instance().mapLayersByName("Выдела"):
+            self.initFilter()
 
     def filterAreaButtonClicked(self):
         if not QgsProject.instance().mapLayersByName("Лесосеки"):
@@ -215,6 +221,7 @@ class QgsLes:
 
     def unload(self):
         del self.qgsLesToolbar
+        # del self.dockWidget
 
     def taxationButtonClicked(self):
         def getResult(feature):

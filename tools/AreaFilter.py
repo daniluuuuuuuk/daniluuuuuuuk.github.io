@@ -20,10 +20,11 @@ class AreaFilterController:
         self.widget.ui.filter_pushButton.clicked.connect(self.filterAreas)
         self.widget.ui.clear_pushButton.clicked.connect(self.clearWidgetData)
         self.layer = QgsProject.instance().mapLayersByName("Лесосеки")[0]
-        self.layer.removeSelection()
+        # self.layer.removeSelection()
         self.setupButtonSignals()
         self.setupControlButtons(False)
         self.initValues()
+        self.deselectAllLayers()
 
     @property
     def ids(self):
@@ -47,6 +48,11 @@ class AreaFilterController:
             self.widget.ui.prev_pushButton.setEnabled(False)
         else:
             self.setupControlButtons(True)
+
+    def deselectAllLayers(self):
+        for a in iface.attributesToolBar().actions(): 
+            if a.objectName() == 'mActionDeselectAll':
+                a.trigger()
 
     def setupButtonSignals(self):
         self.widget.ui.prev_pushButton.clicked.connect(partial(self.zoomToIndex, -1))

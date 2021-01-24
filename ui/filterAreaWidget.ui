@@ -226,6 +226,11 @@
           </item>
           <item>
            <widget class="QTextEdit" name="areaInfo_textEdit">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
             <property name="readOnly">
              <bool>true</bool>
             </property>
