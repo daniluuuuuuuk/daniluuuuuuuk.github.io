@@ -58,10 +58,14 @@ class QgsLes:
         QgsApplication.messageLog().messageReceived.connect(self.write_log_message)
 
     def removeFilterButton(self):
-        if self.qgsLesToolbar:
-            for action in self.qgsLesToolbar.actions():
-                if not action.text():
-                    self.qgsLesToolbar.removeAction(action)
+        try:
+            if self.qgsLesToolbar:
+                for action in self.qgsLesToolbar.actions():
+                    if not action.text():
+                        self.qgsLesToolbar.removeAction(action)
+        except:
+            # issue: при закрытии кугиса тулбар удаляется первее анлодинга проекта -> кугис крашится
+            pass
 
     def write_log_message(self, message, tag, level):
         with open(util.resolvePath("tmp/qgis.log"), "a") as logfile:
