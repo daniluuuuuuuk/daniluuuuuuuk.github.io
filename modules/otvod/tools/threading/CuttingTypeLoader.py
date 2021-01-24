@@ -24,7 +24,7 @@ class CuttingTypeLoader(QgsTask):
         self.cuttingTypes = list((item[0]) for (item) in result)
 
     def run(self, useType):
-        QgsMessageLog.logMessage('Started task "{}"'.format(
+        QgsMessageLog.logMessage('\nStarted task "{}"'.format(
             self.description()), MESSAGE_CATEGORY, Qgis.Info)
 
         self.getCuttingTypes(useType)

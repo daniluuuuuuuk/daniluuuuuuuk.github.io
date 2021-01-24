@@ -234,7 +234,7 @@ class UniqueValuesTask(QgsTask):
             self.result[attr] = values
 
     def run(self, layer):
-        QgsMessageLog.logMessage('Started task "{}"'.format(
+        QgsMessageLog.logMessage('\nStarted task "{}"'.format(
             self.description()), MESSAGE_CATEGORY, Qgis.Info)
         self.findUniqueAttributes(layer)
         return True

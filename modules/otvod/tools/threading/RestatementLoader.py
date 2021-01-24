@@ -80,7 +80,7 @@ class RestatementLoader(QgsTask):
         }
 
     def run(self, guid):
-        QgsMessageLog.logMessage('Started task "{}"'.format(
+        QgsMessageLog.logMessage('\nStarted task "{}"'.format(
             self.description()), MESSAGE_CATEGORY, Qgis.Info)
         
         self.getRestatementData(guid)

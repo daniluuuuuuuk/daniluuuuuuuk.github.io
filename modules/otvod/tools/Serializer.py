@@ -152,7 +152,7 @@ class SerializerTask(QgsTask):
         return [[uid, bindingPoint, magneticInclination], [pointsDict]]
 
     def run(self, data):
-        QgsMessageLog.logMessage('Started task "{}"'.format(
+        QgsMessageLog.logMessage('\nStarted task "{}"'.format(
             self.description()), MESSAGE_CATEGORY, Qgis.Info)
         if self.taskType == 'Save':
             self.deleteExistingArea(data[0])

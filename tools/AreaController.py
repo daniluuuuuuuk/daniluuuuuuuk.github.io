@@ -244,7 +244,7 @@ class RemoveAreaTask(QgsTask):
         postgisConnection.connection.commit()
 
     def run(self, uid):
-        QgsMessageLog.logMessage('Started task "{}"'.format(
+        QgsMessageLog.logMessage('\nStarted task "{}"'.format(
             self.description()), MESSAGE_CATEGORY, Qgis.Info)
         self.deleteArea(uid)
         return True

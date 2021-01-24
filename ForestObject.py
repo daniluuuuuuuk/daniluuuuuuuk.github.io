@@ -180,7 +180,7 @@ class DbQueryWorker(QtCore.QObject):
             ret = self.loader.result
 
         except Exception as e:
-            QgsMessageLog.logMessage('Started task "{}"'.format(
+            QgsMessageLog.logMessage('\nStarted task "{}"'.format(
                 e), MESSAGE_CATEGORY, Qgis.Info)
             raise e
         self.finished.emit(ret)
@@ -202,7 +202,7 @@ class DatabaseQueryTask(QgsTask):
         self.exception = None
 
     def run(self, query):
-        QgsMessageLog.logMessage('Started task "{}"'.format(
+        QgsMessageLog.logMessage('\nStarted task "{}"'.format(
             self.description()), MESSAGE_CATEGORY, Qgis.Info)
         postgisConnection = PostgisDB.PostGisDB()
         self.result = []
