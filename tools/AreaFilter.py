@@ -58,6 +58,19 @@ class AreaFilterController:
         self.widget.ui.prev_pushButton.clicked.connect(partial(self.zoomToIndex, -1))
         self.widget.ui.next_pushButton.clicked.connect(partial(self.zoomToIndex, 1))
 
+        self.widget.ui.lesnich_comboBox.currentTextChanged.connect(self.filterAreas)
+        self.widget.ui.num_kv_comboBox.currentTextChanged.connect(self.filterAreas)
+        self.widget.ui.num_vd_comboBox.currentTextChanged.connect(self.filterAreas)
+        self.widget.ui.num_comboBox.currentTextChanged.connect(self.filterAreas)
+        self.widget.ui.useType_comboBox.currentTextChanged.connect(self.filterAreas)
+        self.widget.ui.cuttingType_comboBox.currentTextChanged.connect(self.filterAreas)
+        self.widget.ui.fio_comboBox.currentTextChanged.connect(self.filterAreas)
+
+        self.widget.ui.info.textChanged.connect(self.filterAreas)
+        self.widget.ui.date_lineEdit.textChanged.connect(self.filterAreas)
+        self.widget.ui.area_min.textChanged.connect(self.filterAreas)
+        self.widget.ui.area_max.textChanged.connect(self.filterAreas)
+
     def zoomToIndex(self, side):
         if not self.ids:
             return
@@ -118,6 +131,7 @@ class AreaFilterController:
         self.widget.ui.num_comboBox.addItems(data['num'])
         self.widget.ui.useType_comboBox.addItems(data['usetype'])
         self.widget.ui.cuttingType_comboBox.addItems(data['cuttingtyp'])
+        self.widget.ui.fio_comboBox.addItems(data['fio'])
         self.negateComboboxes()
 
     def negateComboboxes(self):
@@ -127,6 +141,7 @@ class AreaFilterController:
         self.widget.ui.num_comboBox.setCurrentIndex(-1)
         self.widget.ui.useType_comboBox.setCurrentIndex(-1)
         self.widget.ui.cuttingType_comboBox.setCurrentIndex(-1)
+        self.widget.ui.fio_comboBox.setCurrentIndex(-1)
 
     def filterAreas(self):
         iface.mapCanvas().setCurrentLayer(self.layer)
@@ -144,12 +159,13 @@ class AreaFilterController:
             self.showAreaInfo()
 
     def clearWidgetData(self):
-        self.layer.removeSelection()
-        self.negateComboboxes()
-        self.ids = []
-        self.currentId = 0
+        # if clearData:
         self.widget.ui.areaCounter_lineEdit.clear()
         self.widget.ui.areaInfo_textEdit.clear()
+        self.negateComboboxes()
+        self.layer.removeSelection()
+        self.ids = []
+        self.currentId = 0
         
     def constructExpression(self):
         expression = ''
@@ -170,6 +186,9 @@ class AreaFilterController:
         if self.widget.ui.cuttingType_comboBox.currentText():
             query = " \"cuttingtyp\" = '{}' ".format(self.widget.ui.cuttingType_comboBox.currentText())
             expression += ' and ' + query if expression else expression + query
+        if self.widget.ui.fio_comboBox.currentText():
+            query = " \"fio\" = '{}' ".format(self.widget.ui.fio_comboBox.currentText())
+            expression += ' and ' + query if expression else expression + query            
         if self.widget.ui.area_min.text():
             query = " \"area\" >= '{}' ".format(self.widget.ui.area_min.text())
             expression += ' and ' + query if expression else expression + query
@@ -225,7 +244,7 @@ class UniqueValuesTask(QgsTask):
 
     def findUniqueAttributes(self, layer):
         attributesUnique = ['lesnich_text', 'num_kv', 'num_vds',
-        'num', 'usetype', 'cuttingtyp']
+        'num', 'usetype', 'cuttingtyp', 'fio']
         for attr in attributesUnique:
             idx = layer.fields().indexOf(attr)
             values = layer.uniqueValues(idx)
