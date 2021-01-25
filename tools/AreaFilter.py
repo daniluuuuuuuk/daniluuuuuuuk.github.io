@@ -111,18 +111,18 @@ class AreaFilterController:
     def initValues(self):
 
         def workerFinished(result):
-            worker.deleteLater()
-            thread.quit()
-            thread.wait()
-            thread.deleteLater()
+            self.worker.deleteLater()
+            self.thread.quit()
+            self.thread.wait()
+            self.thread.deleteLater()
             self.appendWidget(result)
 
-        thread = QtCore.QThread()
-        worker = Worker(self.layer)
-        worker.moveToThread(thread)
-        worker.finished.connect(workerFinished)
-        thread.started.connect(worker.run)
-        thread.start()
+        self.thread = QtCore.QThread(iface.mainWindow())
+        self.worker = Worker(self.layer)
+        self.worker.moveToThread(self.thread)
+        self.worker.finished.connect(workerFinished)
+        self.thread.started.connect(self.worker.run)
+        self.thread.start()
 
     def appendWidget(self, data):   
         self.widget.ui.lesnich_comboBox.addItems(data['lesnich_text'])
@@ -183,7 +183,8 @@ class AreaFilterController:
             query = " \"num_kv\" = '{}' ".format(self.widget.ui.num_kv_comboBox.currentText())
             expression += ' and ' + query if expression else expression + query
         if self.widget.ui.num_vd_comboBox.currentText():
-            query = " \"num_vds\" = '%{}%' ".format(self.widget.ui.num_vd_comboBox.currentText())
+            text = self.widget.ui.num_vd_comboBox.currentText()
+            query = " \"num_vds\" = '%{}%' or \"num_vds\" = '{}' ".format(text, text)
             expression += ' and ' + query if expression else expression + query
         if self.widget.ui.num_comboBox.currentText():
             query = " \"num\" = '{}' ".format(self.widget.ui.num_comboBox.currentText())
