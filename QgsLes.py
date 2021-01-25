@@ -54,7 +54,7 @@ class QgsLes:
         QgsProject.instance().legendLayersAdded.connect(self.ifVydLayerReady)
         QgsProject.instance().cleared.connect(self.removeFilterButton)
         self.filter = None
-
+        self.dockWidget = None
         QgsApplication.messageLog().messageReceived.connect(self.write_log_message)
 
     def removeFilterButton(self):
@@ -155,7 +155,7 @@ class QgsLes:
             "Управление лесосекой",
             self.iface.mainWindow(),
         )
-        self.controlAreaAction.triggered.connect(self.controlAreaClicked)        
+        self.controlAreaAction.triggered.connect(self.controlAreaClicked)
 
         self.taxationAction = QAction(
             QIcon(util.resolvePath("res\\info.png")),
@@ -172,6 +172,7 @@ class QgsLes:
         self.filterAreaAction = QAction(
             QIcon(util.resolvePath("res\\icon6.png")), "Панель инструментов", self.iface.mainWindow()
         )
+        self.filterAreaAction.setCheckable(True)
         self.filterAreaAction.triggered.connect(self.filterAreaButtonClicked)        
 
         self.settingsAction = QAction(
@@ -200,22 +201,26 @@ class QgsLes:
         if QgsProject.instance().mapLayersByName("Выдела"):
             self.initFilter()
 
-    def filterAreaButtonClicked(self):
+    def filterAreaButtonClicked(self, checked):
         if not QgsProject.instance().mapLayersByName("Лесосеки"):
             QtWidgets.QMessageBox.warning(None, "Ошибка", "Отсутствует слой лесосек.")
             return
-        self.dockWidget = AreaFilter.AreaFilterDockWidget()
-        self.filgetAreaCtrlr = AreaFilter.AreaFilterController(self.dockWidget)
-        self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockWidget)
+        if not checked and self.dockWidget:
+            self.iface.removeDockWidget(self.dockWidget)
+        else:
+            self.dockWidget = AreaFilter.AreaFilterDockWidget()
+            self.filgetAreaCtrlr = AreaFilter.AreaFilterController(self.dockWidget)
+            self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockWidget)
 
     def controlAreaClicked(self):
 
         def getResult(feature):
-            zoomTool = QgsMapToolZoom(self.canvas, False)
-            self.canvas.setMapTool(zoomTool)
-            
-            self.ctrlr = AreaController.AreaController(feature)
-
+            if feature:
+                zoomTool = QgsMapToolZoom(self.canvas, False)
+                self.canvas.setMapTool(zoomTool)
+                self.ctrlr = AreaController.AreaController(feature)
+            else:
+                QtWidgets.QMessageBox.warning(None, "Ошибка", "Не выбрана лесосека.")
         self.pkr = peeker.PeekStratumFromMap(self.canvas, "Лесосеки")
         self.canvas.setMapTool(self.pkr)
         self.pkr.signal.connect(getResult)
