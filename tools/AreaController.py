@@ -242,6 +242,9 @@ class RemoveAreaTask(QgsTask):
         cursor.execute("DELETE FROM {table} WHERE uid='{area_uid}'"
         .format(table=AREA_TABLE_NAME, area_uid=uid))
         postgisConnection.connection.commit()
+        cursor.execute("DELETE FROM {table} WHERE uid='{area_uid}'"
+        .format(table=AREA_LINE_TABLE_NAME, area_uid=uid))
+        postgisConnection.connection.commit()        
 
     def run(self, uid):
         QgsMessageLog.logMessage('\nStarted task "{}"'.format(
