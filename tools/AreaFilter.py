@@ -144,6 +144,8 @@ class AreaFilterController:
         self.widget.ui.fio_comboBox.setCurrentIndex(-1)
 
     def filterAreas(self):
+        self.ids = []
+        self.currentId = 0                
         iface.mapCanvas().setCurrentLayer(self.layer)
         self.widget.ui.areaInfo_textEdit.clear()
         self.widget.ui.areaCounter_lineEdit.clear()
@@ -159,13 +161,19 @@ class AreaFilterController:
             self.showAreaInfo()
 
     def clearWidgetData(self):
-        # if clearData:
-        self.widget.ui.areaCounter_lineEdit.clear()
-        self.widget.ui.areaInfo_textEdit.clear()
         self.negateComboboxes()
+        self.clearLines()
         self.layer.removeSelection()
         self.ids = []
         self.currentId = 0
+
+    def clearLines(self):
+        self.widget.ui.areaCounter_lineEdit.clear()
+        self.widget.ui.areaInfo_textEdit.clear()
+        self.widget.ui.area_min.clear()
+        self.widget.ui.area_max.clear()
+        self.widget.ui.date_lineEdit.clear()
+        self.widget.ui.info.clear()
         
     def constructExpression(self):
         expression = ''
@@ -175,7 +183,7 @@ class AreaFilterController:
             query = " \"num_kv\" = '{}' ".format(self.widget.ui.num_kv_comboBox.currentText())
             expression += ' and ' + query if expression else expression + query
         if self.widget.ui.num_vd_comboBox.currentText():
-            query = " \"num_vds\" = '{}' ".format(self.widget.ui.num_vd_comboBox.currentText())
+            query = " \"num_vds\" = '%{}%' ".format(self.widget.ui.num_vd_comboBox.currentText())
             expression += ' and ' + query if expression else expression + query
         if self.widget.ui.num_comboBox.currentText():
             query = " \"num\" = '{}' ".format(self.widget.ui.num_comboBox.currentText())
