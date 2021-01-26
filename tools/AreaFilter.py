@@ -115,6 +115,7 @@ class AreaFilterController:
             self.thread.quit()
             self.thread.wait()
             self.thread.deleteLater()
+            print(result)
             self.appendWidget(result)
 
         self.thread = QtCore.QThread(iface.mainWindow())
@@ -125,13 +126,13 @@ class AreaFilterController:
         self.thread.start()
 
     def appendWidget(self, data):   
-        self.widget.ui.lesnich_comboBox.addItems(data['lesnich_text'])
-        self.widget.ui.num_kv_comboBox.addItems(data['num_kv'])
-        self.widget.ui.num_vd_comboBox.addItems(data['num_vds'])
-        self.widget.ui.num_comboBox.addItems(data['num'])
-        self.widget.ui.useType_comboBox.addItems(data['usetype'])
-        self.widget.ui.cuttingType_comboBox.addItems(data['cuttingtyp'])
-        self.widget.ui.fio_comboBox.addItems(data['fio'])
+        self.widget.ui.lesnich_comboBox.addItems(str(i) for i in data['lesnich_text'])
+        self.widget.ui.num_kv_comboBox.addItems(str(i) for i in data['num_kv'])
+        self.widget.ui.num_vd_comboBox.addItems(str(i) for i in data['num_vds'])
+        self.widget.ui.num_comboBox.addItems(str(i) for i in data['num'])
+        self.widget.ui.useType_comboBox.addItems(str(i) for i in data['usetype'])
+        self.widget.ui.cuttingType_comboBox.addItems(str(i) for i in data['cuttingtyp'])
+        self.widget.ui.fio_comboBox.addItems(str(i) for i in data['fio'])
         self.negateComboboxes()
 
     def negateComboboxes(self):
