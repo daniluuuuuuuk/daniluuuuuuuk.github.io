@@ -115,7 +115,6 @@ class AreaFilterController:
             self.thread.quit()
             self.thread.wait()
             self.thread.deleteLater()
-            print(result)
             self.appendWidget(result)
 
         self.thread = QtCore.QThread(iface.mainWindow())
@@ -185,7 +184,7 @@ class AreaFilterController:
             expression += ' and ' + query if expression else expression + query
         if self.widget.ui.num_vd_comboBox.currentText():
             text = self.widget.ui.num_vd_comboBox.currentText()
-            query = " \"num_vds\" = '%{}%' or \"num_vds\" = '{}' ".format(text, text)
+            query = " \"num_vds\" = '{}'".format(text)
             expression += ' and ' + query if expression else expression + query
         if self.widget.ui.num_comboBox.currentText():
             query = " \"num\" = '{}' ".format(self.widget.ui.num_comboBox.currentText())
@@ -211,6 +210,7 @@ class AreaFilterController:
         if self.widget.ui.info.text():
             query = " \"info\" like '%{}%' ".format(self.widget.ui.info.text())
             expression += ' and ' + query if expression else expression + query
+        print(expression)
         return expression
 
 class AreaFilterDockWidget(QDockWidget):
