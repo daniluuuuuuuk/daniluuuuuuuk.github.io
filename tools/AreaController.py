@@ -28,8 +28,12 @@ class AreaController(QtCore.QObject):
         self.sd = SettingsWindow()
         self.sd.setModal(False)
         self.ui = self.sd.ui
+        self.defaultAreaTypeValues = []
+        self.defaultAreaTypes = []
+        self.cuttingAreaTypes = []
+        self.currentCuttingAreaTypes = []
         self.setupValues()
-        self.setupButtons()
+        self.setupButtons()    
         self.window = self.sd.show()
 
     @property
@@ -54,6 +58,7 @@ class AreaController(QtCore.QObject):
         self.ui.count_pushButton.clicked.connect(self.showCountWindow)
         self.ui.delete_pushButton.clicked.connect(self.deleteArea)
         self.ui.buttonBox.button(QDialogButtonBox.Close).setVisible(False)
+        self.ui.useType_comboBox.currentTextChanged.connect(self.useTypeChanged)
 
     def showCountWindow(self):
         uid = self.feature["uid"]
@@ -77,13 +82,22 @@ class AreaController(QtCore.QObject):
             self.feature['vedomstvo_text'] = self.ui.gplho_comboBox.currentText()
             self.feature['useType'] = self.ui.useType_comboBox.currentText()
             self.feature['cuttingTyp'] = self.ui.cuttingType_comboBox.currentText()
+            self.currentCuttingAreaTypes = [
+                self.ui.useType_comboBox.currentText(),
+                self.ui.cuttingType_comboBox.currentText()
+            ]
             layer.updateFeature(self.feature)
             layer.commitChanges()
+            self.cuttingAreaTypes = []
         except Exception as e:
             QMessageBox.information(None, 'Ошибка', e)
         self.editMode = False
 
     def changeEditMode(self):
+        self.currentCuttingAreaTypes = [
+            self.ui.useType_comboBox.currentText(),
+            self.ui.cuttingType_comboBox.currentText()
+        ]            
         self.editMode = not self.editMode
         if self.editMode:
             self.setUseTypes()
@@ -91,12 +105,10 @@ class AreaController(QtCore.QObject):
             self.setupValues()
 
     def setUseTypes(self):
-        self.ui.useType_comboBox.currentTextChanged.connect(self.useTypeChanged)
-        currentUseType = self.ui.useType_comboBox.currentText()
         useTypes = ['Рубки главного пользования', 'Рубки промежуточного пользования', 'Прочие рубки']
         self.ui.useType_comboBox.clear()
         self.ui.useType_comboBox.addItems(useTypes)
-        index = self.ui.useType_comboBox.findText(currentUseType)
+        index = self.ui.useType_comboBox.findText(self.currentCuttingAreaTypes[0])
         if index >= 0:
             self.ui.useType_comboBox.setCurrentIndex(index)
 
@@ -113,21 +125,26 @@ class AreaController(QtCore.QObject):
             return
 
         def workerFinished(result):
-            worker.deleteLater()
-            thread.quit()
-            thread.wait()
-            thread.deleteLater()
+            self.worker.deleteLater()
+            self.thread.quit()
+            self.thread.wait()
+            self.thread.deleteLater()
             self.comboboxClear(self.ui.cuttingType_comboBox)
             self.clearComboboxIndex(self.ui.cuttingType_comboBox)
             self.ui.cuttingType_comboBox.addItems(result)
+            index = self.ui.cuttingType_comboBox.findText(self.currentCuttingAreaTypes[1])
+            if index >= 0:
+                self.ui.cuttingType_comboBox.setCurrentIndex(index)
+            if not self.defaultAreaTypes:
+                self.defaultAreaTypes = result
 
-        thread = QtCore.QThread()
-        worker = CuttingTypeWorker()
-        worker.moveToThread(thread)
-        worker.finished.connect(workerFinished)
-        worker.useType = self.ui.useType_comboBox.currentIndex() + 1
-        thread.started.connect(worker.run)
-        thread.start()
+        self.thread = QtCore.QThread(iface.mainWindow())
+        self.worker = CuttingTypeWorker()
+        self.worker.moveToThread(self.thread)
+        self.worker.finished.connect(workerFinished)
+        self.worker.useType = self.ui.useType_comboBox.currentIndex() + 1
+        self.thread.started.connect(self.worker.run)
+        self.thread.start()
 
     def setupValues(self):
 
@@ -135,11 +152,13 @@ class AreaController(QtCore.QObject):
             self.ui.gplho_comboBox.addItem(self.feature['leshos_text'])
             self.ui.leshos_comboBox.addItem(self.feature['lesnich_text'])
             self.ui.lesnich_comboBox.addItem(self.feature['vedomstvo_text'])
+            self.ui.useType_comboBox.clear()
+            self.ui.cuttingType_comboBox.clear()            
             self.ui.useType_comboBox.addItem(self.feature['usetype'])
             self.ui.cuttingType_comboBox.addItem(self.feature['cuttingtyp'])
             self.ui.gplho_comboBox.setEnabled(False)
             self.ui.leshos_comboBox.setEnabled(False)
-            self.ui.lesnich_comboBox.setEnabled(False)        
+            self.ui.lesnich_comboBox.setEnabled(False)
 
 
         def setupLineEdits():
@@ -151,10 +170,14 @@ class AreaController(QtCore.QObject):
             self.ui.info_textEdit.setText(str(self.feature['info']))
             self.ui.dateEdit.setDate(QDate.fromString(str(self.feature['date']), 'dd.MM.yyyy'))
 
+        self.ui.useType_comboBox.blockSignals(True)
+        self.ui.cuttingType_comboBox.blockSignals(True)
         setupComboboxes()
         setupLineEdits()
         self.changeFormEnableState(False)
-    
+        self.ui.useType_comboBox.blockSignals(False)
+        self.ui.cuttingType_comboBox.blockSignals(False)
+
     def changeFormEnableState(self, val):
         self.ui.num_kv_lineEdit.setEnabled(val)
         self.ui.num_vd_lineEdit.setEnabled(val)
