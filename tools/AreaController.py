@@ -149,11 +149,11 @@ class AreaController(QtCore.QObject):
     def setupValues(self):
 
         def setupComboboxes():
-            self.ui.gplho_comboBox.addItem(self.feature['leshos_text'])
-            self.ui.leshos_comboBox.addItem(self.feature['lesnich_text'])
-            self.ui.lesnich_comboBox.addItem(self.feature['vedomstvo_text'])
+            self.ui.leshos_comboBox.addItem(self.feature['leshos_text'])
+            self.ui.gplho_comboBox.addItem(self.feature['vedomstvo_text'])
+            self.ui.lesnich_comboBox.addItem(self.feature['lesnich_text'])
             self.ui.useType_comboBox.clear()
-            self.ui.cuttingType_comboBox.clear()            
+            self.ui.cuttingType_comboBox.clear()
             self.ui.useType_comboBox.addItem(self.feature['usetype'])
             self.ui.cuttingType_comboBox.addItem(self.feature['cuttingtyp'])
             self.ui.gplho_comboBox.setEnabled(False)

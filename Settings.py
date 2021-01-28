@@ -222,7 +222,7 @@ class SettingsController(QtCore.QObject):
         settingsReport = cfReport.readConfigs()
         oldPath = settingsReport.get("path", "")
         path = str(QFileDialog.getExistingDirectory(None, "Select Directory"))
-        if oldPath:
+        if not path and oldPath:
             path = oldPath
         if not path and not oldPath:
             path = os.path.expanduser('~')
