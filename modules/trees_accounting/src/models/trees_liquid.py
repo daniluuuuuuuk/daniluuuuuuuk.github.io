@@ -1,4 +1,5 @@
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
+from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtCore import Qt
 from typing import Union
 from ..models.dictionary import Species
@@ -11,48 +12,20 @@ class TreesLiquid(QStandardItemModel):
 
     def __init__(self):
         super().__init__()
+        self.trf_height_row = 0  # Номер строки, где прописана разряд высот
+        self.species_row = 1  # Номер строки, где прописана порода
         self.make_dmr()
 
     def make_dmr(self):
         """Строю диаметры для таблицы"""
-        self.setVerticalHeaderItem(0, QStandardItem("Диаметр"))
-        self.setVerticalHeaderItem(1, QStandardItem("см."))
+        self.setVerticalHeaderItem(self.trf_height_row, QStandardItem("Разряд"))
+        self.setVerticalHeaderItem(self.species_row, QStandardItem("Диаметр"))
+        self.setVerticalHeaderItem(2, QStandardItem("см."))
 
-        diameters = (
-            8,
-            12,
-            16,
-            20,
-            24,
-            28,
-            32,
-            36,
-            40,
-            44,
-            48,
-            52,
-            56,
-            60,
-            64,
-            68,
-            72,
-            76,
-            80,
-            84,
-            88,
-            92,
-            96,
-            100,
-            104,
-            108,
-            112,
-            116,
-            120,
-            124,
-        )
+        diameters = [dmr for dmr in range(8, 128, 4)]
 
         for dmr in diameters:
-            row_number = int(dmr / 4)
+            row_number = self.row_number_by_dmr(dmr)
             self.setVerticalHeaderItem(row_number, QStandardItem(str(dmr)))
         self.setVerticalHeaderItem(self.rowCount(), QStandardItem("Сумма"))
 
@@ -66,18 +39,18 @@ class TreesLiquid(QStandardItemModel):
                 Species.code_species == code_species
             ).name_species
 
-        self.setItem(0, last_column, QStandardItem(name_species))
-        self.item(0, last_column).code_species = code_species
-        self.item(0, last_column).setTextAlignment(Qt.AlignHCenter)
-        self.item(0, last_column).setEditable(False)
+        self.setItem(self.species_row, last_column, QStandardItem(name_species))
+        self.item(self.species_row, last_column).code_species = code_species
+        self.item(self.species_row, last_column).setTextAlignment(Qt.AlignHCenter)
+        self.item(self.species_row, last_column).setEditable(False)
 
-        self.setItem(1, last_column, QStandardItem("Деловых"))
-        self.item(1, last_column).setTextAlignment(Qt.AlignHCenter)
-        self.item(1, last_column).setEditable(False)
+        self.setItem(2, last_column, QStandardItem("Деловых"))
+        self.item(2, last_column).setTextAlignment(Qt.AlignHCenter)
+        self.item(2, last_column).setEditable(False)
 
-        self.setItem(1, last_column + 1, QStandardItem("Дровяных"))
-        self.item(1, last_column + 1).setTextAlignment(Qt.AlignHCenter)
-        self.item(1, last_column + 1).setEditable(False)
+        self.setItem(2, last_column + 1, QStandardItem("Дровяных"))
+        self.item(2, last_column + 1).setTextAlignment(Qt.AlignHCenter)
+        self.item(2, last_column + 1).setEditable(False)
 
         self.setItem(self.rowCount() - 1, last_column, QStandardItem("0"))
         self.item(self.rowCount() - 1, last_column).setEditable(False)
@@ -109,7 +82,7 @@ class TreesLiquid(QStandardItemModel):
 
         current_column_ind = self.species_position(record["code_species"])
         current_column_fuel = current_column_ind + 1
-        current_row = record["dmr"] / 4
+        current_row = self.row_number_by_dmr(record["dmr"])
 
         if record["num_ind"] > 0:
             self.setItem(
@@ -123,7 +96,7 @@ class TreesLiquid(QStandardItemModel):
             )
             self.summary_by_column(current_column_fuel)
 
-    def as_list(self) -> list:
+    def as_list(self) -> Union[list, dict]:
         """
         Возвращает список из данных модели
         Каждый элемент списка является словарём типа:
@@ -137,16 +110,39 @@ class TreesLiquid(QStandardItemModel):
         list_from_model = []
 
         for col in range(self.columnCount()):  # Заходим в столбец
-            if self.item(0, col) is not None:
-                if getattr(self.item(0, col), "code_species") is not None:
+            if self.item(self.species_row, col) is not None:
+                if (
+                    getattr(self.item(self.species_row, col), "code_species")
+                    is not None
+                ):
                     #  Если это столбец с названием породы
-                    code_species = getattr(self.item(0, col), "code_species")
-                    for row in range(2, self.rowCount()):
-                        # Заходим в строку (первые две строки не берём, т.к. это название породы и тип)
+                    code_species = getattr(
+                        self.item(self.species_row, col), "code_species"
+                    )
+                    trf_height = getattr(
+                        self.item(self.species_row, col),
+                        "trf_height",
+                    )
+                    if trf_height == 0:
+                        name_species = (
+                            Species.select(Species.name_species)
+                            .where(Species.code_species == code_species)
+                            .get()
+                            .name_species
+                        )
+
+                        return {
+                            "main_text": f'Не выбраны разряд высот для породы "{name_species}"',
+                            "detailed_text": None,
+                        }
+                    for row in range(3, self.rowCount() - 1):  # -1 это Сумма
+                        # Заходим в строку (первые две строки не берём, т.к. это разряд высот, название породы, тип)
                         if self.item(row, col) or self.item(row, col + 1):
                             instance = {}
                             instance["code_species"] = code_species
-                            instance["dmr"] = int(row * 4)
+                            instance["code_trf_height"] = trf_height
+                            instance["dmr"] = int((row - 1) * 4)
+
                             try:
                                 instance["num_ind"] = self.item(row, col).text()
                                 if instance["num_ind"] == "":
@@ -161,7 +157,6 @@ class TreesLiquid(QStandardItemModel):
                             except AttributeError:
                                 instance["num_fuel"] = "0"
                             list_from_model.append(instance)
-
         return list_from_model
 
     def species_position(self, code_species: int = None) -> Union[int, None]:
@@ -172,12 +167,20 @@ class TreesLiquid(QStandardItemModel):
         """
         species_positions = {}
         for col in range(self.columnCount()):
-            if self.item(0, col):
+            if self.item(self.species_row, col):
                 if code_species is not None:
-                    if getattr(self.item(0, col), "code_species") == code_species:
+                    if (
+                        getattr(self.item(self.species_row, col), "code_species")
+                        == code_species
+                    ):
                         return col
-                elif getattr(self.item(0, col), "code_species") is not None:
-                    species_positions[getattr(self.item(0, col), "code_species")] = col
+                elif (
+                    getattr(self.item(self.species_row, col), "code_species")
+                    is not None
+                ):
+                    species_positions[
+                        getattr(self.item(self.species_row, col), "code_species")
+                    ] = col
 
         if code_species is None:
             return species_positions
@@ -187,7 +190,7 @@ class TreesLiquid(QStandardItemModel):
         """
         Подсчитываем количество деревьев по столбцу (по породе и годности)
         """
-        first_row = 2  # 1 - порода, 2 - деловые\дровяные
+        first_row = 3  # 1 - разряд, 2 - порода, 3 - деловые\дровяные
         last_row = self.rowCount() - 1
         summary = 0
         for row in range(first_row, last_row):
@@ -195,3 +198,16 @@ class TreesLiquid(QStandardItemModel):
                 summary += int(self.item(row, column).text())
         self.setItem(last_row, column, QStandardItem(str(summary)))
         self.item(last_row, column).setEditable(False)
+
+    def row_number_by_dmr(self, dmr: int) -> int:
+        """Расчёт строки для диаметра"""
+        return int(dmr / 4) + 1
+
+    def set_trf_for_spc(self, col: int, code_trf_height: int):
+        """
+        Добавляю значение разряда высот в ячейку породы
+        (Невозможно добавить значение разряда пород в ячейку разряда пород,
+        т.к. в ячейки находится виджет и ячейка "якобы" пустая)
+        """
+        if col >= 0:  # При импорте по умолчанию выбран столбец -1
+            self.item(self.species_row, col).trf_height = code_trf_height

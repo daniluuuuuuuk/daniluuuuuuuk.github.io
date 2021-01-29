@@ -1,7 +1,7 @@
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
+from PyQt5.QtGui import QStandardItemModel
 from PyQt5.QtCore import QThread, pyqtSignal
-from .trees_liquid import TreesLiquid
-from ..models.public import Area, Trees
+from ..models.trees_liquid import TreesLiquid
+from ..models.public import Area, Trees, TreesTrfHeight
 
 
 class ImportedData(QThread):
@@ -23,7 +23,7 @@ class ImportedData(QThread):
 
         self.signal_get_att_data.emit(current_area_att)
 
-    def get_trees_data(self) -> list:
+    def get_trees_data(self) -> None:
         """Получение колличества деревьев"""
         trees = Trees.select().where(Trees.area_uuid == self.uuid).dicts()
 
@@ -31,7 +31,30 @@ class ImportedData(QThread):
             del row["area_uuid"]
             self.trees_liquid.add_record(row)
 
+        self.get_trees_trf_data()
+
         self.signal_get_trees_data.emit(self.trees_liquid)
+        return None
+
+    def get_trees_trf_data(self) -> None:
+        """
+        Добавляю в модель данные из БД о разрядах высот
+        """
+        species_position = self.trees_liquid.species_position()
+        for spc in species_position.keys():
+            current_trf_height = int(
+                str(
+                    TreesTrfHeight.select()
+                    .where(
+                        TreesTrfHeight.area_uuid == self.uuid,
+                        TreesTrfHeight.code_species == spc,
+                    )
+                    .get()
+                    .code_trf_height
+                )
+            )
+            self.trees_liquid.set_trf_for_spc(species_position[spc], current_trf_height)
+
         return None
 
     def run(self):

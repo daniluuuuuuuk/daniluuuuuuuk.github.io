@@ -2,6 +2,7 @@ import json
 from PyQt5.QtGui import QStandardItemModel
 from PyQt5.QtCore import QThread, pyqtSignal
 from ..models.dictionary import Organization
+from typing import Union
 
 
 class LPExportedData(QThread):
@@ -45,7 +46,7 @@ class LPExportedData(QThread):
         }
         return head
 
-    def configure_json_body(self) -> list:
+    def configure_json_body(self) -> Union[list, dict]:
         """
         Подготавливаю "тело" запроса
         Пример:
@@ -89,38 +90,45 @@ class LPExportedData(QThread):
         """
         body = []
         code_species_in_body = []
-        for instance in self.model.as_list():
-            if instance["code_species"] not in code_species_in_body:
-                code_species_in_body.append(instance["code_species"])
-                body.append(
-                    {
-                        "code_spc": instance["code_species"],
-                        "code_trf_height": 1,
-                        "trees": [],
-                    }
-                )
-            for rec in body:
-                if rec["code_spc"] == instance["code_species"]:
-                    rec["trees"].append(
+        instance_list = self.model.as_list()
+
+        if type(instance_list) is list:
+            for instance in instance_list:
+                if instance["code_species"] not in code_species_in_body:
+                    code_species_in_body.append(instance["code_species"])
+                    body.append(
                         {
-                            "dmr": instance["dmr"],
-                            "num_ind": instance["num_ind"],
-                            "num_fuel": instance["num_fuel"],
+                            "code_spc": instance["code_species"],
+                            "code_trf_height": instance["code_trf_height"],
+                            "trees": [],
                         }
                     )
-        return body
+                for rec in body:
+                    if rec["code_spc"] == instance["code_species"]:
+                        rec["trees"].append(
+                            {
+                                "dmr": instance["dmr"],
+                                "num_ind": instance["num_ind"],
+                                "num_fuel": instance["num_fuel"],
+                            }
+                        )
+            return body
+        return instance_list
 
     def run(self):
 
         output_lp_dict = self.configure_json_head()
         output_lp_dict["species"] = self.configure_json_body()
 
-        with open(self.export_file, "w") as file:
-            json.dump(output_lp_dict, file, indent=1, ensure_ascii=False)
+        if type(output_lp_dict["species"]) is list:
+            with open(self.export_file, "w") as file:
+                json.dump(output_lp_dict, file, indent=1, ensure_ascii=False)
 
-        self.signal_message_result.emit(
-            {
-                "main_text": f"Данные успешно экспортированы в \n{self.export_file}.",
-                "detailed_text": None,
-            }
-        )
+            self.signal_message_result.emit(
+                {
+                    "main_text": f"Данные успешно экспортированы в \n{self.export_file}.",
+                    "detailed_text": None,
+                }
+            )
+        else:
+            self.signal_message_result.emit(output_lp_dict["species"])

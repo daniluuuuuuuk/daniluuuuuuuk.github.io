@@ -8,8 +8,8 @@ from .services.db_import import ImportedData
 from .services.db_export import DBExportedData
 from .services.lp_export import LPExportedData
 from .services.xlsx_export import XLSXExportedData
-from .services.trees_liquid import TreesLiquid
-from .models.dictionary import Species
+from .models.trees_liquid import TreesLiquid
+from .models.dictionary import Species, TrfHeight
 
 UI_MAINWINDOW = uic.loadUiType(BasicDir.get_module_dir("ui/trees_accounting.ui"))[0]
 UI_SPECIES = uic.loadUiType(BasicDir.get_module_dir("ui/select_species.ui"))[0]
@@ -57,7 +57,75 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
             self.set_att_data, QtCore.Qt.QueuedConnection
         )
 
+    def set_trees_data(self, model):
+        """Применяю модель"""
+        self.trees_liquid = model
+        self.tableView.setModel(self.trees_liquid)
+
+        """Объединяю столбцы с заголовками пород"""
+        for col in range(self.trees_liquid.columnCount()):
+            if not col % 2:  # используем нечётные столбцы (именно там уст. наз. породы)
+                self.tableView.setSpan(0, col, 1, 2)
+                self.tableView.setSpan(self.trees_liquid.species_row, col, 1, 2)
+                self.tableView.setIndexWidget(
+                    self.trees_liquid.index(0, col),
+                    self.create_trf_widget(),
+                )
+                #  Ставлю разряд высот
+                current_trf_height = (
+                    self.tableView.model()
+                    .item(self.trees_liquid.species_row, col)
+                    .trf_height
+                )
+                self.tableView.indexWidget(
+                    self.tableView.model().index(0, col)
+                ).setCurrentIndex(current_trf_height)
+        self.statusBar().showMessage("Данные успешно загружены из БД", 3000)
+
+    def set_att_data(self, att_data: dict):
+        self.att_data = att_data
+        """Рендерим атрибутивные данные"""
+        uuid = att_data["uuid"]
+        self.label_3.setText(att_data["leshos_text"])
+        self.label_3.setToolTip(att_data["leshos_text"])
+
+        self.label_4.setText(att_data["lesnich_text"])
+        self.label_4.setToolTip(att_data["lesnich_text"])
+
+        self.label_14.setText(att_data["compartment"])
+        self.label_14.setToolTip(att_data["compartment"])
+
+        self.label.setText(att_data["sub_compartment"])
+        self.label.setToolTip(att_data["sub_compartment"])
+
+        self.label_15.setText(att_data["area"])
+        self.label_15.setToolTip(att_data["area"])
+
+        self.label_16.setText(att_data["num_cutting_area"])
+        self.label_16.setToolTip(att_data["num_cutting_area"])
+
+        self.label_17.setText(att_data["person_name"])
+        self.label_17.setToolTip(att_data["person_name"])
+
+        self.label_18.setText(att_data["date_trial"])
+        self.label_18.setToolTip(att_data["date_trial"])
+
+        self.label_12.setText(att_data["description"])
+        self.label_12.setToolTip(att_data["description"])
+
+        self.label_5.setText(att_data["use_type"])
+        self.label_5.setToolTip(att_data["use_type"])
+
+        self.label_10.setText(att_data["cutting_type"])
+        self.label_10.setToolTip(att_data["cutting_type"])
+
+        self.statusBar().showMessage(f"UUID лесосеки: {uuid}", 3000)
+
     def db_export(self):
+        #!
+        # print(
+        #     self.tableView.indexWidget(self.tableView.model().index(0, 0)).currentText()
+        # )
         self.exported_data = DBExportedData(self.uuid, self.tableView.model())
         self.exported_data.start()
         self.exported_data.signal_message_result.connect(
@@ -105,17 +173,20 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
         """
         Метод запускается после экспорта в XLSX
         """
-        result = QtWidgets.QMessageBox.information(
-            self,
-            self.windowTitle(),
-            message["main_text"],
-            buttons=QtWidgets.QMessageBox.Open,
-        )
-        if result == 8192:  # 8192 - вес кнопки (Открыть)
-            if platform.system() == "Windows":
-                os.startfile(export_file)
-            else:
-                subprocess.call(("xdg-open", export_file))
+        if message["detailed_text"] is None:
+            result = QtWidgets.QMessageBox.information(
+                self,
+                self.windowTitle(),
+                message["main_text"],
+                buttons=QtWidgets.QMessageBox.Open | QtWidgets.QMessageBox.Close,
+            )
+            if result == 8192:  # 8192 - вес кнопки (Открыть)
+                if platform.system() == "Windows":
+                    os.startfile(export_file)
+                else:
+                    subprocess.call(("xdg-open", export_file))
+        else:
+            self.message.show(**message)
 
     def add_gui_species(self):
         """
@@ -138,9 +209,21 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
                     name_species=modal_window_select_species.name_species,
                 )
 
-                column_with_last_species_name = self.trees_liquid.columnCount() - 2
+                column_with_last_species = self.trees_liquid.columnCount() - 2
 
-                self.tableView.setSpan(0, column_with_last_species_name, 1, 2)
+                self.tableView.setSpan(0, column_with_last_species, 1, 2)  # Разряд
+                self.tableView.setSpan(
+                    self.trees_liquid.species_row, column_with_last_species, 1, 2
+                )  # Назв породы
+                self.tableView.setIndexWidget(
+                    self.trees_liquid.index(0, column_with_last_species),
+                    self.create_trf_widget(),
+                )
+                self.tableView.model().set_trf_for_spc(column_with_last_species, 0)
+                # self.tableView.indexWidget(
+                #     self.trees_liquid.index(0, column_with_last_species)
+                # ).setCurrentIndex(0)
+
             else:
                 QtWidgets.QMessageBox.warning(
                     self, "Внимание", "Данная порода уже присутствует в таблице"
@@ -166,56 +249,15 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
         if modal_window_select_species.exec():
             self.trees_liquid.del_species(modal_window_select_species.code_species)
 
-    def set_trees_data(self, model):
-        """Применяю модель"""
-        self.trees_liquid = model
-        self.tableView.setModel(self.trees_liquid)
-
-        """Объединяю столбцы с заголовками пород"""
-        for col in range(self.trees_liquid.columnCount()):
-            if not col % 2:  # используем нечётные столбцы (именно там уст. наз. породы)
-                self.tableView.setSpan(0, col, 1, 2)
-
-        self.statusBar().showMessage("Данные успешно загружены из БД", 3000)
-
-    def set_att_data(self, att_data: dict):
-        self.att_data = att_data
-        """Рендерим атрибутивные данные"""
-        uuid = att_data["uuid"]
-        self.label_4.setText(att_data["leshos_text"])
-        self.label_4.setToolTip(att_data["leshos_text"])
-
-        self.label_3.setText(att_data["lesnich_text"])
-        self.label_3.setToolTip(att_data["lesnich_text"])
-
-        self.label_14.setText(att_data["compartment"])
-        self.label_14.setToolTip(att_data["compartment"])
-
-        self.label.setText(att_data["sub_compartment"])
-        self.label.setToolTip(att_data["sub_compartment"])
-
-        self.label_15.setText(att_data["area"])
-        self.label_15.setToolTip(att_data["area"])
-
-        self.label_16.setText(att_data["num_cutting_area"])
-        self.label_16.setToolTip(att_data["num_cutting_area"])
-
-        self.label_17.setText(att_data["person_name"])
-        self.label_17.setToolTip(att_data["person_name"])
-
-        self.label_18.setText(att_data["date_trial"])
-        self.label_18.setToolTip(att_data["date_trial"])
-
-        self.label_12.setText(att_data["description"])
-        self.label_12.setToolTip(att_data["description"])
-
-        self.label_5.setText(att_data["use_type"])
-        self.label_5.setToolTip(att_data["use_type"])
-
-        self.label_10.setText(att_data["cutting_type"])
-        self.label_10.setToolTip(att_data["cutting_type"])
-
-        self.statusBar().showMessage(f"UUID лесосеки: {uuid}", 3000)
+    def create_trf_widget(self) -> QtWidgets.QComboBox:
+        """Возвращает combobox для разряда высот"""
+        cb = TrfHeightComboBox()
+        cb.currentIndexChanged.connect(
+            lambda code_trf_height: self.tableView.model().set_trf_for_spc(
+                self.tableView.currentIndex().column(), code_trf_height
+            )
+        )
+        return cb
 
     def closeEditor(self, widget, hint):
         """Метод вызывается при окончании редактирования ячейки в таблице"""
@@ -287,3 +329,24 @@ class InformativeMessage(QtWidgets.QMessageBox):
         if detailed_text:
             self.setDetailedText(str(detailed_text))
         super().show()
+
+
+class TrfHeightComboBox(QtWidgets.QComboBox):
+    def __init__(self):
+        """
+        Кастомный QComboBox для разряда высот
+        """
+        super().__init__()
+        self.set_possible_trf_height()
+
+    def set_possible_trf_height(self):
+        """
+        Добавляю все возможные разряды высот в comboBox
+        """
+        self.addItem("", 0)
+
+        possible_trf_height = {}
+        for trf in TrfHeight.select():
+            self.addItem(trf.name_trf_height, trf.code_trf_height)
+
+        return possible_trf_height

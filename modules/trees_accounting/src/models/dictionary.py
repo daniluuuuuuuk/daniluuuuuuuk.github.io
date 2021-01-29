@@ -20,6 +20,14 @@ class BaseModel(Connection):
         schema = "dictionary"
 
 
+class TrfHeight(BaseModel):
+    code_trf_height = AutoField(null=False, primary_key=True)
+    name_trf_height = TextField(null=False)
+
+    class Meta:
+        table_name = "trf_height"
+
+
 class Econ(BaseModel):
     code_econ = AutoField(null=False, primary_key=True)
     name_econ = TextField(null=False)
