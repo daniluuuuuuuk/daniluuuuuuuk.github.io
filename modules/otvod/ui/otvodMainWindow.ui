@@ -181,11 +181,16 @@
    <widget class="QLabel" name="sliderLabel">
     <property name="geometry">
      <rect>
-      <x>700</x>
+      <x>690</x>
       <y>390</y>
-      <width>31</width>
+      <width>21</width>
       <height>20</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>7</pointsize>
+     </font>
     </property>
     <property name="text">
      <string>0</string>
@@ -227,10 +232,15 @@
     <property name="geometry">
      <rect>
       <x>440</x>
-      <y>394</y>
+      <y>389</y>
       <width>251</width>
-      <height>16</height>
+      <height>21</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
     </property>
     <property name="text">
      <string/>
@@ -360,9 +370,9 @@
    <widget class="QSlider" name="inclinationSlider">
     <property name="geometry">
      <rect>
-      <x>728</x>
+      <x>710</x>
       <y>390</y>
-      <width>81</width>
+      <width>71</width>
       <height>22</height>
      </rect>
     </property>
@@ -623,6 +633,23 @@
     </property>
     <property name="toolTip">
      <string>Загрузить данные из файла (Ctrl + O)</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="magneticDeclination_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>790</x>
+      <y>390</y>
+      <width>21</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Магнитное склонение по данным всемирной магнитной модели сервиса NOAA
+ Satellite and Information Service центра National Geophysical Data Center</string>
     </property>
     <property name="text">
      <string/>

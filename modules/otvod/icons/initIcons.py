@@ -39,7 +39,9 @@ class IconSet:
         self.omw.saveData_pushButton.setIcon(
             QIcon(self.resolve('save.png')))
         self.omw.loadData_pushButton.setIcon(
-            QIcon(self.resolve('upload.png')))               
+            QIcon(self.resolve('upload.png')))
+        self.omw.magneticDeclination_pushButton.setIcon(
+            QIcon(self.resolve('magnet.png')))
 
 
     def resolve(self, name, basepath=None):

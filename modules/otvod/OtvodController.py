@@ -22,6 +22,7 @@ from qgis.gui import  QgsMapToolPan
 from .LayerManager import LayerManager
 from .icons.initIcons import IconSet
 from qgis.core import Qgis, QgsSnappingConfig, QgsTolerance
+from . import geomag
 
 
 class OtvodController():
@@ -106,6 +107,14 @@ class OtvodController():
         self.turnOnTableAndCoords()
 
         self.initSnapping()
+
+        self.omw.magneticDeclination_pushButton.clicked.connect(self.getMagneticInclination)
+
+
+    def getMagneticInclination(self):
+        point = GeoOperations.convertToWgs(self.canvas.center())
+        declination = geomag.declination(point.y(), point.x())
+        self.omw.inclinationSlider.setValue(declination * 10)
 
     def turnOnTableAndCoords(self):
         tableTypeButton = self.radio_group.button(self.tableType)
@@ -222,8 +231,10 @@ class OtvodController():
                     btn.setChecked(True)
         if self.radio_group.id(button) == 0:
             self.omw.inclinationSlider.setEnabled(False)
+            self.omw.magneticDeclination_pushButton.setEnabled(False)
         else:
             self.omw.inclinationSlider.setEnabled(True)
+            self.omw.magneticDeclination_pushButton.setEnabled(True)
 
     def bindingPointCoordChanged(self):
         e = n = 0
