@@ -56,13 +56,13 @@ class RestatementLoader(QgsTask):
             """select name_organization from (select id_organization from "dictionary".organization
                 where code_organization = '{}') typed
                 join "dictionary".organization org on org.parent_id_organization = typed.id_organization
-                where substring(code_organization::varchar(255) from 9 for 2) = '{}'""".format(self.lhCode, code))[0][0]            
+                where substring(code_organization::varchar(255) from 9 for 2) = '{}'""".format(self.lhCode, code))[0][0]
 
         forestObjectCode = postgisConnection.getQueryResult(
             """select code_organization from (select id_organization from "dictionary".organization
                 where code_organization = '{}') typed
                 join "dictionary".organization org on org.parent_id_organization = typed.id_organization
-                where substring(code_organization::varchar(255) from 9 for 2) = '{}'""".format(self.lhCode, code))[0][0]            
+                where substring(code_organization::varchar(255) from 9 for 2) = '{}'""".format(self.lhCode, code))[0][0]
 
         # postgisConnection.__del__()
 

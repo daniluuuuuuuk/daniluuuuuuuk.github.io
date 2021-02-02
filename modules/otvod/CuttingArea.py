@@ -108,11 +108,8 @@ class CuttingArea:
 
     def showDiscrepancyWindow(self):
         discrepancies = self.getDiscrepanciesList()
-        if discrepancies[0] > 700:
-            discrepancies[0] = abs(discrepancies[0] - 360 - 360)
         angleDiscrepancy = GeoOperations.convertToDMS(discrepancies[0])
         maxAngleDiscrepancy = GeoOperations.convertToDMS(discrepancies[2])
-
         angleDiscrepancyFormatted = str(angleDiscrepancy[0]) + '° ' + str(
             round(angleDiscrepancy[1], 1)) + '′ ' + str(round(angleDiscrepancy[2], 1)) + '″'
         maxAngleDiscrepancyFormatted = str(maxAngleDiscrepancy[0]) + '° ' + str(round(
