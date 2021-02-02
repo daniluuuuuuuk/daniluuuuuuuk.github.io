@@ -233,6 +233,9 @@ class CanvasWidget(QgsMapCanvas):
             def getAreaPoints(areaData, areaPoints):
                 self.editedUid = areaData[0]
                 self.omw.azimuth_radio_button.setChecked(True)
+                switch = self.omw.switchLayout.itemAt(0).widget()
+                if switch.isChecked():
+                    switch.setChecked(False)
                 point = GeoOperations.convertToWgs(areaData[1])            
                 self.omw.y_coord_LineEdit.setText(str(round(point.x(), 10)))
                 self.omw.x_coord_LineEdit.setText(str(round(point.y(), 10)))
