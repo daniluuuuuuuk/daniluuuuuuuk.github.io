@@ -174,11 +174,19 @@ class OtvodController():
         return s4
 
     def switchClicked(self, switch):
-        if switch.isChecked():
-            self.coordType = 1
+        if not self.tableWrapper.tableModel.ensureTableCellsNotEmpty():
+            switch.blockSignals(True)
+            if switch.isChecked():
+                switch.setChecked(False)
+            else:
+                switch.setChecked(True)
+            switch.blockSignals(False)
         else:
-            self.coordType = 0
-        self.tableWrapper.convertCoordFormat(self.coordType)
+            if switch.isChecked():
+                self.coordType = 1
+            else:
+                self.coordType = 0
+            self.tableWrapper.convertCoordFormat(self.coordType)
 
     def editAreaAttributes(self):
         editor = CuttingAreaAttributesEditor(self.cuttingArea)
