@@ -161,6 +161,20 @@ class CanvasWidget(QgsMapCanvas):
             for button in btnGroup:
                 button.setEnabled(True)
 
+    def isAreaValid(self, layer):
+
+        def getId(f):
+            return f['id']
+
+        features = sorted(layer.getFeatures(), key=getId)
+        lesosekaPointsCounter = 0
+        for x in features:
+            if x.attributes()[1] == "Лесосека":
+                lesosekaPointsCounter += 1
+                if lesosekaPointsCounter == 3:
+                    return True
+        return False
+
         """Строит лесосеку
         """
 
@@ -181,7 +195,12 @@ class CanvasWidget(QgsMapCanvas):
             bindingPoint = GeoOperations.convertToZone35(QgsPointXY(e, n))
         except Exception as e:
             QMessageBox.information(
-                None, "Ошибка модуля QGISLes", "Отсутствуют угловые точки")
+                None, "Ошибка модуля QGISLes", "Некорректная точка привязки")
+            return
+
+        if not self.isAreaValid(layer):
+            QMessageBox.information(
+                None, "Ошибка модуля QGISLes", "Для построения лесосеки необходимо минимум 3 узла")    
             return
 
         self.cuttingArea = CuttingArea.CuttingArea(
