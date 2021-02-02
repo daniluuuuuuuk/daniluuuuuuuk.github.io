@@ -304,12 +304,12 @@ class QgsLes:
             label = QLabel(dialog)
             label.setText(
                 str(info[0])
-                + ", "
+                + " \n"
                 + str(info[1])
-                + " лесничество, "
-                + "квартал: "
+                + " лесничество \n"
+                + "Квартал: "
                 + str(info[2])
-                + " выдел: "
+                + "\nВыдел: "
                 + str(info[3])
             )
             label.adjustSize()
@@ -319,8 +319,8 @@ class QgsLes:
             def prepareTaxBase(taxBaseList):
                 return [
                     "Бонитет: " + str(taxBaseList[1]),
-                    ", тип леса: " + str(taxBaseList[2]),
-                    ", ТУМ: " + str(taxBaseList[3]),
+                    "\nТип леса: " + str(taxBaseList[2]),
+                    "\nТУМ: " + str(taxBaseList[3]),
                 ]
 
             label = QLabel(dialog)
@@ -338,12 +338,12 @@ class QgsLes:
 
                 return [
                     str(taxList[1]),
-                    ", диаметр: " + str(taxList[2]),
-                    ", полнота: " + str(taxList[4]),
-                    ", высота: " + str(taxList[5]),
-                    ", возраст: " + str(taxList[6]),
-                    ", ярус: " + str(taxList[7]),
-                    ", запас: " + str(taxList[8]),
+                    "\nДиаметр: " + str(taxList[2]),
+                    "\nПолнота: " + str(taxList[4]),
+                    "\nВысота: " + str(taxList[5]),
+                    "\nВозраст: " + str(taxList[6]),
+                    "\nЯрус: " + str(taxList[7]),
+                    "\nЗапас: " + str(taxList[8]),
                 ]
 
             for x in tax:
