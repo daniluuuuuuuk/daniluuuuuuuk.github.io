@@ -110,3 +110,11 @@ class Organization(BaseModel):
             "1500100000": "МЛХ",
             "1500100000": "МЛХ",
         }  # Совпадений не найдено
+
+
+class KindSeeds(BaseModel):
+    code_kind_seeds = IntegerField(null=False, primary_key=True)
+    name_kind_seeds = TextField(null=False)
+
+    class Meta:
+        table_name = "kind_seeds"
