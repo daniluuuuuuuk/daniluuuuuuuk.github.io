@@ -2,17 +2,24 @@ import os
 import platform
 import subprocess
 from PyQt5 import QtWidgets, uic, QtCore
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QMovie
 from .services.config import BasicDir, Config
 from .services.db_import import ImportedData
 from .services.db_export import DBExportedData
 from .services.lp_export import LPExportedData
 from .services.xlsx_export import XLSXExportedData
 from .models.trees_liquid import TreesLiquid
-from .models.dictionary import Species, TrfHeight
+from .models.trees_not_cutting import TreesNotCutting
+from .models.dictionary import Species, TrfHeight, KindSeeds
+from .services.waiting_spinner_widget import QtWaitingSpinner
 
 UI_MAINWINDOW = uic.loadUiType(BasicDir.get_module_dir("ui/trees_accounting.ui"))[0]
-UI_SPECIES = uic.loadUiType(BasicDir.get_module_dir("ui/select_species.ui"))[0]
+UI_LIQUID_SPECIES = uic.loadUiType(
+    BasicDir.get_module_dir("ui/select_liquid_species.ui")
+)[0]
+UI_NOT_CUTTING_SPECIES = uic.loadUiType(
+    BasicDir.get_module_dir("ui/select_not_cutting_species.ui")
+)[0]
 
 
 class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
@@ -28,6 +35,7 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
 
         self.config = Config()
         self.trees_liquid = TreesLiquid()
+        self.tableView_2.setModel(TreesNotCutting())
 
         self.message = InformativeMessage(self)
 
@@ -44,17 +52,33 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
         self.action_XLSX.setIcon(QIcon(BasicDir.get_module_dir("img/xls.png")))
 
         self.pushButton.clicked.connect(self.db_export)
-        self.pushButton_2.clicked.connect(self.add_gui_species)
-        self.pushButton_3.clicked.connect(self.delete_gui_species)
+        self.pushButton_4.clicked.connect(self.add_gui_not_cutting_species)
+        self.pushButton_5.clicked.connect(self.delete_gui_liquid_species)
+        self.pushButton_6.clicked.connect(self.add_gui_liquid_species)
+        self.pushButton_7.clicked.connect(self.delete_gui_not_cutting_species)
+
+        self.tableView_2.horizontalHeader().setSectionResizeMode(
+            QtWidgets.QHeaderView.Stretch
+        )
+        self.tableView_2.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
+        self.tableView_2.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.tableView_2.doubleClicked.connect(self.edit_not_cutting_row)
+
+        self.spinner = QtWaitingSpinner(self, True, True, QtCore.Qt.ApplicationModal)
 
     def db_import(self):
         self.imported_data = ImportedData(self.uuid)
         self.imported_data.start()
+        self.imported_data.started.connect(lambda: self.spinner.start())
+        self.imported_data.finished.connect(lambda: self.spinner.stop())
         self.imported_data.signal_get_trees_data.connect(
             self.set_trees_data, QtCore.Qt.QueuedConnection
         )
         self.imported_data.signal_get_att_data.connect(
             self.set_att_data, QtCore.Qt.QueuedConnection
+        )
+        self.imported_data.signal_get_not_cutting_trees_data.connect(
+            lambda x: self.tableView_2.setModel(x), QtCore.Qt.QueuedConnection
         )
 
     def set_trees_data(self, model):
@@ -126,7 +150,13 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
         # print(
         #     self.tableView.indexWidget(self.tableView.model().index(0, 0)).currentText()
         # )
-        self.exported_data = DBExportedData(self.uuid, self.tableView.model())
+        self.exported_data = DBExportedData(
+            uuid=self.uuid,
+            model_liquid=self.tableView.model(),
+            model_not_cutting=self.tableView_2.model(),
+        )
+        self.exported_data.started.connect(lambda: self.spinner.start())
+        self.exported_data.finished.connect(lambda: self.spinner.stop())
         self.exported_data.start()
         self.exported_data.signal_message_result.connect(
             lambda messages: self.message.show(**messages), QtCore.Qt.QueuedConnection
@@ -144,6 +174,8 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
                 self.lp_exported_data = LPExportedData(
                     self.att_data, self.tableView.model(), export_file[0]
                 )
+                self.lp_exported_data.started.connect(lambda: self.spinner.start())
+                self.lp_exported_data.finished.connect(lambda: self.spinner.stop())
                 self.lp_exported_data.start()
                 self.lp_exported_data.signal_message_result.connect(
                     lambda messages: self.message.show(**messages),
@@ -159,8 +191,13 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
             )
             if export_file[0]:
                 self.xlsx_exported_data = XLSXExportedData(
-                    self.att_data, self.tableView.model(), export_file[0]
+                    self.att_data,
+                    self.tableView.model(),
+                    self.tableView_2.model(),
+                    export_file[0],
                 )
+                self.xlsx_exported_data.started.connect(lambda: self.spinner.start())
+                self.xlsx_exported_data.finished.connect(lambda: self.spinner.stop())
                 self.xlsx_exported_data.start()
                 self.xlsx_exported_data.signal_message_result.connect(
                     lambda messages: self.xls_export_on_finish(
@@ -188,11 +225,11 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
         else:
             self.message.show(**message)
 
-    def add_gui_species(self):
+    def add_gui_liquid_species(self):
         """
         Вызов окна с выбором породы для добавления
         """
-        modal_window_select_species = TaSelectSpecies()
+        modal_window_select_species = TaSelectLiquidSpecies()
 
         if modal_window_select_species.exec():
             self.trees_liquid = self.tableView.model()
@@ -229,25 +266,60 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
                     self, "Внимание", "Данная порода уже присутствует в таблице"
                 )
 
-    def delete_gui_species(self):
-        """
-        Вызов окна с выбором породы для удаления
-        """
+    def add_gui_not_cutting_species(self):
+        modal_select_not_cutting_spc = TaSelectNotCuttingSpecies(
+            list(self.tableView.model().species_position().keys())
+        )
 
-        def fill_species():
-            for code_spc in self.tableView.model().species_position().keys():
-                name_species = Species.get(
-                    Species.code_species == code_spc
-                ).name_species
-                modal_window_select_species.comboBox.addItem(
-                    name_species, userData=QtCore.QVariant(code_spc)
+        if modal_select_not_cutting_spc.exec():
+            self.tableView_2.model().add_record(
+                {
+                    "code_species": modal_select_not_cutting_spc.code_species,
+                    "name_species": modal_select_not_cutting_spc.name_species,
+                    "seed_type_code": modal_select_not_cutting_spc.seed_type_code,
+                    "name_kind_seeds": modal_select_not_cutting_spc.name_kind_seeds,
+                    "seed_dmr": modal_select_not_cutting_spc.seed_dmr,
+                    "seed_count": modal_select_not_cutting_spc.seed_count,
+                    "seed_number": modal_select_not_cutting_spc.seed_number,
+                }
+            )
+            self.was_edited = True
+
+    def delete_gui_liquid_species(self):
+        """
+        Удаление выделенной породы
+        """
+        current_col = self.tableView.currentIndex().column()
+        try:
+            code_spc = self.tableView.model().item(1, current_col).code_species
+            name_spc = self.tableView.model().item(1, current_col).text()
+        except AttributeError:
+            try:
+                code_spc = self.tableView.model().item(1, current_col - 1).code_species
+                name_spc = self.tableView.model().item(1, current_col - 1).text()
+            except AttributeError:
+                QtWidgets.QMessageBox.critical(
+                    self, "Ошибка", "Выберите породу в таблице для удаления"
                 )
+                return False
+        result = QtWidgets.QMessageBox.question(
+            self,
+            "Внимание",
+            f"Вы действительно хотите удалить выбранную породу: {name_spc}",
+            buttons=QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Yes,
+            defaultButton=QtWidgets.QMessageBox.No,
+        )
+        if result == 16384:
+            self.trees_liquid.del_species(code_spc)
+            self.was_edited = True
 
-        modal_window_select_species = TaSelectSpecies()
-        modal_window_select_species.fill_species = fill_species
-        modal_window_select_species.setWindowTitle("Удаление породы")
-        if modal_window_select_species.exec():
-            self.trees_liquid.del_species(modal_window_select_species.code_species)
+    def delete_gui_not_cutting_species(self) -> bool:
+        current_row = self.tableView_2.currentIndex().row()
+        if current_row < 0:
+            QtWidgets.QMessageBox.critical(self, "Ошибка", "Выберите строку с записью.")
+            return False
+        self.tableView_2.model().takeRow(current_row)
+        self.was_edited = True
 
     def create_trf_widget(self) -> QtWidgets.QComboBox:
         """Возвращает combobox для разряда высот"""
@@ -258,6 +330,29 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
             )
         )
         return cb
+
+    def edit_not_cutting_row(self):
+        current_row = self.tableView_2.currentIndex().row()
+        not_cutting_row_data = self.tableView_2.model().as_list()[current_row]
+
+        modal_select_not_cutting_spc = TaSelectNotCuttingSpecies(
+            list(self.tableView.model().species_position().keys()), not_cutting_row_data
+        )
+
+        if modal_select_not_cutting_spc.exec():
+            self.tableView_2.model().add_record(
+                {
+                    "code_species": modal_select_not_cutting_spc.code_species,
+                    "name_species": modal_select_not_cutting_spc.name_species,
+                    "seed_type_code": modal_select_not_cutting_spc.seed_type_code,
+                    "name_kind_seeds": modal_select_not_cutting_spc.name_kind_seeds,
+                    "seed_dmr": modal_select_not_cutting_spc.seed_dmr,
+                    "seed_count": modal_select_not_cutting_spc.seed_count,
+                    "seed_number": modal_select_not_cutting_spc.seed_number,
+                },
+                current_row,
+            )
+            self.was_edited = True
 
     def closeEditor(self, widget, hint):
         """Метод вызывается при окончании редактирования ячейки в таблице"""
@@ -288,7 +383,7 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
                 self.was_edited = False
 
 
-class TaSelectSpecies(QtWidgets.QDialog, UI_SPECIES):
+class TaSelectLiquidSpecies(QtWidgets.QDialog, UI_LIQUID_SPECIES):
     """
     GUI для выбора породы при добавлении породы
     """
@@ -315,6 +410,97 @@ class TaSelectSpecies(QtWidgets.QDialog, UI_SPECIES):
 
     def exec(self):
         self.fill_species()
+        return super().exec()
+
+
+class TaSelectNotCuttingSpecies(QtWidgets.QDialog, UI_NOT_CUTTING_SPECIES):
+    """
+    GUI для выбора породы при добавлении/изменении записи
+    """
+
+    def __init__(self, current_spc: list, current_data: dict = None, parent=None):
+        QtWidgets.QDialog.__init__(self, parent)
+        self.current_spc = current_spc
+        self.current_data = current_data
+
+        self.setupUi(self)
+
+    def fill_species(self):
+        """
+        Заполняю выпадающий список породами
+        """
+        for spc in (
+            Species.select(Species.code_species, Species.name_species)
+            .where(Species.code_species << self.current_spc)
+            .order_by(Species.name_species)
+        ):
+            self.comboBox.addItem(
+                spc.name_species, userData=QtCore.QVariant(spc.code_species)
+            )
+
+    def fill_kind_seeds(self):
+        """Заполняю combobox видами семенников"""
+        for kind_seed in KindSeeds.select(
+            KindSeeds.code_kind_seeds, KindSeeds.name_kind_seeds
+        ).order_by(KindSeeds.name_kind_seeds):
+            self.comboBox_2.addItem(
+                kind_seed.name_kind_seeds,
+                userData=QtCore.QVariant(kind_seed.code_kind_seeds),
+            )
+
+    def seeds_field_validation(self) -> bool:
+        """Валидация вводимых полей"""
+        try:
+            int(self.lineEdit.text())
+            int(self.lineEdit_2.text())
+        except ValueError:
+            return False
+        return True
+
+    def set_values(self, current_data: dict):
+        """При изменении записи устанавливает выбранные значения"""
+        self.lineEdit.setText(str(current_data["seed_dmr"]))
+        self.lineEdit_2.setText(str(current_data["seed_count"]))
+        self.lineEdit_3.setText(str(current_data["seed_number"]))
+        current_species_name = (
+            Species.select(Species.name_species)
+            .where(Species.code_species == current_data["code_species"])
+            .get()
+            .name_species
+        )
+        current_seed_type_name = (
+            KindSeeds.select(KindSeeds.name_kind_seeds)
+            .where(KindSeeds.code_kind_seeds == current_data["seed_type_code"])
+            .get()
+            .name_kind_seeds
+        )
+        self.comboBox.setCurrentText(current_species_name)
+        self.comboBox_2.setCurrentText(current_seed_type_name)
+
+    def accept(self):
+        self.name_species = self.comboBox.itemText(self.comboBox.currentIndex())
+        self.code_species = self.comboBox.itemData(self.comboBox.currentIndex())
+        if not self.seeds_field_validation():
+            QtWidgets.QMessageBox.critical(self, "Ошибка", "Введены неверные данные")
+            return False
+        self.seed_type_code = self.comboBox_2.itemData(self.comboBox_2.currentIndex())
+        self.name_kind_seeds = self.comboBox_2.itemText(self.comboBox_2.currentIndex())
+        self.seed_dmr = self.lineEdit.text()
+        self.seed_count = self.lineEdit_2.text()
+        self.seed_number = self.lineEdit_3.text()
+        super().accept()
+
+    def exec(self):
+        if len(self.current_spc) == 0:
+            QtWidgets.QMessageBox.critical(
+                self, "Ошибка", "Не добавлены породы в перечет."
+            )
+            return False
+
+        self.fill_species()
+        self.fill_kind_seeds()
+        if self.current_data:
+            self.set_values(self.current_data)
         return super().exec()
 
 
