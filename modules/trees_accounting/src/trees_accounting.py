@@ -2,7 +2,7 @@ import os
 import platform
 import subprocess
 from PyQt5 import QtWidgets, uic, QtCore
-from PyQt5.QtGui import QIcon, QMovie
+from PyQt5.QtGui import QIcon, QStandardItemModel
 from .services.config import BasicDir, Config
 from .services.db_import import ImportedData
 from .services.db_export import DBExportedData
@@ -35,7 +35,6 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
 
         self.config = Config()
         self.trees_liquid = TreesLiquid()
-        self.tableView_2.setModel(TreesNotCutting())
 
         self.message = InformativeMessage(self)
 
@@ -67,12 +66,15 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
         self.spinner = QtWaitingSpinner(self, True, True, QtCore.Qt.ApplicationModal)
 
     def db_import(self):
+        """
+        Метод запуска потока для импорта данных из БД
+        """
         self.imported_data = ImportedData(self.uuid)
         self.imported_data.start()
         self.imported_data.started.connect(lambda: self.spinner.start())
         self.imported_data.finished.connect(lambda: self.spinner.stop())
         self.imported_data.signal_get_trees_data.connect(
-            self.set_trees_data, QtCore.Qt.QueuedConnection
+            self.set_trees_liquid_data, QtCore.Qt.QueuedConnection
         )
         self.imported_data.signal_get_att_data.connect(
             self.set_att_data, QtCore.Qt.QueuedConnection
@@ -81,20 +83,19 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
             lambda x: self.tableView_2.setModel(x), QtCore.Qt.QueuedConnection
         )
 
-    def set_trees_data(self, model):
-        """Применяю модель"""
+    def set_trees_liquid_data(self, model: QStandardItemModel):
+        """
+        Метод для установки данных в таблицу "Ведомость перечета деревьев".
+        Применяется модель.
+        Форматируется таблица (объединяются столбцы с заголовками пород).
+        Выставляется разряд высот.
+        """
         self.trees_liquid = model
         self.tableView.setModel(self.trees_liquid)
 
-        """Объединяю столбцы с заголовками пород"""
         for col in range(self.trees_liquid.columnCount()):
             if not col % 2:  # используем нечётные столбцы (именно там уст. наз. породы)
-                self.tableView.setSpan(0, col, 1, 2)
-                self.tableView.setSpan(self.trees_liquid.species_row, col, 1, 2)
-                self.tableView.setIndexWidget(
-                    self.trees_liquid.index(0, col),
-                    self.create_trf_widget(),
-                )
+                self.formatting_trees_liquid_table(col)
                 #  Ставлю разряд высот
                 current_trf_height = (
                     self.tableView.model()
@@ -102,19 +103,35 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
                     .trf_height
                 )
                 self.tableView.indexWidget(
-                    self.tableView.model().index(0, col)
+                    self.tableView.model().index(self.trees_liquid.trf_height_row, col)
                 ).setCurrentIndex(current_trf_height)
         self.statusBar().showMessage("Данные успешно загружены из БД", 3000)
 
     def set_att_data(self, att_data: dict):
+        """
+        Метод для установки второстипенных данных в шапку программы,
+        а так же всплывающие подсказки.
+        Используемые данные:
+            >>>leshos_text  -> Название лесхоза
+            >>>lesnich_text -> Название лесничества
+            >>>compartment  -> Квартал
+            >>>sub_compartment  -> Выдел(а)
+            >>>area -> Площадь лесосеки
+            >>>num_cutting_area -> Номер лесосеки
+            >>>person_name  -> ФИО
+            >>>date_trial   -> Дата отвода
+            >>>description  -> Дополнительные сведения
+            >>>use_type -> Пользование
+            >>>cutting_type -> Вид рубки
+        """
         self.att_data = att_data
-        """Рендерим атрибутивные данные"""
-        uuid = att_data["uuid"]
-        self.label_3.setText(att_data["leshos_text"])
-        self.label_3.setToolTip(att_data["leshos_text"])
 
-        self.label_4.setText(att_data["lesnich_text"])
-        self.label_4.setToolTip(att_data["lesnich_text"])
+        uuid = att_data["uuid"]
+        self.label_4.setText(att_data["leshos_text"])
+        self.label_4.setToolTip(att_data["leshos_text"])
+
+        self.label_3.setText(att_data["lesnich_text"])
+        self.label_3.setToolTip(att_data["lesnich_text"])
 
         self.label_14.setText(att_data["compartment"])
         self.label_14.setToolTip(att_data["compartment"])
@@ -145,11 +162,26 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
 
         self.statusBar().showMessage(f"UUID лесосеки: {uuid}", 3000)
 
+    def formatting_trees_liquid_table(self, required_column: int) -> bool:
+        """
+        Форматирует таблицу "Ведомость перечета деревьев".
+        Объединяет столбцы для:
+            разряда высот TreesLiquid().trf_height_row
+            названия породы TreesLiquid().species_row
+        Создаёт виджет для выбора разряда высот.
+        """
+        self.tableView.setSpan(self.trees_liquid.trf_height_row, required_column, 1, 2)
+        self.tableView.setSpan(self.trees_liquid.species_row, required_column, 1, 2)
+        self.tableView.setIndexWidget(
+            self.trees_liquid.index(self.trees_liquid.trf_height_row, required_column),
+            self.create_trf_widget(),
+        )
+        return True
+
     def db_export(self):
-        #!
-        # print(
-        #     self.tableView.indexWidget(self.tableView.model().index(0, 0)).currentText()
-        # )
+        """
+        Метод запуска потока для экспорта данных в БД
+        """
         self.exported_data = DBExportedData(
             uuid=self.uuid,
             model_liquid=self.tableView.model(),
@@ -164,6 +196,12 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
         self.was_edited = False
 
     def lp_export(self):
+        """
+        Метод запуска потока для экспорта данных в АРМ Лесопользование 3.
+
+        Проверяет добавлены ли данные в таблицу "Ведомость перечета деревьев".
+        Вызывает окно с выбором пути и названием файла для экспорта.
+        """
         if self.tableView.model().columnCount() > 1:
             export_file = QtWidgets.QFileDialog.getSaveFileName(
                 caption="Сохранение файла",
@@ -183,6 +221,12 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
                 )
 
     def xls_export(self):
+        """
+        Метод запуска потока для экспорта данных в Excel (xlsx).
+
+        Проверяет добавлены ли данные в таблицу "Ведомость перечета деревьев".
+        Вызывает окно с выбором пути и названием файла для экспорта.
+        """
         if self.tableView.model().columnCount() > 1:
             export_file = QtWidgets.QFileDialog.getSaveFileName(
                 caption="Сохранение файла",
@@ -208,7 +252,8 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
 
     def xls_export_on_finish(self, message: dict, export_file: str):
         """
-        Метод запускается после экспорта в XLSX
+        Метод запускается после экспорта в XLSX.
+        Вызывает окно с возможностью открытия экспортируемого файла.
         """
         if message["detailed_text"] is None:
             result = QtWidgets.QMessageBox.information(
@@ -227,7 +272,7 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
 
     def add_gui_liquid_species(self):
         """
-        Вызов окна с выбором породы для добавления
+        Вызывает окно с выбором породы для добавления в таблицу "Ведомость перечета деревьев".
         """
         modal_window_select_species = TaSelectLiquidSpecies()
 
@@ -248,18 +293,8 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
 
                 column_with_last_species = self.trees_liquid.columnCount() - 2
 
-                self.tableView.setSpan(0, column_with_last_species, 1, 2)  # Разряд
-                self.tableView.setSpan(
-                    self.trees_liquid.species_row, column_with_last_species, 1, 2
-                )  # Назв породы
-                self.tableView.setIndexWidget(
-                    self.trees_liquid.index(0, column_with_last_species),
-                    self.create_trf_widget(),
-                )
+                self.formatting_trees_liquid_table(column_with_last_species)
                 self.tableView.model().set_trf_for_spc(column_with_last_species, 0)
-                # self.tableView.indexWidget(
-                #     self.trees_liquid.index(0, column_with_last_species)
-                # ).setCurrentIndex(0)
 
             else:
                 QtWidgets.QMessageBox.warning(
@@ -267,6 +302,9 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
                 )
 
     def add_gui_not_cutting_species(self):
+        """
+        Вызывает окно с выбором породы для добавления в таблицу "Рубке не подлежат".
+        """
         modal_select_not_cutting_spc = TaSelectNotCuttingSpecies(
             list(self.tableView.model().species_position().keys())
         )
@@ -287,7 +325,7 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
 
     def delete_gui_liquid_species(self):
         """
-        Удаление выделенной породы
+        Удаление выделенной породы из таблицы "Ведомость перечета деревьев"
         """
         current_col = self.tableView.currentIndex().column()
         try:
@@ -305,7 +343,7 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
         result = QtWidgets.QMessageBox.question(
             self,
             "Внимание",
-            f"Вы действительно хотите удалить выбранную породу: {name_spc}",
+            f"Вы действительно хотите удалить выбранную породу: {name_spc}?",
             buttons=QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Yes,
             defaultButton=QtWidgets.QMessageBox.No,
         )
@@ -314,6 +352,9 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
             self.was_edited = True
 
     def delete_gui_not_cutting_species(self) -> bool:
+        """
+        Удаление выделенной строки из таблицы "Ведомость перечета деревьев".
+        """
         current_row = self.tableView_2.currentIndex().row()
         if current_row < 0:
             QtWidgets.QMessageBox.critical(self, "Ошибка", "Выберите строку с записью.")
@@ -322,7 +363,13 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
         self.was_edited = True
 
     def create_trf_widget(self) -> QtWidgets.QComboBox:
-        """Возвращает combobox для разряда высот"""
+        """
+        Создание экземпляра класса для выбора разряда высот.
+        Устанавливает сигнал, который при изменении значения в comboBox
+        устанавливает новое значение разряда высот в ячейку с названием породы
+        (Невозможно добавить значение разряда пород в ячейку разряда высот,
+        т.к. в ячейки находится виджет и ячейка "якобы" пустая)
+        """
         cb = TrfHeightComboBox()
         cb.currentIndexChanged.connect(
             lambda code_trf_height: self.tableView.model().set_trf_for_spc(
@@ -332,11 +379,21 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
         return cb
 
     def edit_not_cutting_row(self):
+        """
+        Вызывает окно с редактированием записи таблицы "Рубке не подлежат".
+        """
         current_row = self.tableView_2.currentIndex().row()
-        not_cutting_row_data = self.tableView_2.model().as_list()[current_row]
+        not_cutting_data = self.tableView_2.model().as_list()
+        available_species = list(self.tableView.model().species_position().keys())
+
+        if type(not_cutting_data) is list:
+            not_cutting_row_data = not_cutting_data[current_row]
+        else:
+            self.message(not_cutting_data)
+            return False
 
         modal_select_not_cutting_spc = TaSelectNotCuttingSpecies(
-            list(self.tableView.model().species_position().keys()), not_cutting_row_data
+            available_species, not_cutting_row_data
         )
 
         if modal_select_not_cutting_spc.exec():
@@ -355,17 +412,22 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
             self.was_edited = True
 
     def closeEditor(self, widget, hint):
-        """Метод вызывается при окончании редактирования ячейки в таблице"""
+        """
+        Проверка значения, которое вводится в таблицу "Ведомость перечета деревьев".
+        Метод вызывается при окончании редактирования ячейки в таблице.
+        """
         if widget.text() != "":
             self.was_edited = True
             try:
-                int(widget.text())
+                if int(widget.text()) < 1 or int(widget.text()) > 2147483648:
+                    raise ValueError
+
                 self.tableView.model().summary_by_column(
                     self.tableView.currentIndex().column()
                 )
             except ValueError:
                 self.message.show(
-                    main_text="Ошибка вводимых данных. Введите целочисленное значение."
+                    main_text="Ошибка вводимых данных. Введите целочисленное значение (больше 0 и меньше 2147483648)."
                 )
         self.origin_closeEditor(widget, hint)
 
@@ -451,8 +513,14 @@ class TaSelectNotCuttingSpecies(QtWidgets.QDialog, UI_NOT_CUTTING_SPECIES):
     def seeds_field_validation(self) -> bool:
         """Валидация вводимых полей"""
         try:
-            int(self.lineEdit.text())
-            int(self.lineEdit_2.text())
+            if int(self.lineEdit.text()) < 0 and int(self.lineEdit.text()) > 2147483648:
+                raise ValueError
+
+            if (
+                int(self.lineEdit_2.text()) < 0
+                and int(self.lineEdit_2.text()) > 2147483648
+            ):
+                raise ValueError
         except ValueError:
             return False
         return True
@@ -514,6 +582,8 @@ class InformativeMessage(QtWidgets.QMessageBox):
         self.setText(str(main_text))
         if detailed_text:
             self.setDetailedText(str(detailed_text))
+        else:
+            self.setDetailedText(None)
         super().show()
 
 

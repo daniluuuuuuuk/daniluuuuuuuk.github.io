@@ -77,31 +77,37 @@ class XLSXExportedData(QThread):
         ws = wb["Семенники"]
         instance_list = self.model_not_cutting.as_list()
 
-        for counter in range(len(instance_list)):
-            row = counter + 4
-            current_species_name = (
-                Species.select(Species.name_species)
-                .where(Species.code_species == instance_list[counter]["code_species"])
-                .get()
-                .name_species
-            )
-            current_seed_type_name = (
-                KindSeeds.select(KindSeeds.name_kind_seeds)
-                .where(
-                    KindSeeds.code_kind_seeds
-                    == instance_list[counter]["seed_type_code"]
+        if type(instance_list) is list:
+            for counter in range(len(instance_list)):
+                row = counter + 4
+                current_species_name = (
+                    Species.select(Species.name_species)
+                    .where(
+                        Species.code_species == instance_list[counter]["code_species"]
+                    )
+                    .get()
+                    .name_species
                 )
-                .get()
-                .name_kind_seeds
-            )
+                current_seed_type_name = (
+                    KindSeeds.select(KindSeeds.name_kind_seeds)
+                    .where(
+                        KindSeeds.code_kind_seeds
+                        == instance_list[counter]["seed_type_code"]
+                    )
+                    .get()
+                    .name_kind_seeds
+                )
 
-            ws.cell(row=row, column=1, value=current_species_name)
-            ws.cell(row=row, column=4, value=current_seed_type_name)
-            ws.cell(row=row, column=8, value=instance_list[counter]["seed_dmr"])
-            ws.cell(row=row, column=10, value=instance_list[counter]["seed_count"])
-            ws.cell(row=row, column=12, value=instance_list[counter]["seed_number"])
+                ws.cell(row=row, column=1, value=current_species_name)
+                ws.cell(row=row, column=4, value=current_seed_type_name)
+                ws.cell(row=row, column=8, value=instance_list[counter]["seed_dmr"])
+                ws.cell(row=row, column=10, value=instance_list[counter]["seed_count"])
+                ws.cell(row=row, column=12, value=instance_list[counter]["seed_number"])
 
-        return True
+            return True
+
+        else:
+            self.signal_message_result.emit(instance_list)
 
     def run(self):
         file = BasicDir.get_module_dir("templates/template_accounting.xlsx")

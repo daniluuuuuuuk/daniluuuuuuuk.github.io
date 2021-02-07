@@ -358,6 +358,9 @@
             <property name="text">
              <string>-</string>
             </property>
+            <property name="shortcut">
+             <string>Ctrl+-</string>
+            </property>
            </widget>
           </item>
           <item>

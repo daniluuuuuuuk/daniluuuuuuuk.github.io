@@ -18,7 +18,9 @@ class BasicDir:
         else:
             os_path_separator = "/"
         current_full_path = os.path.dirname(os.path.realpath(__file__))
-        module_folders_array = current_full_path.split(os_path_separator)[:-1]  # up 3 level
+        module_folders_array = current_full_path.split(os_path_separator)[
+            :-1
+        ]  # up 3 level
         module_path = os_path_separator.join(module_folders_array)
         full_file_path = module_path + os_path_separator + relative_path
         return full_file_path
@@ -32,7 +34,9 @@ class BasicDir:
         else:
             os_path_separator = "/"
         current_full_path = os.path.dirname(os.path.realpath(__file__))
-        plugin_folders_array = current_full_path.split(os_path_separator)[:-4]  # up 3 level
+        plugin_folders_array = current_full_path.split(os_path_separator)[
+            :-4
+        ]  # up 3 level
         plugin_path = os_path_separator.join(plugin_folders_array)
         full_file_path = plugin_path + os_path_separator + relative_path
 

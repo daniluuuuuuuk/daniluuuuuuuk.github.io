@@ -48,15 +48,22 @@ class TreesNotCutting(QStandardItemModel):
 
         return False
 
-    def as_list(self) -> list:
+    def as_list(self) -> Union[list, dict]:
         list_from_model = []
-        for row in range(self.rowCount()):  # Заходим в строку
-            one_row = {
-                "code_species": self.item(row, 0).code_species,
-                "seed_type_code": self.item(row, 1).seed_type_code,
-                "seed_dmr": int(self.item(row, 2).text()),
-                "seed_count": int(self.item(row, 3).text()),
-                "seed_number": self.item(row, 4).text(),
+        try:
+            for row in range(self.rowCount()):  # Заходим в строку
+                one_row = {
+                    "code_species": self.item(row, 0).code_species,
+                    "seed_type_code": self.item(row, 1).seed_type_code,
+                    "seed_dmr": int(self.item(row, 2).text()),
+                    "seed_count": int(self.item(row, 3).text()),
+                    "seed_number": self.item(row, 4).text(),
+                }
+                list_from_model.append(one_row)
+            return list_from_model
+
+        except Exception as mes:
+            return {
+                "main_text": f"Ошибка представления данных.",
+                "detailed_text": str(mes),
             }
-            list_from_model.append(one_row)
-        return list_from_model

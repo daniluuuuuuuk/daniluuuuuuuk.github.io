@@ -14,9 +14,9 @@ class TreesLiquid(QStandardItemModel):
         super().__init__()
         self.trf_height_row = 0  # Номер строки, где прописана разряд высот
         self.species_row = 1  # Номер строки, где прописана порода
-        self.make_dmr()
+        self.__make_dmr()
 
-    def make_dmr(self):
+    def __make_dmr(self):
         """Строю диаметры для таблицы"""
         self.setVerticalHeaderItem(self.trf_height_row, QStandardItem("Разряд"))
         self.setVerticalHeaderItem(self.species_row, QStandardItem("Диаметр"))
@@ -144,18 +144,42 @@ class TreesLiquid(QStandardItemModel):
                             instance["dmr"] = int((row - 1) * 4)
 
                             try:
-                                instance["num_ind"] = self.item(row, col).text()
-                                if instance["num_ind"] == "":
+                                instance["num_ind"] = int(self.item(row, col).text())
+                                if (
+                                    instance["num_ind"] == ""
+                                    or instance["num_ind"] < 1
+                                    or instance["num_ind"] > 2147483648
+                                ):
                                     raise AttributeError
                             except AttributeError:
                                 instance["num_ind"] = "0"
+                            except ValueError:
+                                return {
+                                    "main_text": f"Ошибка вводимых данных. \
+                                        Введите целочисленное значение (больше 0 и меньше 2147483648).\
+                                        \nСтрока {row}, столбец {col+1}",
+                                    "detailed_text": None,
+                                }
 
                             try:
-                                instance["num_fuel"] = self.item(row, col + 1).text()
-                                if instance["num_fuel"] == "":
+                                instance["num_fuel"] = int(
+                                    self.item(row, col + 1).text()
+                                )
+                                if (
+                                    instance["num_fuel"] == ""
+                                    or instance["num_fuel"] < 1
+                                    or instance["num_fuel"] > 2147483648
+                                ):
                                     raise AttributeError
                             except AttributeError:
                                 instance["num_fuel"] = "0"
+                            except ValueError:
+                                return {
+                                    "main_text": f"Ошибка вводимых данных. \
+                                        Введите целочисленное значение (больше 0 и меньше 2147483648).\
+                                        \nСтрока {row}, столбец {col+2}",
+                                    "detailed_text": None,
+                                }
                             list_from_model.append(instance)
         return list_from_model
 
@@ -206,7 +230,7 @@ class TreesLiquid(QStandardItemModel):
     def set_trf_for_spc(self, col: int, code_trf_height: int):
         """
         Добавляю значение разряда высот в ячейку породы
-        (Невозможно добавить значение разряда пород в ячейку разряда пород,
+        (Невозможно добавить значение разряда пород в ячейку разряда высот,
         т.к. в ячейки находится виджет и ячейка "якобы" пустая)
         """
         if col >= 0:  # При импорте по умолчанию выбран столбец -1
