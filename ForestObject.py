@@ -180,7 +180,7 @@ class DbQueryWorker(QtCore.QObject):
             ret = self.loader.result
 
         except Exception as e:
-            QgsMessageLog.logMessage('\nStarted task "{}"'.format(
+            QgsMessageLog.logMessage('\Exception in task "{}"'.format(
                 e), MESSAGE_CATEGORY, Qgis.Info)
             raise e
         self.finished.emit(ret)

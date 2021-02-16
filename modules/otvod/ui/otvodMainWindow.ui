@@ -329,7 +329,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QPushButton" name="importCoordinates">
+   <widget class="QPushButton" name="exportAsImage_PushButton">
     <property name="geometry">
      <rect>
       <x>620</x>
@@ -339,7 +339,7 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>Импортировать координаты с устройства</string>
+     <string>Экспортировать как изображение</string>
     </property>
     <property name="text">
      <string/>

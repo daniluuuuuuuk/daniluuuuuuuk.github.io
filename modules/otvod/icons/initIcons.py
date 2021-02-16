@@ -30,8 +30,8 @@ class IconSet:
             QIcon(self.resolve('lesoseka_from_map.png')))
         self.omw.lesoseka_from_map_points_button.setIcon(
             QIcon(self.resolve('lesoseka_from_map_points.png')))
-        self.omw.importCoordinates.setIcon(
-            QIcon(self.resolve('internet.png')))
+        self.omw.exportAsImage_PushButton.setIcon(
+            QIcon(self.resolve('image.png')))
         self.omw.handTool_button.setIcon(
             QIcon(self.resolve('hand_tool.png')))
         self.omw.manageLayers_button.setIcon(

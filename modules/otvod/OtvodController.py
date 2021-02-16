@@ -4,7 +4,7 @@ from .MainWindow import MainWindow
 from .CanvasWidget import CanvasWidget
 from .ui.SwitchButton import Switch
 from .gui.LesosekaInfoDialog import LesosekaInfo
-from .tools import GeoOperations
+from .tools import GeoOperations, ImageExporter
 from .tools.tempFeatures.BindingPointBuilder import BindingPointBuilder
 from . import Report
 from .DataTable import DataTableWrapper
@@ -12,7 +12,7 @@ from .OtvodSettingsDialog import OtvodSettingsWindow
 from ...tools import config
 from .CuttingAreaAttributesEditor import CuttingAreaAttributesEditor
 from PyQt5.QtGui import QIcon
-from qgis.core import QgsProject, QgsPointXY
+from qgis.core import QgsProject, QgsPointXY, QgsPrintLayout
 from functools import partial
 from qgis.PyQt.QtWidgets import QMessageBox, QDialog, QButtonGroup, QFileDialog, QTableWidgetItem
 from datetime import datetime
@@ -41,6 +41,9 @@ class OtvodController():
         self.tableWrapper = self.loadDataTable()
         
         IconSet(self.omw)
+
+
+
 
         self.omw.saveData_action.triggered.connect(
             lambda: self.saveDataToFile())
@@ -110,6 +113,15 @@ class OtvodController():
 
         self.omw.magneticDeclination_pushButton.clicked.connect(self.getMagneticInclination)
 
+        self.project = QgsProject.instance()
+        self.imgExporter = ImageExporter.ImageExporter(self.project, self.canvas)
+        self.omw.exportAsImage_PushButton.clicked.connect(self.generateImage)
+
+    def generateImage(self):      
+        path = self.imgExporter.doJob(self.tableWrapper.getJSONRows())
+        self.omw.outputLabel.setText(
+            "<a href=file:///{}>Открыть картинку</a>".format(os.path.realpath(path)))
+        self.omw.outputLabel.setOpenExternalLinks(True)
 
     def getMagneticInclination(self):
         point = GeoOperations.convertToWgs(self.canvas.center())

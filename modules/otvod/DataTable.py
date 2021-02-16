@@ -580,7 +580,7 @@ class DataTableWrapper():
         self.tableModel.add_lesoseka_node_row()
 
     def getJSONRows(self):
-        self.tableModel.getJSONRows()
+        return self.tableModel.getJSONRows()
 
     def encodeJSON(self, table):
         if isinstance(table, DataTableWrapper):
