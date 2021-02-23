@@ -157,7 +157,9 @@ class OtvodController():
         QgsProject.instance().setSnappingConfig(my_snap_config)
 
     def manageCanvasLayers(self):
-        manager = LayerManager(self.canvas)
+        self.manager = LayerManager(self.canvas)
+        if self.manager.initWidget():
+            self.manager.changeLayers(self.manager.checkBoxes)
 
     def initHandTool(self):
         self.canvas.setMapTool(self.panTool)
@@ -402,6 +404,12 @@ class OtvodController():
 
 
     def saveCuttingArea(self):
+        try:
+            layer = QgsProject.instance().mapLayersByName("Результат обрезки")[0]
+            QgsProject.instance().removeMapLayers([layer.id()])
+            self.canvas.refreshAllLayers()
+        except Exception as e:
+            print(str(e) + "Ошибка при удалении слоя Результат обрезки")
         if self.cuttingArea == None:
             self.cuttingArea = self.canvasWidget.cuttingArea
         if self.cuttingArea == None:
@@ -440,6 +448,11 @@ class OtvodController():
             QgsProject.instance().removeMapLayers([layer.id()])
         except Exception as e:
             print(str(e) + "Ошибка при удалении слоя Пикеты")
+        try:
+            layer = QgsProject.instance().mapLayersByName("Результат обрезки")[0]
+            QgsProject.instance().removeMapLayers([layer.id()])
+        except Exception as e:
+            print(str(e) + "Ошибка при удалении слоя Результат обрезки")            
         # self.omw.outputLabel.setText("Лесосека удалена")
         self.magneticInclination = 0.0
         # self.omw.inclinationSlider.setValue(0)

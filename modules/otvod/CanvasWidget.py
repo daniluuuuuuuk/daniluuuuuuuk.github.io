@@ -1,3 +1,4 @@
+from . import CuttingArea
 from .UIButtonController import ButtonController
 from .tools import GeoOperations
 from .tools.Serializer import DbSerializer
@@ -9,13 +10,14 @@ from .tools.mapTools.PeekStratumFromMap import PeekStratumFromMap
 from .tools.tempFeatures.AnchorPointBuilder import AnchorPointBuilder
 from .tools.tempFeatures.CuttingAreaBuilder import CuttingAreaBuilder
 from .tools.tempFeatures.PointBuilder import PointBuilder
+from .tools.VydelAreaCalculator import VydelAreaCalculator
 from .gui.LesosekaInfoDialog import LesosekaInfo
-from . import CuttingArea
 from qgis.PyQt.QtWidgets import QMessageBox, QDialog
 from qgis.core import QgsCoordinateReferenceSystem, QgsProject, QgsPointXY
 from PyQt5.QtGui import QColor
 from qgis.gui import QgsMapCanvas, QgsMapToolZoom, QgsMapToolPan
 from qgis.PyQt.QtCore import QObject
+from .LayerManager import LayerManager
 
 
 class CanvasWidget(QgsMapCanvas):
@@ -218,9 +220,14 @@ class CanvasWidget(QgsMapCanvas):
         self.omw.azimuth_radio_button.setChecked(True)
         self.table.makeTableFromCuttingArea(bindingPoint, cuttingArea)
         self.table.deleteLastTemperatePoint()
-
+        self.showAreaByVydel()
         # self.omw.inclinationSlider.setValue(0)
         
+    def showAreaByVydel(self):
+        calc = VydelAreaCalculator()
+        layer = calc.calculateAreaByVydel()
+        manager = LayerManager(self.canvas)
+        manager.addLayer('Результат обрезки')
 
         """Получение точки из окна карты и занесение ее координат XY в таблицу
         """

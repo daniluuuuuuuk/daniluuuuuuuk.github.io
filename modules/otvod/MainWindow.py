@@ -153,5 +153,10 @@ class MainWindow(QMainWindow, otvodMainWindow):
             QgsProject.instance().removeMapLayers([layer.id()])
         except Exception as e:
             print(str(e) + "Ошибка при удалении слоя Привязка временный слой")
+        try:
+            layer = QgsProject.instance().mapLayersByName("Результат обрезки")[0]
+            QgsProject.instance().removeMapLayers([layer.id()])
+        except Exception as e:
+            print(str(e) + "Ошибка при удалении слоя Результат обрезки")                  
         iface.mapCanvas().refresh()
         self.deleteLater()
