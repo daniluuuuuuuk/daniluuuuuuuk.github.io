@@ -217,7 +217,7 @@ class CanvasWidget(QgsMapCanvas):
             switch.setChecked(False)
 
         # self.tableWrapper.convertCoordFormat(self.coordType)
-        self.omw.azimuth_radio_button.setChecked(True)
+        self.omw.coord_radio_button.setChecked(True)
         self.table.makeTableFromCuttingArea(bindingPoint, cuttingArea)
         self.table.deleteLastTemperatePoint()
         self.showAreaByVydel()
@@ -258,7 +258,7 @@ class CanvasWidget(QgsMapCanvas):
             
             def getAreaPoints(areaData, areaPoints):
                 self.editedUid = areaData[0]
-                self.omw.azimuth_radio_button.setChecked(True)
+                self.omw.coord_radio_button.setChecked(True)
                 switch = self.omw.switchLayout.itemAt(0).widget()
                 if switch.isChecked():
                     switch.setChecked(False)
