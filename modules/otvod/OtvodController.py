@@ -6,7 +6,7 @@ from .ui.SwitchButton import Switch
 from .gui.LesosekaInfoDialog import LesosekaInfo
 from .tools import GeoOperations, ImageExporter
 from .tools.tempFeatures.BindingPointBuilder import BindingPointBuilder
-from . import Report
+from . import Report, LayoutManager
 from .DataTable import DataTableWrapper
 from .OtvodSettingsDialog import OtvodSettingsWindow
 from ...tools import config
@@ -41,9 +41,6 @@ class OtvodController():
         self.tableWrapper = self.loadDataTable()
         
         IconSet(self.omw)
-
-
-
 
         self.omw.saveData_action.triggered.connect(
             lambda: self.saveDataToFile())
@@ -81,7 +78,7 @@ class OtvodController():
             self.canvasWidget.showPointOnCanvas)
 
         self.omw.peekFromGPSPushButton.clicked.connect(self.getGPSCoords)
-        self.omw.generateReport_Button.clicked.connect(self.generateReport)
+        self.omw.generateReport_Button.clicked.connect(self.generateLayout)
 
         self.omw.buildLesoseka_Button.clicked.connect(
             self.canvasWidget.buildLesosekaFromMap)
@@ -463,7 +460,7 @@ class OtvodController():
         self.canvas.refresh()
         iface.mapCanvas().refresh()
 
-    def generateReport(self):
+    def generateLayout(self):
         try:
             QgsProject.instance().mapLayersByName(
                 "Привязка временный слой")[0],
@@ -496,10 +493,6 @@ class OtvodController():
                     "Привязка временный слой")[0],
                 QgsProject.instance().mapLayersByName("Пикеты")[0]
             ]
-
-        report = Report.Report(
-            self.tableWrapper.tableModel, self.canvas, layers)
-        path = report.generate()
-        self.omw.outputLabel.setText(
-            "<a href=file:///{}>Открыть отчет</a>".format(os.path.realpath(path)))
-        self.omw.outputLabel.setOpenExternalLinks(True)
+        layout = LayoutManager.LayoutManager(
+            self.tableWrapper.tableModel, self.canvas, layers, QgsProject.instance())
+        layout.generate(self.tableWrapper.getJSONRows())

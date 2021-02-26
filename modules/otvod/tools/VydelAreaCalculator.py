@@ -5,6 +5,7 @@ from qgis.core import QgsVectorLayer, QgsCoordinateReferenceSystem, QgsProject, 
 from qgis.core import QgsProcessing, QgsDistanceArea, QgsCoordinateTransformContext, edit
 from qgis.core import QgsVectorLayerSimpleLabeling, QgsTextFormat, QgsTextBufferSettings
 from qgis.core import QgsTextBufferSettings, QgsUnitTypes, QgsField, QgsPalLayerSettings
+from qgis.PyQt.QtWidgets import QToolButton, QMenu, QWidgetAction, QWidget, QMessageBox
 
 class VydelAreaCalculator:
 
@@ -40,19 +41,22 @@ class VydelAreaCalculator:
                 # newLayer.commitChanges()
 
     def calculateAreaByVydel(self):
-        
-        newLayer = self.getCuttedLayer(self.inpath, self.layer)
+        try:
+            newLayer = self.getCuttedLayer(self.inpath, self.layer)
 
-        self.project.addMapLayer(newLayer)
+            self.project.addMapLayer(newLayer)
 
-        da = self.setupAreaCalculationObject()
+            da = self.setupAreaCalculationObject()
 
-        self.addAreaAttribute(newLayer, "area_calc")
+            self.addAreaAttribute(newLayer, "area_calc")
 
-        self.updateAreaAttribute(newLayer, da)
+            self.updateAreaAttribute(newLayer, da)
 
-        newLayer.renderer().setSymbol(self.setLayerSymbol())
-        self.setLayerLabelling(newLayer)
+            newLayer.renderer().setSymbol(self.setLayerSymbol())
+            self.setLayerLabelling(newLayer)
+
+        except Exception as e:
+            QMessageBox.information(None, 'Ошибка', "Ошибка при расчете площади по выделам.\n" + str(e))
     
     def updateAreaAttribute(self, newLayer, da):
         with edit(newLayer):
