@@ -19,12 +19,23 @@ class ImageExporter:
         settings = cf.readConfigs()
         return settings.get('path')
 
+    def getBaseLayers(self):
+        layerNamesToShow = ["Выдела", "Кварталы", "Лесосека временный слой",
+        "Привязка временный слой", "Пикеты", "Точка привязки", "Привязка", "Лесосека"]
+        layers = []
+        for name in layerNamesToShow:
+            layer = QgsProject.instance().mapLayersByName(name)
+            if layer:
+                layers.append(layer[0])
+                QgsProject.instance().removeMapLayers([layer[0].id()])        
+        return layers
+
     def prepareImage(self):
         settings = QgsMapSettings()
         self.canvas.refresh()
         settings.setOutputSize(QSize(391, 361))
         settings.setExtent(self.canvas.extent())
-        settings.setLayers(self.project.mapLayers().values())
+        settings.setLayers(self.getBaseLayers())
         crs = QgsCoordinateReferenceSystem('EPSG:32635')
         settings.setDestinationCrs(crs)
         job = QgsMapRendererSequentialJob(settings)

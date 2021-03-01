@@ -11,13 +11,21 @@ import math
 from ...tools import config
 from ... import util
 
+A4_PAGE_HEIGHT = 3700
+
 class LayoutManager:
 
-    def __init__(self, table, canvas, layers, project):
-        self.layers = layers
+    def __init__(self, canvas, project, uid=None, scale=None):
         self.project = project
         self.canvas = canvas
-        self.uid = self.getUid()
+        if not uid:
+            self.uid = self.getUid()
+        else:
+            self.uid = uid
+        if not scale:
+            self.scale = self.canvas.scale()
+        else:
+            self.scale = scale
         self.feature = self.getFeatureByUid()
 
     def getUid(self):
@@ -69,33 +77,43 @@ class LayoutManager:
 
         return layout
 
+    def getBaseLayers(self):
+        layerNamesToShow = ["Выдела", "Кварталы", "Лесосека временный слой",
+        "Привязка временный слой", "Пикеты", "Точка привязки", "Привязка", "Лесосека"]
+        layers = []
+        for name in layerNamesToShow:
+            layer = QgsProject.instance().mapLayersByName(name)
+            if layer:
+                layers.append(layer[0])
+        return layers
+
     def prepareMap(self, layout):
         mapItem = QgsLayoutItemMap(layout)
         mapItem.attemptSetSceneRect(QRectF(55, 70, 100, 100))
         # setup an initial extent to view in the map
         rectangle = self.canvas.extent()
         mapItem.setExtent(rectangle)
-        mapItem.setScale(self.canvas.scale())
+        mapItem.setScale(self.scale)
+        mapItem.setLayers(self.getBaseLayers())
         layout.addLayoutItem(mapItem)
         return mapItem
 
     def generateTableHTML(self, rows):
         
         def parseHeader():
-            tableHeaderDict = list(rows[1].values())[0]
-            keys = list(tableHeaderDict.keys())
             th = ''
-            for key in keys:
+            for key in rows[0]:
+                if key == 'GPS':
+                    continue
                 th += '<th>' + key + '</th>'
             return '<tr>' + th + '</tr>'
         
         def parseValues():
             values = ''
             for row in rows[1:]:
-                valuesDict = list(row.values())[0]
                 tr = ''
-                td = ''                
-                for data in list(valuesDict.values()):
+                td = ''
+                for data in row:
                     td += '<td>' + data + '</td>'
                 tr = '<tr>' + td + '</tr>'
                 values += tr
@@ -103,7 +121,6 @@ class LayoutManager:
 
         htmlHeader = parseHeader()
         htmlValues = parseValues()
-
         return '<center><table>' + htmlHeader + htmlValues + '</table></center>'
 
     def prepareTableCss(self):
@@ -120,6 +137,7 @@ class LayoutManager:
             'td { \
             border: 1px solid black;\
             white-space: nowrap;\
+            text-align: center;\
             }'
 
     def composeHtmlLayout(self, layout, tableRows, topPosition):
@@ -181,11 +199,11 @@ class LayoutManager:
         
         def setScaleLabel():           
             mainlabel = QgsLayoutItemLabel(layout)
-            mainlabel.setText('Масштаб: {}'.format(round(self.canvas.scale())))
+            mainlabel.setText('Масштаб: {}'.format(round(self.scale)))
             mainlabel.setFont(QFont('Times New Roman', 11))
             layout.addLayoutItem(mainlabel)
             mainlabel.adjustSizeToText()
-            mainlabel.attemptMove(QgsLayoutPoint(650, 750, QgsUnitTypes.LayoutPixels))
+            mainlabel.attemptMove(QgsLayoutPoint(1100, 750, QgsUnitTypes.LayoutPixels))
 
         layout_html = QgsLayoutItemHtml(layout)
         html_frame = QgsLayoutFrame(layout, layout_html)
@@ -214,7 +232,6 @@ class LayoutManager:
             attrDict["num"] = self.feature["num"]
             attrDict["useType"] = self.feature["usetype"]
             attrDict["cuttingType"] = self.feature["cuttingtyp"]
-            # attrDict["plot"] = self.feature["plot"]
             attrDict["fio"] = self.feature["fio"]
             attrDict["date"] = self.feature["date"]
             attrDict["info"] = self.feature["info"]
@@ -264,26 +281,37 @@ class LayoutManager:
         for i in range(0, len(tableRows), 45):
             yield tableRows[i:i + 45]
             
-
     def prepareTable(self, layoutPageCount, layout, tableRows):
-        layoutA4PageHeight = 3700
-
         if layoutPageCount == 1:
             tableHtmlLayout = self.composeHtmlLayout(layout, tableRows, 2200)
         else:
-            tableHtmlLayout = self.composeHtmlLayout(layout, tableRows[0:20], 2200)
-            tableChunks = self.getRowsChunked(tableRows[20:])
+            tableHtmlLayout = self.composeHtmlLayout(layout, tableRows[0:15], 2200)
+            tableChunks = self.getRowsChunked(tableRows[15:])
             i = 1
             for chnk in tableChunks:
-                topPosition = i * layoutA4PageHeight + 125            
+                topPosition = i * A4_PAGE_HEIGHT + 125            
                 tableHtmlLayout = self.composeHtmlLayout(layout, chnk, topPosition)
                 i += 1
 
     def countPages(self, tableRows):
-        if (len(tableRows) - 1) < 20:
+        if (len(tableRows) - 1) < 15:
             return 1
         else:
-            return 1 + math.ceil((len(tableRows[20:]) - 1) / 45)
+            return 1 + math.ceil((len(tableRows[15:]) - 1) / 45)
+
+    def prepareFio(self, pages, layout):
+        if pages == 1:
+            heightPosition = 3200
+        else:
+            heightPosition = (pages - 1) * 3700 + 3100
+
+        fioLabel = QgsLayoutItemLabel(layout)
+        fioLabel.setText("Исполнитель: {}".format(str(self.feature["fio"])))
+        fioLabel.setFont(QFont('Times New Roman', 11))
+        layout.addLayoutItem(fioLabel)
+        fioLabel.adjustSizeToText()
+        fioLabel.attemptMove(QgsLayoutPoint(200, heightPosition, QgsUnitTypes.LayoutPixels))
+
 
     def generate(self, tableRows):
         pages = self.countPages(tableRows)
@@ -294,4 +322,5 @@ class LayoutManager:
         legendImages = self.prepareLegendImages(layout)
         mapItem = self.prepareMap(layout)
         self.prepareTable(pages, layout, tableRows)
+        self.prepareFio(pages, layout)
         iface.openLayoutDesigner(layout)

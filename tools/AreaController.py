@@ -5,8 +5,10 @@ from . import config
 from ..gui import areaControllerDialog
 from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QMessageBox
 from qgis.PyQt.QtCore import QDate
+from ..modules.otvod.tools.Serializer import DbSerializer
 from ..modules.otvod.tools.threading.CuttingTypeWorker import Worker as CuttingTypeWorker
 from ..modules.otvod.tools.threading.CuttingTypeLoader import CuttingTypeLoader
+from .AreaDataContainer import AreaDataPrintContainer, AreaCoordinatesTypeDialog
 from ..modules.trees_accounting.src.trees_accounting import TaMainWindow
 from qgis.utils import iface
 
@@ -59,6 +61,33 @@ class AreaController(QtCore.QObject):
         self.ui.delete_pushButton.clicked.connect(self.deleteArea)
         self.ui.buttonBox.button(QDialogButtonBox.Close).setVisible(False)
         self.ui.useType_comboBox.currentTextChanged.connect(self.useTypeChanged)
+        self.ui.print_pushButton.clicked.connect(self.printArea)
+
+    def printArea(self):
+        
+        def areaPointsLoaded(data, points):
+            dc = AreaDataPrintContainer(data, points, self.feature, layoutData)
+            dc.buildPointsLayer()
+            dc.buildAreaLayer()
+            dc.prepareTableForLayout()
+            dc.printLayout()
+
+        def dialogData(dialog):
+            layoutData = {
+                'type' : dialog.coordTypeGroup.checkedButton().text(),
+                'format' : dialog.coordFormatGroup.checkedButton().text(),
+                'scale' : dialog.scaleCombobox.currentText()
+            }
+            return layoutData
+
+        self.dialog = AreaCoordinatesTypeDialog()
+        if self.dialog.exec() == QDialog.Accepted:
+            layoutData = dialogData(self.dialog)
+            uid = self.feature["uid"]
+            serializer = DbSerializer(uid)
+            serializer.signal.connect(areaPointsLoaded)
+            serializer.loadFromDb()
+        return
 
     def showCountWindow(self):
         uid = self.feature["uid"]
@@ -221,6 +250,19 @@ class SettingsWindow(QDialog):
         self.ui = areaControllerDialog.Ui_Dialog()
         self.ui.setupUi(self)
 
+    def closeEvent(self, event):
+
+        layerNamesToDelete = ["Лесосека", "Точка привязки",
+        "Привязка", "Пикеты"]
+
+        for name in layerNamesToDelete:
+            layer = QgsProject.instance().mapLayersByName(name)
+            if layer:
+                QgsProject.instance().removeMapLayers([layer[0].id()])
+
+        iface.mapCanvas().refresh()
+        self.deleteLater()
+
 class Worker(QtCore.QObject):
 
     def __init__(self, uid):
@@ -267,7 +309,7 @@ class RemoveAreaTask(QgsTask):
         postgisConnection.connection.commit()
         cursor.execute("DELETE FROM {table} WHERE uid='{area_uid}'"
         .format(table=AREA_LINE_TABLE_NAME, area_uid=uid))
-        postgisConnection.connection.commit()        
+        postgisConnection.connection.commit()
 
     def run(self, uid):
         QgsMessageLog.logMessage('\nStarted task "{}"'.format(

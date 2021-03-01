@@ -401,12 +401,12 @@ class OtvodController():
 
 
     def saveCuttingArea(self):
-        try:
-            layer = QgsProject.instance().mapLayersByName("Результат обрезки")[0]
-            QgsProject.instance().removeMapLayers([layer.id()])
-            self.canvas.refreshAllLayers()
-        except Exception as e:
-            print(str(e) + "Ошибка при удалении слоя Результат обрезки")
+        layer = QgsProject.instance().mapLayersByName("Результат обрезки")
+        if layer:
+            QgsProject.instance().removeMapLayers([layer[0].id()])
+
+        self.canvas.refreshAllLayers()
+
         if self.cuttingArea == None:
             self.cuttingArea = self.canvasWidget.cuttingArea
         if self.cuttingArea == None:
@@ -418,38 +418,14 @@ class OtvodController():
             self.omw.outputLabel.setText("Лесосека сохранена")
 
     def deleteCuttingArea(self):
-        try:
-            layer = QgsProject.instance().mapLayersByName("Точка привязки")[0]
-            QgsProject.instance().removeMapLayers([layer.id()])
-        except Exception as e:
-            print(str(e) + "Ошибка при удалении слоя Точка привязки")
-        try:
-            layer = QgsProject.instance().mapLayersByName(
-                "Лесосека временный слой")[0]
-            QgsProject.instance().removeMapLayers([layer.id()])
-        except Exception as e:
-            print(str(e) + "Ошибка при удалении слоя Точка привязки")
-        try:
-            layer = QgsProject.instance().mapLayersByName("Опорные точки")[0]
-            QgsProject.instance().removeMapLayers([layer.id()])
-        except Exception as e:
-            print(str(e) + "Ошибка при удалении слоя Опорные точки")
-        try:
-            layer = QgsProject.instance().mapLayersByName(
-                "Привязка временный слой")[0]
-            QgsProject.instance().removeMapLayers([layer.id()])
-        except Exception as e:
-            print(str(e) + "Ошибка при удалении слоя Привязка временный слой")
-        try:
-            layer = QgsProject.instance().mapLayersByName("Пикеты")[0]
-            QgsProject.instance().removeMapLayers([layer.id()])
-        except Exception as e:
-            print(str(e) + "Ошибка при удалении слоя Пикеты")
-        try:
-            layer = QgsProject.instance().mapLayersByName("Результат обрезки")[0]
-            QgsProject.instance().removeMapLayers([layer.id()])
-        except Exception as e:
-            print(str(e) + "Ошибка при удалении слоя Результат обрезки")            
+        layerNamesToDelete = ["Точка привязки", "Лесосека временный слой", "Опорные точки",
+        "Привязка временный слой", "Пикеты", "Результат обрезки"]
+
+        for name in layerNamesToDelete:
+            layer = QgsProject.instance().mapLayersByName(name)
+            if layer:
+                QgsProject.instance().removeMapLayers([layer[0].id()])
+
         # self.omw.outputLabel.setText("Лесосека удалена")
         self.magneticInclination = 0.0
         # self.omw.inclinationSlider.setValue(0)
@@ -461,38 +437,5 @@ class OtvodController():
         iface.mapCanvas().refresh()
 
     def generateLayout(self):
-        try:
-            QgsProject.instance().mapLayersByName(
-                "Привязка временный слой")[0],
-        except:
-            layers = [
-                QgsProject.instance().mapLayersByName("Точка привязки")[0],
-                QgsProject.instance().mapLayersByName("Выдела")[0],
-                # QgsProject.instance().mapLayersByName("Гидрография площадная")[0],
-                # QgsProject.instance().mapLayersByName("Дороги")[0],
-                QgsProject.instance().mapLayersByName("Кварталы")[0],
-                QgsProject.instance().mapLayersByName("Населенные пункты")[0],
-                QgsProject.instance().mapLayersByName(
-                    "Лесосека временный слой")[0],
-                # QgsProject.instance().mapLayersByName("Гидрография линейная")[0],
-                # QgsProject.instance().mapLayersByName("Привязка временный слой")[0],
-                QgsProject.instance().mapLayersByName("Пикеты")[0]
-            ]
-        else:
-            layers = [
-                QgsProject.instance().mapLayersByName("Точка привязки")[0],
-                QgsProject.instance().mapLayersByName("Выдела")[0],
-                # QgsProject.instance().mapLayersByName("Гидрография площадная")[0],
-                # QgsProject.instance().mapLayersByName("Дороги")[0],
-                QgsProject.instance().mapLayersByName("Кварталы")[0],
-                QgsProject.instance().mapLayersByName("Населенные пункты")[0],
-                QgsProject.instance().mapLayersByName(
-                    "Лесосека временный слой")[0],
-                # QgsProject.instance().mapLayersByName("Гидрография линейная")[0],
-                QgsProject.instance().mapLayersByName(
-                    "Привязка временный слой")[0],
-                QgsProject.instance().mapLayersByName("Пикеты")[0]
-            ]
-        layout = LayoutManager.LayoutManager(
-            self.tableWrapper.tableModel, self.canvas, layers, QgsProject.instance())
-        layout.generate(self.tableWrapper.getJSONRows())
+        layout = LayoutManager.LayoutManager(self.canvas, QgsProject.instance())
+        layout.generate([self.tableWrapper.getColumnNames()] + self.tableWrapper.copyTableData())
