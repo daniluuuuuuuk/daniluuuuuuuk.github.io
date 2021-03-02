@@ -20,6 +20,14 @@ class BaseModel(Connection):
         schema = "dictionary"
 
 
+class TrfHeight(BaseModel):
+    code_trf_height = AutoField(null=False, primary_key=True)
+    name_trf_height = TextField(null=False)
+
+    class Meta:
+        table_name = "trf_height"
+
+
 class Econ(BaseModel):
     code_econ = AutoField(null=False, primary_key=True)
     name_econ = TextField(null=False)
@@ -102,3 +110,11 @@ class Organization(BaseModel):
             "1500100000": "МЛХ",
             "1500100000": "МЛХ",
         }  # Совпадений не найдено
+
+
+class KindSeeds(BaseModel):
+    code_kind_seeds = IntegerField(null=False, primary_key=True)
+    name_kind_seeds = TextField(null=False)
+
+    class Meta:
+        table_name = "kind_seeds"

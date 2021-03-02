@@ -35,7 +35,9 @@ class Worker(QtCore.QObject):
     def run(self):
         ret = None
         try:
-            self.loader.run(self.identity, self.num_lhz, self.num_lch, self.lhCode)
+            self.loader.run(
+                self.identity, self.num_lhz, self.num_lch, self.lhCode
+            )
             self.loader.waitForFinished()
             ret = {
                 "lh_name": self.loader.lh_name,

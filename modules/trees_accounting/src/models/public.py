@@ -16,7 +16,7 @@ from peewee import (
 )
 
 from .database_connection import Connection
-from .dictionary import Species
+from .dictionary import Species, TrfHeight, KindSeeds
 
 
 class BaseModel(Connection):
@@ -62,3 +62,29 @@ class Trees(BaseModel):
     dmr = IntegerField(null=False)
     num_ind = IntegerField()
     num_fuel = IntegerField()
+
+
+class TreesNotCuttingModel(BaseModel):
+    area_uuid = UUIDField(null=False)
+    code_species = ForeignKeyField(Species, column_name="code_species", null=False)
+    seed_type_code = ForeignKeyField(
+        KindSeeds, column_name="seed_type_code", null=False
+    )
+    seed_dmr = IntegerField(null=False)
+    seed_count = IntegerField(null=False)
+    seed_number = TextField(null=True)
+
+    class Meta:
+        table_name = "trees_not_cutting"
+
+
+class TreesTrfHeight(BaseModel):
+    area_uuid = CharField(column_name="area_uuid")
+    code_species = ForeignKeyField(Species, column_name="code_species")
+    code_trf_height = ForeignKeyField(TrfHeight, column_name="code_trf_height")
+
+    def __str__(self):
+        return f"{self.area_uuid}__{self.code_species}"
+
+    class Meta:
+        table_name = "trees_trf_height"

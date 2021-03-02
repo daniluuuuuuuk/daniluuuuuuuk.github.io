@@ -13,7 +13,9 @@ from .tools.ProjectInitializer import QgsProjectInitializer
 from .tools.TaxationLoader import Worker as taxWorker
 from .tools import config, AreaController, AreaFilter
 
-from .gui.taxationDescription import TaxationDescription as TaxationDescriptionDialog
+from .gui.taxationDescription import (
+    TaxationDescription as TaxationDescriptionDialog,
+)
 from qgis.PyQt.QtCore import Qt
 
 
@@ -57,7 +59,9 @@ class QgsLes:
         QgsProject.instance().cleared.connect(self.removeFilterButton)
         self.filter = None
         self.dockWidget = None
-        QgsApplication.messageLog().messageReceived.connect(self.write_log_message)
+        QgsApplication.messageLog().messageReceived.connect(
+            self.write_log_message
+        )
 
     def removeFilterButton(self):
         try:
@@ -169,7 +173,9 @@ class QgsLes:
         self.taxationAction.triggered.connect(self.taxationButtonClicked)
 
         self.countAction = QAction(
-            QIcon(util.resolvePath("res\\icon.png")), "Перечет", self.iface.mainWindow()
+            QIcon(util.resolvePath("res\\icon.png")),
+            "Перечет",
+            self.iface.mainWindow(),
         )
         self.countAction.triggered.connect(self.countButtonClicked)
 
@@ -187,7 +193,9 @@ class QgsLes:
             self.iface.mainWindow(),
         )
 
-        self.settingsAction.triggered.connect(lambda: Settings.SettingsController())
+        self.settingsAction.triggered.connect(
+            lambda: Settings.SettingsController()
+        )
 
         self.initProjectAction = QAction(
             QIcon(util.resolvePath("res\\download.png")),
@@ -209,13 +217,17 @@ class QgsLes:
 
     def filterAreaButtonClicked(self, checked):
         if not QgsProject.instance().mapLayersByName("Лесосеки"):
-            QtWidgets.QMessageBox.warning(None, "Ошибка", "Отсутствует слой лесосек.")
+            QtWidgets.QMessageBox.warning(
+                None, "Ошибка", "Отсутствует слой лесосек."
+            )
             return
         if not checked and self.dockWidget:
             self.iface.removeDockWidget(self.dockWidget)
         else:
             self.dockWidget = AreaFilter.AreaFilterDockWidget()
-            self.filgetAreaCtrlr = AreaFilter.AreaFilterController(self.dockWidget)
+            self.filgetAreaCtrlr = AreaFilter.AreaFilterController(
+                self.dockWidget
+            )
             self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockWidget)
 
     def controlAreaClicked(self):
@@ -225,14 +237,18 @@ class QgsLes:
                 self.canvas.setMapTool(zoomTool)
                 self.ctrlr = AreaController.AreaController(feature)
             else:
-                QtWidgets.QMessageBox.warning(None, "Ошибка", "Не выбрана лесосека.")
+                QtWidgets.QMessageBox.warning(
+                    None, "Ошибка", "Не выбрана лесосека."
+                )
 
         self.pkr = peeker.PeekStratumFromMap(self.canvas, "Лесосеки")
         self.canvas.setMapTool(self.pkr)
         self.pkr.signal.connect(getResult)
 
     def initProjectClicked(self):
-        self.initializer = QgsProjectInitializer(self.iface, self.qgsLesToolbar)
+        self.initializer = QgsProjectInitializer(
+            self.iface, self.qgsLesToolbar
+        )
 
     def unload(self):
         del self.qgsLesToolbar
@@ -292,7 +308,9 @@ class QgsLes:
                 self.rst = TaMainWindow(uid)
                 self.rst.show()
             else:
-                QtWidgets.QMessageBox.warning(None, "Внимание", "Не выбрана лесосека.")
+                QtWidgets.QMessageBox.warning(
+                    None, "Внимание", "Не выбрана лесосека."
+                )
 
             zoomTool = QgsMapToolZoom(self.canvas, False)
             self.canvas.setMapTool(zoomTool)

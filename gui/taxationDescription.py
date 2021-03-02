@@ -14,7 +14,9 @@ from PyQt5.QtWidgets import (
 )
 
 
-UI_TAX_DESCRIPTION = uic.loadUiType(util.resolvePath("ui\\taxationDescription.ui"))[0]
+UI_TAX_DESCRIPTION = uic.loadUiType(
+    util.resolvePath("ui\\taxationDescription.ui")
+)[0]
 
 
 class AlignDelegate(QStyledItemDelegate):
@@ -122,8 +124,12 @@ class TaxationDescription(QDialog, UI_TAX_DESCRIPTION):
         # Заполняю первую таблицу:
         self.tableWidget.setItem(0, 1, QTableWidgetItem(tax_data["lh_name"]))
         self.tableWidget.setItem(1, 1, QTableWidgetItem(tax_data["lch_name"]))
-        self.tableWidget.setItem(2, 1, QTableWidgetItem(str(tax_data["num_kv"])))
-        self.tableWidget.setItem(3, 1, QTableWidgetItem(str(tax_data["num_vd"])))
+        self.tableWidget.setItem(
+            2, 1, QTableWidgetItem(str(tax_data["num_kv"]))
+        )
+        self.tableWidget.setItem(
+            3, 1, QTableWidgetItem(str(tax_data["num_vd"]))
+        )
         self.tableWidget.setItem(4, 1, QTableWidgetItem(str(tax_data["area"])))
         self.tableWidget.setItem(5, 1, QTableWidgetItem(tax_data["bonitet"]))
         self.tableWidget.setItem(6, 1, QTableWidgetItem(tax_data["tl"]))
@@ -137,13 +143,19 @@ class TaxationDescription(QDialog, UI_TAX_DESCRIPTION):
 
         for yar in tax_data["m10"]:
             self.tableWidget_2.insertRow(0)
-            self.tableWidget_2.setItem(0, 0, QTableWidgetItem(str(yar["yarus"])))
+            self.tableWidget_2.setItem(
+                0, 0, QTableWidgetItem(str(yar["yarus"]))
+            )
             self.tableWidget_2.setItem(0, 1, QTableWidgetItem(str(yar["dmr"])))
             self.tableWidget_2.setItem(0, 2, QTableWidgetItem(yar["proish"]))
             self.tableWidget_2.setItem(0, 3, QTableWidgetItem(yar["poln"]))
-            self.tableWidget_2.setItem(0, 4, QTableWidgetItem(str(yar["height"])))
+            self.tableWidget_2.setItem(
+                0, 4, QTableWidgetItem(str(yar["height"]))
+            )
             self.tableWidget_2.setItem(0, 5, QTableWidgetItem(str(yar["age"])))
-            self.tableWidget_2.setItem(0, 6, QTableWidgetItem(str(yar["zapas"])))
+            self.tableWidget_2.setItem(
+                0, 6, QTableWidgetItem(str(yar["zapas"]))
+            )
             self.tableWidget_2.setItem(0, 7, QTableWidgetItem(yar["formula"]))
 
         return True
