@@ -119,7 +119,7 @@ class AreaController(QtCore.QObject):
             layer.commitChanges()
             self.cuttingAreaTypes = []
         except Exception as e:
-            QMessageBox.information(None, 'Ошибка', e)
+            QMessageBox.information(None, 'Ошибка', str(e))
         self.editMode = False
 
     def changeEditMode(self):

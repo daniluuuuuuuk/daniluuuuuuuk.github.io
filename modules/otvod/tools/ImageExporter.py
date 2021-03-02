@@ -27,7 +27,6 @@ class ImageExporter:
             layer = QgsProject.instance().mapLayersByName(name)
             if layer:
                 layers.append(layer[0])
-                QgsProject.instance().removeMapLayers([layer[0].id()])        
         return layers
 
     def prepareImage(self):
