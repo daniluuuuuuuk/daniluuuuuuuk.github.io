@@ -252,7 +252,7 @@ class CanvasWidget(QgsMapCanvas):
         # self.tableWrapper.convertCoordFormat(self.coordType)
         self.omw.coord_radio_button.setChecked(True)
         self.table.makeTableFromCuttingArea(bindingPoint, cuttingArea)
-        self.table.deleteLastTemperatePoint()
+        # self.table.deleteLastTemperatePoint()
         self.showAreaByVydel()
         # self.omw.inclinationSlider.setValue(0)
 
