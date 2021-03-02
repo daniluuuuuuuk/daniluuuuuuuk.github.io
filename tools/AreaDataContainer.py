@@ -145,11 +145,13 @@ class AreaDataPrintContainer:
         sourceLYR = self.projectInstance.mapLayersByName(sourceLYRName)[0]
         destLYR = self.projectInstance.mapLayersByName(destLYRName)[0]
 
-        feature = list(sourceLYR.getFeatures("uid = '{}'".format(self.uid)))[0]
+        feature = list(sourceLYR.getFeatures("uid = '{}'".format(self.uid)))
+        if not feature:
+            return
 
         destLYR.startEditing()
         data_provider = destLYR.dataProvider()
-        data_provider.addFeatures([feature])
+        data_provider.addFeatures([feature[0]])
         destLYR.commitChanges()
         iface.messageBar().clearWidgets()
 
