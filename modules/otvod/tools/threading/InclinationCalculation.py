@@ -42,7 +42,7 @@ class Calculator(QgsTask):
         self.updatedTableList = None
 
     def run(self, tableList, tableType, coordType, inclinationValue):
-        QgsMessageLog.logMessage('Started task "{}"'.format(
+        QgsMessageLog.logMessage('\nStarted task "{}"'.format(
             self.description()), MESSAGE_CATEGORY, Qgis.Info)
         
         if tableType == 1:

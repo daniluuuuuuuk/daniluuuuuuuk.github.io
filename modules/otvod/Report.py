@@ -106,13 +106,27 @@ class Report:
         p = document.add_paragraph(
             '\nИсполнитель:{}'.format(self.areaAttributes["fio"]))
 
-        path = os.path.join(self.getReportFolder(), 'Отвод_кв_{}.docx'.format(str(self.areaAttributes["num_kv"])))
-        document.save(path)
-        path = path.replace("\\", "\\\\")
-        path = path.replace("/", "\\\\")
-        path = path.replace(" ", "%20")
-
-        return path
+        path = os.path.join(
+                self.getReportFolder(),
+                'Отвод кв. {} выд. {}.docx'.format(str(self.areaAttributes["num_kv"]), str(self.areaAttributes["num_vds"]))
+                )
+        try:
+            document.save(path)
+            path = path.replace("\\", "\\\\")
+            path = path.replace("/", "\\\\")
+            path = path.replace(" ", "%20")
+            return path
+        except Exception as e:
+            if '[Errno 22]' in str(e):
+                message = str(e) + '\n Неправильный путь сохранения отчета.'  \
+                + 'Проверьте настройки модуля.'
+            elif '[Errno 13]' in str(e):
+                message = str(e) + '\n Невозможно сохранить файл. ' \
+                + 'Закройте программу просмотра отчета и попробуйте снова.'
+            else:
+                message = str(e)
+            QMessageBox.information(None, "Ошибка сохранения отчета", message)
+            return ''
     
     def getLhType(self):
         cf = config.Configurer('enterprise')

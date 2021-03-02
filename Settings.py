@@ -8,7 +8,7 @@ from PyQt5 import QtCore
 from .modules.otvod.tools.threading.ForestObjectWorker import Worker as ForestObjWorker
 from .modules.otvod.tools.threading.ForestObjectLoader import ForestObjectLoader
 from qgis.utils import iface
-
+import os
 
 class SettingsWindow(QDialog):
     def __init__(self, parent=None):
@@ -218,7 +218,14 @@ class SettingsController(QtCore.QObject):
         cfOtvod.writeConfigs()
 
     def chooseReportFolder(self):
+        cfReport = config.Configurer("report")
+        settingsReport = cfReport.readConfigs()
+        oldPath = settingsReport.get("path", "")
         path = str(QFileDialog.getExistingDirectory(None, "Select Directory"))
+        if not path and oldPath:
+            path = oldPath
+        if not path and not oldPath:
+            path = os.path.expanduser('~')
         self.tableUi.lineEdit.setText(path)
 
     def populateOtvodSettings(self):

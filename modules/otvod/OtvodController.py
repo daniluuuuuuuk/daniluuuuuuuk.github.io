@@ -4,15 +4,15 @@ from .MainWindow import MainWindow
 from .CanvasWidget import CanvasWidget
 from .ui.SwitchButton import Switch
 from .gui.LesosekaInfoDialog import LesosekaInfo
-from .tools import GeoOperations
+from .tools import GeoOperations, ImageExporter
 from .tools.tempFeatures.BindingPointBuilder import BindingPointBuilder
-from . import Report
+from . import Report, LayoutManager
 from .DataTable import DataTableWrapper
 from .OtvodSettingsDialog import OtvodSettingsWindow
 from ...tools import config
 from .CuttingAreaAttributesEditor import CuttingAreaAttributesEditor
 from PyQt5.QtGui import QIcon
-from qgis.core import QgsProject, QgsPointXY
+from qgis.core import QgsProject, QgsPointXY, QgsPrintLayout
 from functools import partial
 from qgis.PyQt.QtWidgets import QMessageBox, QDialog, QButtonGroup, QFileDialog, QTableWidgetItem
 from datetime import datetime
@@ -22,6 +22,7 @@ from qgis.gui import  QgsMapToolPan
 from .LayerManager import LayerManager
 from .icons.initIcons import IconSet
 from qgis.core import Qgis, QgsSnappingConfig, QgsTolerance
+from . import geomag
 
 
 class OtvodController():
@@ -77,7 +78,7 @@ class OtvodController():
             self.canvasWidget.showPointOnCanvas)
 
         self.omw.peekFromGPSPushButton.clicked.connect(self.getGPSCoords)
-        self.omw.generateReport_Button.clicked.connect(self.generateReport)
+        self.omw.generateReport_Button.clicked.connect(self.generateLayout)
 
         self.omw.buildLesoseka_Button.clicked.connect(
             self.canvasWidget.buildLesosekaFromMap)
@@ -106,6 +107,23 @@ class OtvodController():
         self.turnOnTableAndCoords()
 
         self.initSnapping()
+
+        self.omw.magneticDeclination_pushButton.clicked.connect(self.getMagneticInclination)
+
+        self.project = QgsProject.instance()
+        self.imgExporter = ImageExporter.ImageExporter(self.project, self.canvas)
+        self.omw.exportAsImage_PushButton.clicked.connect(self.generateImage)
+
+    def generateImage(self):      
+        path = self.imgExporter.doJob(self.tableWrapper.getJSONRows())
+        self.omw.outputLabel.setText(
+            "<a href=file:///{}>Открыть картинку</a>".format(os.path.realpath(path)))
+        self.omw.outputLabel.setOpenExternalLinks(True)
+
+    def getMagneticInclination(self):
+        point = GeoOperations.convertToWgs(self.canvas.center())
+        declination = geomag.declination(point.y(), point.x())
+        self.omw.inclinationSlider.setValue(declination * 10)
 
     def turnOnTableAndCoords(self):
         tableTypeButton = self.radio_group.button(self.tableType)
@@ -136,7 +154,9 @@ class OtvodController():
         QgsProject.instance().setSnappingConfig(my_snap_config)
 
     def manageCanvasLayers(self):
-        manager = LayerManager(self.canvas)
+        self.manager = LayerManager(self.canvas)
+        if self.manager.initWidget():
+            self.manager.changeLayers(self.manager.checkBoxes)
 
     def initHandTool(self):
         self.canvas.setMapTool(self.panTool)
@@ -165,11 +185,19 @@ class OtvodController():
         return s4
 
     def switchClicked(self, switch):
-        if switch.isChecked():
-            self.coordType = 1
+        if not self.tableWrapper.tableModel.ensureTableCellsNotEmpty():
+            switch.blockSignals(True)
+            if switch.isChecked():
+                switch.setChecked(False)
+            else:
+                switch.setChecked(True)
+            switch.blockSignals(False)
         else:
-            self.coordType = 0
-        self.tableWrapper.convertCoordFormat(self.coordType)
+            if switch.isChecked():
+                self.coordType = 1
+            else:
+                self.coordType = 0
+            self.tableWrapper.convertCoordFormat(self.coordType)
 
     def editAreaAttributes(self):
         editor = CuttingAreaAttributesEditor(self.cuttingArea)
@@ -222,8 +250,10 @@ class OtvodController():
                     btn.setChecked(True)
         if self.radio_group.id(button) == 0:
             self.omw.inclinationSlider.setEnabled(False)
+            self.omw.magneticDeclination_pushButton.setEnabled(False)
         else:
             self.omw.inclinationSlider.setEnabled(True)
+            self.omw.magneticDeclination_pushButton.setEnabled(True)
 
     def bindingPointCoordChanged(self):
         e = n = 0
@@ -371,6 +401,12 @@ class OtvodController():
 
 
     def saveCuttingArea(self):
+        layer = QgsProject.instance().mapLayersByName("Результат обрезки")
+        if layer:
+            QgsProject.instance().removeMapLayers([layer[0].id()])
+
+        self.canvas.refreshAllLayers()
+
         if self.cuttingArea == None:
             self.cuttingArea = self.canvasWidget.cuttingArea
         if self.cuttingArea == None:
@@ -382,33 +418,14 @@ class OtvodController():
             self.omw.outputLabel.setText("Лесосека сохранена")
 
     def deleteCuttingArea(self):
-        try:
-            layer = QgsProject.instance().mapLayersByName("Точка привязки")[0]
-            QgsProject.instance().removeMapLayers([layer.id()])
-        except Exception as e:
-            print(str(e) + "Ошибка при удалении слоя Точка привязки")
-        try:
-            layer = QgsProject.instance().mapLayersByName(
-                "Лесосека временный слой")[0]
-            QgsProject.instance().removeMapLayers([layer.id()])
-        except Exception as e:
-            print(str(e) + "Ошибка при удалении слоя Точка привязки")
-        try:
-            layer = QgsProject.instance().mapLayersByName("Опорные точки")[0]
-            QgsProject.instance().removeMapLayers([layer.id()])
-        except Exception as e:
-            print(str(e) + "Ошибка при удалении слоя Опорные точки")
-        try:
-            layer = QgsProject.instance().mapLayersByName(
-                "Привязка временный слой")[0]
-            QgsProject.instance().removeMapLayers([layer.id()])
-        except Exception as e:
-            print(str(e) + "Ошибка при удалении слоя Привязка временный слой")
-        try:
-            layer = QgsProject.instance().mapLayersByName("Пикеты")[0]
-            QgsProject.instance().removeMapLayers([layer.id()])
-        except Exception as e:
-            print(str(e) + "Ошибка при удалении слоя Пикеты")
+        layerNamesToDelete = ["Точка привязки", "Лесосека временный слой", "Опорные точки",
+        "Привязка временный слой", "Пикеты", "Результат обрезки"]
+
+        for name in layerNamesToDelete:
+            layer = QgsProject.instance().mapLayersByName(name)
+            if layer:
+                QgsProject.instance().removeMapLayers([layer[0].id()])
+
         # self.omw.outputLabel.setText("Лесосека удалена")
         self.magneticInclination = 0.0
         # self.omw.inclinationSlider.setValue(0)
@@ -419,43 +436,6 @@ class OtvodController():
         self.canvas.refresh()
         iface.mapCanvas().refresh()
 
-    def generateReport(self):
-        try:
-            QgsProject.instance().mapLayersByName(
-                "Привязка временный слой")[0],
-        except:
-            layers = [
-                QgsProject.instance().mapLayersByName("Точка привязки")[0],
-                QgsProject.instance().mapLayersByName("Выдела")[0],
-                # QgsProject.instance().mapLayersByName("Гидрография площадная")[0],
-                # QgsProject.instance().mapLayersByName("Дороги")[0],
-                QgsProject.instance().mapLayersByName("Кварталы")[0],
-                QgsProject.instance().mapLayersByName("Населенные пункты")[0],
-                QgsProject.instance().mapLayersByName(
-                    "Лесосека временный слой")[0],
-                # QgsProject.instance().mapLayersByName("Гидрография линейная")[0],
-                # QgsProject.instance().mapLayersByName("Привязка временный слой")[0],
-                QgsProject.instance().mapLayersByName("Пикеты")[0]
-            ]
-        else:
-            layers = [
-                QgsProject.instance().mapLayersByName("Точка привязки")[0],
-                QgsProject.instance().mapLayersByName("Выдела")[0],
-                # QgsProject.instance().mapLayersByName("Гидрография площадная")[0],
-                # QgsProject.instance().mapLayersByName("Дороги")[0],
-                QgsProject.instance().mapLayersByName("Кварталы")[0],
-                QgsProject.instance().mapLayersByName("Населенные пункты")[0],
-                QgsProject.instance().mapLayersByName(
-                    "Лесосека временный слой")[0],
-                # QgsProject.instance().mapLayersByName("Гидрография линейная")[0],
-                QgsProject.instance().mapLayersByName(
-                    "Привязка временный слой")[0],
-                QgsProject.instance().mapLayersByName("Пикеты")[0]
-            ]
-
-        report = Report.Report(
-            self.tableWrapper.tableModel, self.canvas, layers)
-        path = report.generate()
-        self.omw.outputLabel.setText(
-            "<a href=file:///{}>Открыть отчет</a>".format(os.path.realpath(path)))
-        self.omw.outputLabel.setOpenExternalLinks(True)
+    def generateLayout(self):
+        layout = LayoutManager.LayoutManager(self.canvas, QgsProject.instance())
+        layout.generate([self.tableWrapper.getColumnNames()] + self.tableWrapper.copyTableData())

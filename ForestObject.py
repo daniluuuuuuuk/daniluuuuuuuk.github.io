@@ -83,16 +83,15 @@ class ForestEnterprise(QtCore.QObject):
         self._name = name
 
     def setNameFromDb(self):
-
         def workerFinished(result):
-            worker.deleteLater()
-            thread.quit()
-            thread.wait()
-            thread.deleteLater()
+            self.worker.deleteLater()
+            self.thread.quit()
+            self.thread.wait()
+            self.thread.deleteLater()
             self.nameLoaded.emit(result)
 
-        thread = QtCore.QThread(iface.mainWindow())
-        worker = DbQueryWorker(
+        self.thread = QtCore.QThread(iface.mainWindow())
+        self.worker = DbQueryWorker(
                 ["""select name_organization 
                 from "dictionary".organization
                 where code_organization = '{}'""".format(str(self.lhCode)),
@@ -100,10 +99,10 @@ class ForestEnterprise(QtCore.QObject):
                 """select name_organization from (select id_organization from "dictionary".organization
                 where code_organization = '{}') typed
                 join "dictionary".organization org on org.parent_id_organization = typed.id_organization""".format(self.lhCode)])
-        worker.moveToThread(thread)
-        worker.finished.connect(workerFinished)
-        thread.started.connect(worker.run)
-        thread.start()
+        self.worker.moveToThread(self.thread)
+        self.worker.finished.connect(workerFinished)
+        self.thread.started.connect(self.worker.run)
+        self.thread.start()
 
 class Forestry(ForestObject):
 
@@ -181,6 +180,8 @@ class DbQueryWorker(QtCore.QObject):
             ret = self.loader.result
 
         except Exception as e:
+            QgsMessageLog.logMessage('\Exception in task "{}"'.format(
+                e), MESSAGE_CATEGORY, Qgis.Info)
             raise e
         self.finished.emit(ret)
 
@@ -201,7 +202,7 @@ class DatabaseQueryTask(QgsTask):
         self.exception = None
 
     def run(self, query):
-        QgsMessageLog.logMessage('Started task "{}"'.format(
+        QgsMessageLog.logMessage('\nStarted task "{}"'.format(
             self.description()), MESSAGE_CATEGORY, Qgis.Info)
         postgisConnection = PostgisDB.PostGisDB()
         self.result = []

@@ -1,3 +1,4 @@
+from . import CuttingArea
 from .UIButtonController import ButtonController
 from .tools import GeoOperations
 from .tools.Serializer import DbSerializer
@@ -9,13 +10,14 @@ from .tools.mapTools.PeekStratumFromMap import PeekStratumFromMap
 from .tools.tempFeatures.AnchorPointBuilder import AnchorPointBuilder
 from .tools.tempFeatures.CuttingAreaBuilder import CuttingAreaBuilder
 from .tools.tempFeatures.PointBuilder import PointBuilder
+from .tools.VydelAreaCalculator import VydelAreaCalculator
 from .gui.LesosekaInfoDialog import LesosekaInfo
-from . import CuttingArea
 from qgis.PyQt.QtWidgets import QMessageBox, QDialog
 from qgis.core import QgsCoordinateReferenceSystem, QgsProject, QgsPointXY
 from PyQt5.QtGui import QColor
 from qgis.gui import QgsMapCanvas, QgsMapToolZoom, QgsMapToolPan
 from qgis.PyQt.QtCore import QObject
+from .LayerManager import LayerManager
 
 
 class CanvasWidget(QgsMapCanvas):
@@ -161,6 +163,20 @@ class CanvasWidget(QgsMapCanvas):
             for button in btnGroup:
                 button.setEnabled(True)
 
+    def isAreaValid(self, layer):
+
+        def getId(f):
+            return f['id']
+
+        features = sorted(layer.getFeatures(), key=getId)
+        lesosekaPointsCounter = 0
+        for x in features:
+            if x.attributes()[1] == "Лесосека":
+                lesosekaPointsCounter += 1
+                if lesosekaPointsCounter == 3:
+                    return True
+        return False
+
         """Строит лесосеку
         """
 
@@ -181,7 +197,12 @@ class CanvasWidget(QgsMapCanvas):
             bindingPoint = GeoOperations.convertToZone35(QgsPointXY(e, n))
         except Exception as e:
             QMessageBox.information(
-                None, "Ошибка модуля QGISLes", "Отсутствуют угловые точки")
+                None, "Ошибка модуля QGISLes", "Некорректная точка привязки")
+            return
+
+        if not self.isAreaValid(layer):
+            QMessageBox.information(
+                None, "Ошибка модуля QGISLes", "Для построения лесосеки необходимо минимум 3 узла")    
             return
 
         self.cuttingArea = CuttingArea.CuttingArea(
@@ -196,12 +217,17 @@ class CanvasWidget(QgsMapCanvas):
             switch.setChecked(False)
 
         # self.tableWrapper.convertCoordFormat(self.coordType)
-        self.omw.azimuth_radio_button.setChecked(True)
+        self.omw.coord_radio_button.setChecked(True)
         self.table.makeTableFromCuttingArea(bindingPoint, cuttingArea)
         self.table.deleteLastTemperatePoint()
-
+        self.showAreaByVydel()
         # self.omw.inclinationSlider.setValue(0)
         
+    def showAreaByVydel(self):
+        calc = VydelAreaCalculator()
+        layer = calc.calculateAreaByVydel()
+        manager = LayerManager(self.canvas)
+        manager.addLayer('Результат обрезки')
 
         """Получение точки из окна карты и занесение ее координат XY в таблицу
         """
@@ -232,7 +258,10 @@ class CanvasWidget(QgsMapCanvas):
             
             def getAreaPoints(areaData, areaPoints):
                 self.editedUid = areaData[0]
-                self.omw.azimuth_radio_button.setChecked(True)
+                self.omw.coord_radio_button.setChecked(True)
+                switch = self.omw.switchLayout.itemAt(0).widget()
+                if switch.isChecked():
+                    switch.setChecked(False)
                 point = GeoOperations.convertToWgs(areaData[1])            
                 self.omw.y_coord_LineEdit.setText(str(round(point.x(), 10)))
                 self.omw.x_coord_LineEdit.setText(str(round(point.y(), 10)))

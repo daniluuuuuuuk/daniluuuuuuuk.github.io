@@ -11,9 +11,9 @@ from qgis.core import Qgis, QgsApplication
 from .modules.trees_accounting.src.trees_accounting import TaMainWindow
 from .tools.ProjectInitializer import QgsProjectInitializer
 from .tools.TaxationLoader import Worker as taxWorker
-from .tools import config
+from .tools import config, AreaController, AreaFilter
 from .gui.taxationDescription import Ui_Dialog as TaxationDialog
-
+from qgis.PyQt.QtCore import Qt
 
 class DatabaseConnectionVerifier:
     def __init__(self, iface):
@@ -52,9 +52,20 @@ class QgsLes:
         self.runnable = runnable
         self.canvas = self.iface.mapCanvas()
         QgsProject.instance().legendLayersAdded.connect(self.ifVydLayerReady)
+        QgsProject.instance().cleared.connect(self.removeFilterButton)
         self.filter = None
-
+        self.dockWidget = None
         QgsApplication.messageLog().messageReceived.connect(self.write_log_message)
+
+    def removeFilterButton(self):
+        try:
+            if self.qgsLesToolbar:
+                for action in self.qgsLesToolbar.actions():
+                    if not action.text():
+                        self.qgsLesToolbar.removeAction(action)
+        except:
+            # issue: при закрытии кугиса тулбар удаляется первее анлодинга проекта -> кугис крашится
+            pass
 
     def write_log_message(self, message, tag, level):
         with open(util.resolvePath("tmp/qgis.log"), "a") as logfile:
@@ -139,6 +150,13 @@ class QgsLes:
         )
         self.otvodAction.triggered.connect(self.otvodButtonClicked)
 
+        self.controlAreaAction = QAction(
+            QIcon(util.resolvePath("res\\icon5.png")),
+            "Управление лесосекой",
+            self.iface.mainWindow(),
+        )
+        self.controlAreaAction.triggered.connect(self.controlAreaClicked)
+
         self.taxationAction = QAction(
             QIcon(util.resolvePath("res\\info.png")),
             "Информация о выделе",
@@ -150,6 +168,12 @@ class QgsLes:
             QIcon(util.resolvePath("res\\icon.png")), "Перечет", self.iface.mainWindow()
         )
         self.countAction.triggered.connect(self.countButtonClicked)
+
+        self.filterAreaAction = QAction(
+            QIcon(util.resolvePath("res\\icon6.png")), "Панель инструментов", self.iface.mainWindow()
+        )
+        self.filterAreaAction.setCheckable(True)
+        self.filterAreaAction.triggered.connect(self.filterAreaButtonClicked)        
 
         self.settingsAction = QAction(
             QIcon(util.resolvePath("res\\settings.png")),
@@ -169,19 +193,44 @@ class QgsLes:
         self.qgsLesToolbar.addAction(self.taxationAction)
         self.qgsLesToolbar.addAction(self.otvodAction)
         self.qgsLesToolbar.addAction(self.countAction)
+        self.qgsLesToolbar.addAction(self.controlAreaAction)
+        self.qgsLesToolbar.addAction(self.filterAreaAction)
         self.qgsLesToolbar.addAction(self.settingsAction)
         self.qgsLesToolbar.addAction(self.initProjectAction)
 
         if QgsProject.instance().mapLayersByName("Выдела"):
             self.initFilter()
 
-    def initProjectClicked(self):
+    def filterAreaButtonClicked(self, checked):
+        if not QgsProject.instance().mapLayersByName("Лесосеки"):
+            QtWidgets.QMessageBox.warning(None, "Ошибка", "Отсутствует слой лесосек.")
+            return
+        if not checked and self.dockWidget:
+            self.iface.removeDockWidget(self.dockWidget)
+        else:
+            self.dockWidget = AreaFilter.AreaFilterDockWidget()
+            self.filgetAreaCtrlr = AreaFilter.AreaFilterController(self.dockWidget)
+            self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockWidget)
 
-        # self.filter = None
+    def controlAreaClicked(self):
+
+        def getResult(feature):
+            if feature:
+                zoomTool = QgsMapToolZoom(self.canvas, False)
+                self.canvas.setMapTool(zoomTool)
+                self.ctrlr = AreaController.AreaController(feature)
+            else:
+                QtWidgets.QMessageBox.warning(None, "Ошибка", "Не выбрана лесосека.")
+        self.pkr = peeker.PeekStratumFromMap(self.canvas, "Лесосеки")
+        self.canvas.setMapTool(self.pkr)
+        self.pkr.signal.connect(getResult)
+
+    def initProjectClicked(self):
         self.initializer = QgsProjectInitializer(self.iface, self.qgsLesToolbar)
 
     def unload(self):
         del self.qgsLesToolbar
+        # del self.dockWidget
 
     def taxationButtonClicked(self):
         def getResult(feature):
@@ -255,12 +304,12 @@ class QgsLes:
             label = QLabel(dialog)
             label.setText(
                 str(info[0])
-                + ", "
+                + " \n"
                 + str(info[1])
-                + " лесничество, "
-                + "квартал: "
+                + " лесничество \n"
+                + "Квартал: "
                 + str(info[2])
-                + " выдел: "
+                + "\nВыдел: "
                 + str(info[3])
             )
             label.adjustSize()
@@ -270,8 +319,8 @@ class QgsLes:
             def prepareTaxBase(taxBaseList):
                 return [
                     "Бонитет: " + str(taxBaseList[1]),
-                    ", тип леса: " + str(taxBaseList[2]),
-                    ", ТУМ: " + str(taxBaseList[3]),
+                    "\nТип леса: " + str(taxBaseList[2]),
+                    "\nТУМ: " + str(taxBaseList[3]),
                 ]
 
             label = QLabel(dialog)
@@ -289,12 +338,12 @@ class QgsLes:
 
                 return [
                     str(taxList[1]),
-                    ", диаметр: " + str(taxList[2]),
-                    ", полнота: " + str(taxList[4]),
-                    ", высота: " + str(taxList[5]),
-                    ", возраст: " + str(taxList[6]),
-                    ", ярус: " + str(taxList[7]),
-                    ", запас: " + str(taxList[8]),
+                    "\nДиаметр: " + str(taxList[2]),
+                    "\nПолнота: " + str(taxList[4]),
+                    "\nВысота: " + str(taxList[5]),
+                    "\nВозраст: " + str(taxList[6]),
+                    "\nЯрус: " + str(taxList[7]),
+                    "\nЗапас: " + str(taxList[8]),
                 ]
 
             for x in tax:

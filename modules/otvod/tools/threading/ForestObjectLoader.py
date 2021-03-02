@@ -114,7 +114,7 @@ class ForestObjectLoader(QgsTask):
         # postgisConnection.__del__()
 
     def run(self, gplho, leshoz):
-        QgsMessageLog.logMessage('Started task "{}"'.format(
+        QgsMessageLog.logMessage('\nStarted task "{}"'.format(
             self.description()), MESSAGE_CATEGORY, Qgis.Info)
 
         if gplho is None:

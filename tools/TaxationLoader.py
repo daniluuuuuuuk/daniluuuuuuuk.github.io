@@ -62,7 +62,7 @@ class Loader(QgsTask):
 
 
     def run(self, identity, lh, lch, lh_type):
-        QgsMessageLog.logMessage('Started task "{}"'.format(
+        QgsMessageLog.logMessage('\nStarted task "{}"'.format(
             self.description()), MESSAGE_CATEGORY, Qgis.Info)
         self.loadTaxation(identity, lh, lch, lh_type)
         return True

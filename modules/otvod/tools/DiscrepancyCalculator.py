@@ -60,7 +60,10 @@ class DiscrepancyCalculator:
         az2 = float((str(calculateAzimuthWithPrecision(
             point4, point1, '.0000001'))))
         if abs(az1 - az2) > 180:
-            return 360 - abs(az1) + abs(az2)
+            az = 360 - abs(az1) + abs(az2)
+            if az > 700:
+                az = abs(az - 360 - 360)
+            return az
         else:
             return abs(az1 - az2)
 

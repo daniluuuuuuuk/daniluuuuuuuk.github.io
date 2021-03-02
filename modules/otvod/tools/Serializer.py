@@ -41,6 +41,9 @@ class DbSerializer(QtCore.QObject):
             thread.quit()
             thread.wait()
             thread.deleteLater()
+            if not result:
+                QMessageBox.information(None, 'Ошибка', "Данные отвода для лесосеки не найдены.")
+                return
             self.signal.emit(result[0][0], result[0][1])
 
         thread = QtCore.QThread(iface.mainWindow())
@@ -67,10 +70,13 @@ class Worker(QtCore.QObject):
             self.serializer.run(self.data)
             self.serializer.waitForFinished()
             if self.serializer.area == None and self.taskType != 'Save':
-                QMessageBox.information(
-                None, 'Ошибка', "Данные отвода в БД не найдены")
-                # ret = [[]]
-                return
+                QgsMessageLog.logMessage('\nError "{}"'.format(
+                    'Ошибка, данные точки привязки не найдены'), MESSAGE_CATEGORY, Qgis.Warning)
+                ret = []
+            elif self.taskType != 'Save' and not self.serializer.area[1][0]:
+                QgsMessageLog.logMessage('\nError "{}"'.format(
+                    'Ошибка, данные отвода не найдены'), MESSAGE_CATEGORY, Qgis.Warning)
+                ret = []
             else:
                 ret = [self.serializer.area]
 
@@ -152,7 +158,7 @@ class SerializerTask(QgsTask):
         return [[uid, bindingPoint, magneticInclination], [pointsDict]]
 
     def run(self, data):
-        QgsMessageLog.logMessage('Started task "{}"'.format(
+        QgsMessageLog.logMessage('\nStarted task "{}"'.format(
             self.description()), MESSAGE_CATEGORY, Qgis.Info)
         if self.taskType == 'Save':
             self.deleteExistingArea(data[0])

@@ -580,7 +580,7 @@ class DataTableWrapper():
         self.tableModel.add_lesoseka_node_row()
 
     def getJSONRows(self):
-        self.tableModel.getJSONRows()
+        return self.tableModel.getJSONRows()
 
     def encodeJSON(self, table):
         if isinstance(table, DataTableWrapper):
@@ -603,52 +603,20 @@ class DataTableWrapper():
                 layer.deleteFeature(f.id())
 
     def makeTableFromCuttingArea(self, bindingPoint, cuttingArea):
-        # self.tableModel.setMagneticInclination(0)
         currentTableType = self.tableModel.tabletype
         currentCoordType = self.tableModel.coordType
         inclination = decimal.Decimal(self.getMagneticInclination()).quantize(decimal.Decimal('.1'))
         self.tableModel.setParams(
-            1, 0, float(inclination), self.getBindingPointXY())
-        azimuthTableList = []
+            0, 0, float(inclination), self.getBindingPointXY())
+        coordTableList = []
         lastAnchorLinePoint = None
         for key in cuttingArea:
-            if cuttingArea[key][1] == "Привязка":
-                lastAnchorLinePoint = key
-            if key == 0:
-                azimuth = GeoOperations.calculateAzimuth(bindingPoint, cuttingArea[key][0]) - inclination
-                azimuth = self.validatedAzimuth(azimuth)
-                distance = GeoOperations.calculateDistance(bindingPoint, cuttingArea[key][0])
-            else:
-                azimuth = GeoOperations.calculateAzimuth(cuttingArea[key-1][0], cuttingArea[key][0]) - inclination
-                azimuth = self.validatedAzimuth(azimuth)
-                distance = GeoOperations.calculateDistance(cuttingArea[key-1][0], cuttingArea[key][0])
-            
-            azimuthTableList.append([str(key) + "-" + str(key + 1), str(azimuth), str(distance), cuttingArea[key][1]])
-        if lastAnchorLinePoint is None:
-            azimuth = GeoOperations.calculateAzimuth(cuttingArea[key][0], bindingPoint) - inclination
-            azimuth = self.validatedAzimuth(azimuth)
-            distance = GeoOperations.calculateDistance(cuttingArea[key][0], bindingPoint)
-            if azimuth <= 0.1 or distance <= 0.1:
-                row = azimuthTableList[-1]
-                row[0] = row[0].split('-')[0] + '-' + '0'
-                del azimuthTableList[-1]
-                azimuthTableList.append(row)   
-                self.refreshTable(azimuthTableList, cuttingArea)
-                return
-            azimuthTableList.append([str(key + 1) + "-" + "0", str(azimuth), str(distance), cuttingArea[key][1]])
-        else:
-            azimuth = GeoOperations.calculateAzimuth(cuttingArea[key][0], cuttingArea[lastAnchorLinePoint][0]) - inclination
-            azimuth = self.validatedAzimuth(azimuth)
-            distance = GeoOperations.calculateDistance(cuttingArea[key][0], cuttingArea[lastAnchorLinePoint][0])
-            if azimuth <= 0.1 or distance <= 0.1:
-                row = azimuthTableList[-1]
-                row[0] = row[0].split('-')[0] + '-' + str(lastAnchorLinePoint + 1)
-                del azimuthTableList[-1]
-                azimuthTableList.append(row)   
-                self.refreshTable(azimuthTableList, cuttingArea)
-                return
-            azimuthTableList.append([str(key + 1) + "-" + str(lastAnchorLinePoint + 1), str(azimuth), str(distance), cuttingArea[key][1]])
-        self.refreshTable(azimuthTableList, cuttingArea)
+            point = cuttingArea[key][0]
+            pointWGS = GeoOperations.convertToWgs(point)
+            coordX = pointWGS.x()
+            coordY = pointWGS.y()
+            coordTableList.append([str(key) + "-" + str(key + 1), str(coordY), str(coordX), cuttingArea[key][1]])
+        self.refreshTable(coordTableList, cuttingArea)
     
     def validatedAzimuth(self, azimuth):
         if azimuth > 360:
@@ -662,9 +630,10 @@ class DataTableWrapper():
         self.deleteRows()
         self.populateTable(azimuthTableList)
         self.tableModel.pointsDict = cuttingArea.copy()
+        self.tableModel.refreshData()
 
     def convertCoordFormat(self, coordType):
-        # self.tableModel.setRerender(False)
+        self.tableModel.setRerender(False)
         currentTableType = self.tableModel.tabletype
         params = self.tableModel.getParams()
         tableList = self.copyTableData()
@@ -676,7 +645,7 @@ class DataTableWrapper():
         elif coordType == 1:
             convertedTableList = cvt.convertToDMS()
         self.populateTable(convertedTableList)
-        # self.tableModel.setRerender(True)
+        self.tableModel.setRerender(True)
 
     def populateTable(self, tableList):
         self.deleteRows()
@@ -692,7 +661,7 @@ class DataTableWrapper():
         elif self.tableModel.tabletype == 4:
             self.populateAzimuthTable(tableList)
         self.tableModel.setRerender(True)
-        self.tableModel.refreshData()
+        # self.tableModel.refreshData()
 
     def populateCoordTable(self, tableList):
 

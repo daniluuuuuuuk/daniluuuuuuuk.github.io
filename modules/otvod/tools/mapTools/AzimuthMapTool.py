@@ -54,6 +54,8 @@ class AzimuthMapTool(QgsMapToolEmitPoint, QObject):
         elif self.firstPoint and not self.secondPoint:
             self.secondPoint = self.toMapCoordinates(e.pos())
             self.showPoint(self.secondPoint)
+            if len(self.pointList) <= 1:
+                return
             az = GeoOperations.calculateAzimuth(
                 # self.pointList[0], self.pointList[1]) + Decimal(self.inclination)
                 self.pointList[0], self.pointList[1])             
