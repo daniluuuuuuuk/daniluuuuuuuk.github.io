@@ -1,6 +1,7 @@
 from qgis.PyQt.QtWidgets import QDialog, QMessageBox, QToolButton, QFileDialog
 from .gui import settingsDialog, changePortDialog
 from .tools import config
+from .tools.ImportDatabase import DataImport
 from .tools import module_errors as er
 from .PostgisDB import PostGisDB
 from .BluetoothAdapter import BTAdapter
@@ -13,6 +14,9 @@ from .modules.otvod.tools.threading.ForestObjectLoader import (
 )
 from qgis.utils import iface
 import os
+from .modules.trees_accounting.src.services.waiting_spinner_widget import (
+    QtWaitingSpinner,
+)
 
 
 class SettingsWindow(QDialog):
@@ -35,6 +39,10 @@ class SettingsController(QtCore.QObject):
         self.sd = SettingsWindow()
         self.sd.setModal(False)
         self.tableUi = self.sd.ui
+
+        self.spinner = QtWaitingSpinner(
+            self.sd, True, True, QtCore.Qt.ApplicationModal
+        )
 
         self.tabletypes = {
             "Координаты": 0,
@@ -371,10 +379,56 @@ class SettingsController(QtCore.QObject):
             )
 
     def importDB(self):
+        """
+        Импорт базы данных  из файла.
+        Перед импортом проверяется соединение с СУБД.
+        """
+
+        dbconnection = PostGisDB()
+        tc = dbconnection.testConnection(
+            host=self.tableUi.connectionLineEdit.text(),
+            port=self.tableUi.portLineEdit.text(),
+            user=self.tableUi.usernameLineEdit.text(),
+            password=self.tableUi.passwordLineEdit.text(),
+            database=None,
+        )
+        if not tc:
+            QMessageBox.information(
+                None, er.MODULE_ERROR, er.DBMS_CONNECTION_ERROR
+            )
+            return False
+
         result = QMessageBox.question(
-            self,
+            None,
             "",
-            "Are you sure to reset all the values?",
+            "Текущая база данных будет УДАЛЕНА. Продолжить?",
             QMessageBox.StandardButtons(QMessageBox.Yes | QMessageBox.No),
         )
-        print(result)
+        if result == QMessageBox.Yes:
+            bu_file = QFileDialog.getOpenFileName(None, "Выбор файла")[0]
+
+            if bu_file != "":
+                db_info = {
+                    "host": self.tableUi.connectionLineEdit.text(),
+                    "port": self.tableUi.portLineEdit.text(),
+                    "user": self.tableUi.usernameLineEdit.text(),
+                    "password": self.tableUi.passwordLineEdit.text(),
+                    "database": self.tableUi.BDNameLineEdit.text(),
+                }
+
+                self.imported_data = DataImport(
+                    db_info=db_info, filename=bu_file
+                )
+                self.imported_data.start()
+                self.imported_data.signal_message_result.connect(
+                    lambda x: print(x), QtCore.Qt.QueuedConnection
+                )
+                self.imported_data.started.connect(
+                    lambda: self.spinner.start()
+                )
+                self.imported_data.finished.connect(
+                    lambda: self.spinner.stop()
+                )
+
+            else:
+                return False
