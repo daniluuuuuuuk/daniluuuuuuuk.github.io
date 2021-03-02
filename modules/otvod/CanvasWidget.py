@@ -1,3 +1,4 @@
+from . import CuttingArea
 from .UIButtonController import ButtonController
 from .tools import GeoOperations
 from .tools.Serializer import DbSerializer
@@ -9,21 +10,29 @@ from .tools.mapTools.PeekStratumFromMap import PeekStratumFromMap
 from .tools.tempFeatures.AnchorPointBuilder import AnchorPointBuilder
 from .tools.tempFeatures.CuttingAreaBuilder import CuttingAreaBuilder
 from .tools.tempFeatures.PointBuilder import PointBuilder
+from .tools.VydelAreaCalculator import VydelAreaCalculator
 from .gui.LesosekaInfoDialog import LesosekaInfo
-from . import CuttingArea
 from qgis.PyQt.QtWidgets import QMessageBox, QDialog
 from qgis.core import QgsCoordinateReferenceSystem, QgsProject, QgsPointXY
 from PyQt5.QtGui import QColor
 from qgis.gui import QgsMapCanvas, QgsMapToolZoom, QgsMapToolPan
 from qgis.PyQt.QtCore import QObject
+from .LayerManager import LayerManager
 
 
 class CanvasWidget(QgsMapCanvas):
-
     def __init__(self, otvodMainWindow, layers, rct, table):
 
-        self.predefinedScales = [500, 1000, 2500,
-                                 5000, 10000, 25000, 50000, 100000]
+        self.predefinedScales = [
+            500,
+            1000,
+            2500,
+            5000,
+            10000,
+            25000,
+            50000,
+            100000,
+        ]
 
         super(CanvasWidget, self).__init__()
         QObject.__init__(self)
@@ -42,7 +51,7 @@ class CanvasWidget(QgsMapCanvas):
 
         """Возвращает кнопки управления лесосекой
         """
-        
+
     def getButtons(self):
         return [
             self.omw.buildLesoseka_Button,
@@ -61,7 +70,8 @@ class CanvasWidget(QgsMapCanvas):
             box.addItem(str(x))
         if self.canvas:
             box.currentTextChanged.connect(
-                lambda x: self.canvas.zoomScale(int(x)))
+                lambda x: self.canvas.zoomScale(int(x))
+            )
 
         """При изменении масштаба производится его округление до предопределенных значений
         """
@@ -69,8 +79,9 @@ class CanvasWidget(QgsMapCanvas):
     def onScaleChanged(self):
         self.canvas.scaleChanged.disconnect(self.onScaleChanged)
         scale = self.canvas.scale()
-        targetScale = min(self.predefinedScales,
-                          key=lambda x: abs(int(x) - scale))
+        targetScale = min(
+            self.predefinedScales, key=lambda x: abs(int(x) - scale)
+        )
         self.canvas.zoomScale(targetScale)
         self.omw.canvas_scale_combo.setCurrentText(str(targetScale))
         self.canvas.scaleChanged.connect(self.onScaleChanged)
@@ -87,7 +98,7 @@ class CanvasWidget(QgsMapCanvas):
 
         canvas.setLayers(self.layers)
 
-        crs = QgsCoordinateReferenceSystem('EPSG:32635')
+        crs = QgsCoordinateReferenceSystem("EPSG:32635")
         canvas.setDestinationCrs(crs)
         mapSettings = canvas.mapSettings()
         canvas.setExtent(self.rct)
@@ -105,14 +116,25 @@ class CanvasWidget(QgsMapCanvas):
         """
 
     def findAzimuth(self, btn, btnState):
-
         def getResult(result):
-            magnAz = self.validatedAzimuth(float(round(result[0], 1)) - self.table.getMagneticInclination())
+            magnAz = self.validatedAzimuth(
+                float(round(result[0], 1))
+                - self.table.getMagneticInclination()
+            )
             self.omw.outputLabel.setText(
-                "Аз. истин.: " + str(round(result[0], 1)) + "°, магн.: " + str(round(magnAz, 1)) + "°. Расст.: " + str(round(result[1], 1)) + "м.")
+                "Аз. истин.: "
+                + str(round(result[0], 1))
+                + "°, магн.: "
+                + str(round(magnAz, 1))
+                + "°. Расст.: "
+                + str(round(result[1], 1))
+                + "м."
+            )
 
         if btnState == True:
-            self.amt = AzimuthMapTool(self.canvas, self.table.getMagneticInclination())
+            self.amt = AzimuthMapTool(
+                self.canvas, self.table.getMagneticInclination()
+            )
             self.canvas.setMapTool(self.amt)
             self.amt.signal.connect(getResult)
         elif btnState == False:
@@ -131,7 +153,6 @@ class CanvasWidget(QgsMapCanvas):
         """
 
     def build_from_map(self, btn, btnState, btnGroup):
-
         def getResult(result):
             point = GeoOperations.convertToWgs(result[0][0])
             self.omw.y_coord_LineEdit.setText(str(point.x()))
@@ -140,14 +161,18 @@ class CanvasWidget(QgsMapCanvas):
             # if btn.objectName() == "lesoseka_from_map_button":
             #     self.buildLesosekaFromMap()
             btn.toggle()
-            
+
         if btnState == True:
             self.omw.coord_radio_button.toggle()
             self.table.deleteRows()
             if btn.objectName() == "lesoseka_from_map_points_button":
-                self.bfm = BuildFromMapPointsTool(self.canvas, self.table.getMagneticInclination())
+                self.bfm = BuildFromMapPointsTool(
+                    self.canvas, self.table.getMagneticInclination()
+                )
             elif btn.objectName() == "lesoseka_from_map_button":
-                self.bfm = BuildFromMapTool(self.canvas, self.table.getMagneticInclination())
+                self.bfm = BuildFromMapTool(
+                    self.canvas, self.table.getMagneticInclination()
+                )
             self.canvas.setMapTool(self.bfm)
             self.bfm.signal.connect(getResult)
 
@@ -161,6 +186,19 @@ class CanvasWidget(QgsMapCanvas):
             for button in btnGroup:
                 button.setEnabled(True)
 
+    def isAreaValid(self, layer):
+        def getId(f):
+            return f["id"]
+
+        features = sorted(layer.getFeatures(), key=getId)
+        lesosekaPointsCounter = 0
+        for x in features:
+            if x.attributes()[1] == "Лесосека":
+                lesosekaPointsCounter += 1
+                if lesosekaPointsCounter == 3:
+                    return True
+        return False
+
         """Строит лесосеку
         """
 
@@ -169,7 +207,8 @@ class CanvasWidget(QgsMapCanvas):
             layer = QgsProject.instance().mapLayersByName("Пикеты")[0]
         except Exception as e:
             QMessageBox.information(
-                None, "Ошибка модуля QGISLes", "Отсутствуют угловые точки")
+                None, "Ошибка модуля QGISLes", "Отсутствуют угловые точки"
+            )
             return
 
         layerVd = QgsProject.instance().mapLayersByName("Выдела")[0]
@@ -181,11 +220,26 @@ class CanvasWidget(QgsMapCanvas):
             bindingPoint = GeoOperations.convertToZone35(QgsPointXY(e, n))
         except Exception as e:
             QMessageBox.information(
-                None, "Ошибка модуля QGISLes", "Отсутствуют угловые точки")
+                None, "Ошибка модуля QGISLes", "Некорректная точка привязки"
+            )
+            return
+
+        if not self.isAreaValid(layer):
+            QMessageBox.information(
+                None,
+                "Ошибка модуля QGISLes",
+                "Для построения лесосеки необходимо минимум 3 узла",
+            )
             return
 
         self.cuttingArea = CuttingArea.CuttingArea(
-            self.canvas, bindingPoint, layer, None, self.btnControl, self.editedUid)
+            self.canvas,
+            bindingPoint,
+            layer,
+            None,
+            self.btnControl,
+            self.editedUid,
+        )
         self.canvas.setMapTool(self.panTool)
         cuttingArea = self.cuttingArea.build()
         if not cuttingArea:
@@ -196,18 +250,22 @@ class CanvasWidget(QgsMapCanvas):
             switch.setChecked(False)
 
         # self.tableWrapper.convertCoordFormat(self.coordType)
-        self.omw.azimuth_radio_button.setChecked(True)
+        self.omw.coord_radio_button.setChecked(True)
         self.table.makeTableFromCuttingArea(bindingPoint, cuttingArea)
         self.table.deleteLastTemperatePoint()
-
+        self.showAreaByVydel()
         # self.omw.inclinationSlider.setValue(0)
-        
+
+    def showAreaByVydel(self):
+        calc = VydelAreaCalculator()
+        layer = calc.calculateAreaByVydel()
+        manager = LayerManager(self.canvas)
+        manager.addLayer("Результат обрезки")
 
         """Получение точки из окна карты и занесение ее координат XY в таблицу
         """
 
     def peekPointFromMap(self, btn, btnState):
-
         def getResult(point):
             point = GeoOperations.convertToWgs(point)
             self.omw.y_coord_LineEdit.setText(str(round(point.x(), 10)))
@@ -225,15 +283,16 @@ class CanvasWidget(QgsMapCanvas):
 
         elif btnState == False:
             self.canvas.setMapTool(self.panTool)
-    
-    def peekVydelFromMap(self, btn, btnState):
 
+    def peekVydelFromMap(self, btn, btnState):
         def getSelectedFeature(selectedFeature):
-            
             def getAreaPoints(areaData, areaPoints):
                 self.editedUid = areaData[0]
-                self.omw.azimuth_radio_button.setChecked(True)
-                point = GeoOperations.convertToWgs(areaData[1])            
+                self.omw.coord_radio_button.setChecked(True)
+                switch = self.omw.switchLayout.itemAt(0).widget()
+                if switch.isChecked():
+                    switch.setChecked(False)
+                point = GeoOperations.convertToWgs(areaData[1])
                 self.omw.y_coord_LineEdit.setText(str(round(point.x(), 10)))
                 self.omw.x_coord_LineEdit.setText(str(round(point.y(), 10)))
                 self.omw.inclinationSlider.setValue(float(areaData[2] * 10))
@@ -242,7 +301,7 @@ class CanvasWidget(QgsMapCanvas):
             if not selectedFeature:
                 return
             try:
-                serializer = DbSerializer(selectedFeature['uid'])
+                serializer = DbSerializer(selectedFeature["uid"])
                 serializer.signal.connect(getAreaPoints)
                 serializer.loadFromDb()
             finally:
@@ -252,7 +311,7 @@ class CanvasWidget(QgsMapCanvas):
                     self.canvas.setMapTool(self.panTool)
 
         if btnState == True:
-            self.ppfm = PeekStratumFromMap(self.canvas, 'Лесосеки')
+            self.ppfm = PeekStratumFromMap(self.canvas, "Лесосеки")
             self.canvas.setMapTool(self.ppfm)
             self.ppfm.signal.connect(getSelectedFeature)
 

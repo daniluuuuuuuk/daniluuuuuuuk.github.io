@@ -4,4 +4,4 @@ test/
 .idea/
 modules/trial_area/src/trial_area.ini
 tmp/*
-modules/trees_accounting/sql
+/config.ini

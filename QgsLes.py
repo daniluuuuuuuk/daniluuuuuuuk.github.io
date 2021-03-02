@@ -11,8 +11,12 @@ from qgis.core import Qgis, QgsApplication
 from .modules.trees_accounting.src.trees_accounting import TaMainWindow
 from .tools.ProjectInitializer import QgsProjectInitializer
 from .tools.TaxationLoader import Worker as taxWorker
-from .tools import config
-from .gui.taxationDescription import Ui_Dialog as TaxationDialog
+from .tools import config, AreaController, AreaFilter
+
+from .gui.taxationDescription import (
+    TaxationDescription as TaxationDescriptionDialog,
+)
+from qgis.PyQt.QtCore import Qt
 
 
 class DatabaseConnectionVerifier:
@@ -52,9 +56,22 @@ class QgsLes:
         self.runnable = runnable
         self.canvas = self.iface.mapCanvas()
         QgsProject.instance().legendLayersAdded.connect(self.ifVydLayerReady)
+        QgsProject.instance().cleared.connect(self.removeFilterButton)
         self.filter = None
+        self.dockWidget = None
+        QgsApplication.messageLog().messageReceived.connect(
+            self.write_log_message
+        )
 
-        QgsApplication.messageLog().messageReceived.connect(self.write_log_message)
+    def removeFilterButton(self):
+        try:
+            if self.qgsLesToolbar:
+                for action in self.qgsLesToolbar.actions():
+                    if not action.text():
+                        self.qgsLesToolbar.removeAction(action)
+        except:
+            # issue: при закрытии кугиса тулбар удаляется первее анлодинга проекта -> кугис крашится
+            pass
 
     def write_log_message(self, message, tag, level):
         with open(util.resolvePath("tmp/qgis.log"), "a") as logfile:
@@ -107,7 +124,9 @@ class QgsLes:
         self.filterAction = self.filter.getFilterWidget()
         self.qgsLesToolbar.addWidget(self.filterAction)
         self.filterButtonAction = QAction(
-            QIcon(util.resolvePath("res\\icon3.png")), "Поиск", self.iface.mainWindow(),
+            QIcon(util.resolvePath("res\\icon3.png")),
+            "Поиск",
+            self.iface.mainWindow(),
         )
         self.filterAction.setDefaultAction(self.filterButtonAction)
         self.ctrl = Filter.FilterWidgetController(self.filter, self.iface)
@@ -139,6 +158,13 @@ class QgsLes:
         )
         self.otvodAction.triggered.connect(self.otvodButtonClicked)
 
+        self.controlAreaAction = QAction(
+            QIcon(util.resolvePath("res\\icon5.png")),
+            "Управление лесосекой",
+            self.iface.mainWindow(),
+        )
+        self.controlAreaAction.triggered.connect(self.controlAreaClicked)
+
         self.taxationAction = QAction(
             QIcon(util.resolvePath("res\\info.png")),
             "Информация о выделе",
@@ -147,9 +173,19 @@ class QgsLes:
         self.taxationAction.triggered.connect(self.taxationButtonClicked)
 
         self.countAction = QAction(
-            QIcon(util.resolvePath("res\\icon.png")), "Перечет", self.iface.mainWindow()
+            QIcon(util.resolvePath("res\\icon.png")),
+            "Перечет",
+            self.iface.mainWindow(),
         )
         self.countAction.triggered.connect(self.countButtonClicked)
+
+        self.filterAreaAction = QAction(
+            QIcon(util.resolvePath("res\\icon6.png")),
+            "Панель инструментов",
+            self.iface.mainWindow(),
+        )
+        self.filterAreaAction.setCheckable(True)
+        self.filterAreaAction.triggered.connect(self.filterAreaButtonClicked)
 
         self.settingsAction = QAction(
             QIcon(util.resolvePath("res\\settings.png")),
@@ -157,7 +193,9 @@ class QgsLes:
             self.iface.mainWindow(),
         )
 
-        self.settingsAction.triggered.connect(lambda: Settings.SettingsController())
+        self.settingsAction.triggered.connect(
+            lambda: Settings.SettingsController()
+        )
 
         self.initProjectAction = QAction(
             QIcon(util.resolvePath("res\\download.png")),
@@ -169,24 +207,58 @@ class QgsLes:
         self.qgsLesToolbar.addAction(self.taxationAction)
         self.qgsLesToolbar.addAction(self.otvodAction)
         self.qgsLesToolbar.addAction(self.countAction)
+        self.qgsLesToolbar.addAction(self.controlAreaAction)
+        self.qgsLesToolbar.addAction(self.filterAreaAction)
         self.qgsLesToolbar.addAction(self.settingsAction)
         self.qgsLesToolbar.addAction(self.initProjectAction)
 
         if QgsProject.instance().mapLayersByName("Выдела"):
             self.initFilter()
 
-    def initProjectClicked(self):
+    def filterAreaButtonClicked(self, checked):
+        if not QgsProject.instance().mapLayersByName("Лесосеки"):
+            QtWidgets.QMessageBox.warning(
+                None, "Ошибка", "Отсутствует слой лесосек."
+            )
+            return
+        if not checked and self.dockWidget:
+            self.iface.removeDockWidget(self.dockWidget)
+        else:
+            self.dockWidget = AreaFilter.AreaFilterDockWidget()
+            self.filgetAreaCtrlr = AreaFilter.AreaFilterController(
+                self.dockWidget
+            )
+            self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockWidget)
 
-        # self.filter = None
-        self.initializer = QgsProjectInitializer(self.iface, self.qgsLesToolbar)
+    def controlAreaClicked(self):
+        def getResult(feature):
+            if feature:
+                zoomTool = QgsMapToolZoom(self.canvas, False)
+                self.canvas.setMapTool(zoomTool)
+                self.ctrlr = AreaController.AreaController(feature)
+            else:
+                QtWidgets.QMessageBox.warning(
+                    None, "Ошибка", "Не выбрана лесосека."
+                )
+
+        self.pkr = peeker.PeekStratumFromMap(self.canvas, "Лесосеки")
+        self.canvas.setMapTool(self.pkr)
+        self.pkr.signal.connect(getResult)
+
+    def initProjectClicked(self):
+        self.initializer = QgsProjectInitializer(
+            self.iface, self.qgsLesToolbar
+        )
 
     def unload(self):
         del self.qgsLesToolbar
+        # del self.dockWidget
 
     def taxationButtonClicked(self):
         def getResult(feature):
             def showTaxationDetails(details):
-                self.showTaxation(details)
+                tdd = TaxationDescriptionDialog(tax_data=details)
+                tdd.exec()
 
             if feature:
                 txwrker = taxWorker(feature)
@@ -236,7 +308,9 @@ class QgsLes:
                 self.rst = TaMainWindow(uid)
                 self.rst.show()
             else:
-                QtWidgets.QMessageBox.warning(None, "Внимание", "Не выбрана лесосека.")
+                QtWidgets.QMessageBox.warning(
+                    None, "Внимание", "Не выбрана лесосека."
+                )
 
             zoomTool = QgsMapToolZoom(self.canvas, False)
             self.canvas.setMapTool(zoomTool)
@@ -244,83 +318,3 @@ class QgsLes:
         self.pkr = peeker.PeekStratumFromMap(self.canvas, "Лесосеки")
         self.canvas.setMapTool(self.pkr)
         self.pkr.signal.connect(getResult)
-
-    def showTaxation(self, taxation):
-        if not taxation[0]:
-            return
-
-        layout = QVBoxLayout()
-
-        def appendForestryInfo(info, dialog):
-            label = QLabel(dialog)
-            label.setText(
-                str(info[0])
-                + ", "
-                + str(info[1])
-                + " лесничество, "
-                + "квартал: "
-                + str(info[2])
-                + " выдел: "
-                + str(info[3])
-            )
-            label.adjustSize()
-            layout.addWidget(label)
-
-        def appendTaxationBase(tax, dialog):
-            def prepareTaxBase(taxBaseList):
-                return [
-                    "Бонитет: " + str(taxBaseList[1]),
-                    ", тип леса: " + str(taxBaseList[2]),
-                    ", ТУМ: " + str(taxBaseList[3]),
-                ]
-
-            label = QLabel(dialog)
-            tax = prepareTaxBase(tax)
-            label.setText(str(tax[0]) + str(tax[1]) + str(tax[2]))
-            label.adjustSize()
-            layout.addWidget(label)
-
-        def appendTaxation(tax, dialog):
-            def prepareTax(tx):
-                taxList = list(tx)
-                for i, item in enumerate(taxList):
-                    if item is None:
-                        taxList[i] = "-"
-
-                return [
-                    str(taxList[1]),
-                    ", диаметр: " + str(taxList[2]),
-                    ", полнота: " + str(taxList[4]),
-                    ", высота: " + str(taxList[5]),
-                    ", возраст: " + str(taxList[6]),
-                    ", ярус: " + str(taxList[7]),
-                    ", запас: " + str(taxList[8]),
-                ]
-
-            for x in tax:
-                taxLine = prepareTax(x)
-                label = QLabel(dialog)
-                label.setText(
-                    str(taxLine[0])
-                    + str(taxLine[1])
-                    + str(taxLine[2])
-                    + str(taxLine[3])
-                    + str(taxLine[4])
-                    + str(taxLine[5])
-                    + str(taxLine[6])
-                )
-                label.adjustSize()
-                layout.addWidget(label)
-
-        dialog = QDialog()
-        window = TaxationDialog()
-        window.setupUi(dialog)
-
-        appendForestryInfo(taxation[2], dialog)
-        appendTaxationBase(taxation[0][0], dialog)
-        appendTaxation(taxation[1], dialog)
-        dialog.setLayout(layout)
-
-        if dialog.exec_() == QDialog.Accepted:
-            return True
-        return False

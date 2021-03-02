@@ -5,9 +5,14 @@ from .tools import module_errors as er
 from .PostgisDB import PostGisDB
 from .BluetoothAdapter import BTAdapter
 from PyQt5 import QtCore
-from .modules.otvod.tools.threading.ForestObjectWorker import Worker as ForestObjWorker
-from .modules.otvod.tools.threading.ForestObjectLoader import ForestObjectLoader
+from .modules.otvod.tools.threading.ForestObjectWorker import (
+    Worker as ForestObjWorker,
+)
+from .modules.otvod.tools.threading.ForestObjectLoader import (
+    ForestObjectLoader,
+)
 from qgis.utils import iface
+import os
 
 
 class SettingsWindow(QDialog):
@@ -67,14 +72,24 @@ class SettingsController(QtCore.QObject):
         )
 
         self.tableUi.changeForkComButton.clicked.connect(self.changeComPort)
-        self.tableUi.changeRangeFinderComButton.clicked.connect(self.changeComPort)
-        self.tableUi.SaveBTConfigPushButton.clicked.connect(self.saveComPortConfig)
+        self.tableUi.changeRangeFinderComButton.clicked.connect(
+            self.changeComPort
+        )
+        self.tableUi.SaveBTConfigPushButton.clicked.connect(
+            self.saveComPortConfig
+        )
 
-        self.tableUi.gplho_comboBox.currentTextChanged.connect(self.gplhoChanged)
-        self.tableUi.leshoz_comboBox.currentTextChanged.connect(self.leshozChanged)
+        self.tableUi.gplho_comboBox.currentTextChanged.connect(
+            self.gplhoChanged
+        )
+        self.tableUi.leshoz_comboBox.currentTextChanged.connect(
+            self.leshozChanged
+        )
 
         self.tableUi.toolButton.clicked.connect(self.chooseReportFolder)
-        self.tableUi.saveOtvodSettingsButton.clicked.connect(self.saveOtvodSettings)
+        self.tableUi.saveOtvodSettingsButton.clicked.connect(
+            self.saveOtvodSettings
+        )
         self.sd.exec()
 
         self.lhTypesAndNames = None
@@ -204,21 +219,34 @@ class SettingsController(QtCore.QObject):
             arg.setCurrentIndex(-1)
 
     def saveOtvodSettings(self):
-        cfReport = config.Configurer("report", {"path": self.tableUi.lineEdit.text()})
+        cfReport = config.Configurer(
+            "report", {"path": self.tableUi.lineEdit.text()}
+        )
         cfReport.writeConfigs()
         otvodSettings = {
             "tabletype": str(
-                self.tabletypes.get(self.tableUi.tableType_comboBox.currentText(), "0")
+                self.tabletypes.get(
+                    self.tableUi.tableType_comboBox.currentText(), "0"
+                )
             ),
             "coordtype": str(
-                self.coordtypes.get(self.tableUi.coordType_comboBox.currentText(), "0")
+                self.coordtypes.get(
+                    self.tableUi.coordType_comboBox.currentText(), "0"
+                )
             ),
         }
         cfOtvod = config.Configurer("otvod", otvodSettings)
         cfOtvod.writeConfigs()
 
     def chooseReportFolder(self):
+        cfReport = config.Configurer("report")
+        settingsReport = cfReport.readConfigs()
+        oldPath = settingsReport.get("path", "")
         path = str(QFileDialog.getExistingDirectory(None, "Select Directory"))
+        if not path and oldPath:
+            path = oldPath
+        if not path and not oldPath:
+            path = os.path.expanduser("~")
         self.tableUi.lineEdit.setText(path)
 
     def populateOtvodSettings(self):
@@ -244,11 +272,21 @@ class SettingsController(QtCore.QObject):
         try:
             cf = config.Configurer("dbconnection")
             bdsettings = cf.readConfigs()
-            self.tableUi.connectionLineEdit.setText(bdsettings.get("host", "No data"))
-            self.tableUi.portLineEdit.setText(bdsettings.get("port", "No data"))
-            self.tableUi.usernameLineEdit.setText(bdsettings.get("user", "No data"))
-            self.tableUi.passwordLineEdit.setText(bdsettings.get("password", "No data"))
-            self.tableUi.BDNameLineEdit.setText(bdsettings.get("database", "No data"))
+            self.tableUi.connectionLineEdit.setText(
+                bdsettings.get("host", "No data")
+            )
+            self.tableUi.portLineEdit.setText(
+                bdsettings.get("port", "No data")
+            )
+            self.tableUi.usernameLineEdit.setText(
+                bdsettings.get("user", "No data")
+            )
+            self.tableUi.passwordLineEdit.setText(
+                bdsettings.get("password", "No data")
+            )
+            self.tableUi.BDNameLineEdit.setText(
+                bdsettings.get("database", "No data")
+            )
         except Exception as e:
             QMessageBox.information(
                 None, er.MODULE_ERROR, er.CONFIG_FILE_ERROR + str(e)
@@ -257,7 +295,9 @@ class SettingsController(QtCore.QObject):
     def populateBTSettings(self):
         cf = config.Configurer("bluetooth")
         btsettings = cf.readConfigs()
-        self.tableUi.forkComPortlineEdit.setText(btsettings.get("fork", "No data"))
+        self.tableUi.forkComPortlineEdit.setText(
+            btsettings.get("fork", "No data")
+        )
         self.tableUi.rangeFinderLineEdit.setText(
             btsettings.get("rangefinder", "No data")
         )
@@ -269,7 +309,9 @@ class SettingsController(QtCore.QObject):
         ui = sd.ui
 
         btAdapter = BTAdapter()
-        ui.comPortCombobox.addItems([x.device for x in btAdapter.getAvailablePorts()])
+        ui.comPortCombobox.addItems(
+            [x.device for x in btAdapter.getAvailablePorts()]
+        )
         result = sd.exec()
 
         if result == QDialog.Accepted:
@@ -319,6 +361,10 @@ class SettingsController(QtCore.QObject):
             database=self.tableUi.BDNameLineEdit.text(),
         )
         if tc:
-            QMessageBox.information(None, er.MODULE_ERROR, er.CONNECTION_SUCCEEDED)
+            QMessageBox.information(
+                None, er.MODULE_ERROR, er.CONNECTION_SUCCEEDED
+            )
         else:
-            QMessageBox.information(None, er.MODULE_ERROR, er.DATABASE_CONNECTION_ERROR)
+            QMessageBox.information(
+                None, er.MODULE_ERROR, er.DATABASE_CONNECTION_ERROR
+            )
