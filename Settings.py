@@ -64,6 +64,7 @@ class SettingsController(QtCore.QObject):
         self.populateBTSettings()
 
         self.tableUi.saveConfigButton.clicked.connect(self.saveBDConfig)
+        self.tableUi.importDB_pushButton.clicked.connect(self.importDB)
         self.tableUi.testDBConnection_pushButton.clicked.connect(
             self.getDBConnectionState
         )
@@ -368,3 +369,12 @@ class SettingsController(QtCore.QObject):
             QMessageBox.information(
                 None, er.MODULE_ERROR, er.DATABASE_CONNECTION_ERROR
             )
+
+    def importDB(self):
+        result = QMessageBox.question(
+            self,
+            "",
+            "Are you sure to reset all the values?",
+            QMessageBox.StandardButtons(QMessageBox.Yes | QMessageBox.No),
+        )
+        print(result)
