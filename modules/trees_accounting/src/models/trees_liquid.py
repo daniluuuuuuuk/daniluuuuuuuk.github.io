@@ -18,7 +18,9 @@ class TreesLiquid(QStandardItemModel):
 
     def __make_dmr(self):
         """Строю диаметры для таблицы"""
-        self.setVerticalHeaderItem(self.trf_height_row, QStandardItem("Разряд"))
+        self.setVerticalHeaderItem(
+            self.trf_height_row, QStandardItem("Разряд")
+        )
         self.setVerticalHeaderItem(self.species_row, QStandardItem("Диаметр"))
         self.setVerticalHeaderItem(2, QStandardItem("см."))
 
@@ -39,9 +41,13 @@ class TreesLiquid(QStandardItemModel):
                 Species.code_species == code_species
             ).name_species
 
-        self.setItem(self.species_row, last_column, QStandardItem(name_species))
+        self.setItem(
+            self.species_row, last_column, QStandardItem(name_species)
+        )
         self.item(self.species_row, last_column).code_species = code_species
-        self.item(self.species_row, last_column).setTextAlignment(Qt.AlignHCenter)
+        self.item(self.species_row, last_column).setTextAlignment(
+            Qt.AlignHCenter
+        )
         self.item(self.species_row, last_column).setEditable(False)
 
         self.setItem(2, last_column, QStandardItem("Деловых"))
@@ -86,13 +92,17 @@ class TreesLiquid(QStandardItemModel):
 
         if record["num_ind"] > 0:
             self.setItem(
-                current_row, current_column_ind, QStandardItem(str(record["num_ind"]))
+                current_row,
+                current_column_ind,
+                QStandardItem(str(record["num_ind"])),
             )
             self.summary_by_column(current_column_ind)
 
         if record["num_fuel"] > 0:
             self.setItem(
-                current_row, current_column_fuel, QStandardItem(str(record["num_fuel"]))
+                current_row,
+                current_column_fuel,
+                QStandardItem(str(record["num_fuel"])),
             )
             self.summary_by_column(current_column_fuel)
 
@@ -144,7 +154,9 @@ class TreesLiquid(QStandardItemModel):
                             instance["dmr"] = int((row - 1) * 4)
 
                             try:
-                                instance["num_ind"] = int(self.item(row, col).text())
+                                instance["num_ind"] = int(
+                                    self.item(row, col).text()
+                                )
                                 if (
                                     instance["num_ind"] == ""
                                     or instance["num_ind"] < 1
@@ -154,12 +166,14 @@ class TreesLiquid(QStandardItemModel):
                             except AttributeError:
                                 instance["num_ind"] = "0"
                             except ValueError:
-                                return {
-                                    "main_text": f"Ошибка вводимых данных. \
-                                        Введите целочисленное значение (больше 0 и меньше 2147483648).\
-                                        \nСтрока {row}, столбец {col+1}",
-                                    "detailed_text": None,
-                                }
+                                if self.item(row, col).text() == "":
+                                    instance["num_ind"] = "0"
+                                else:
+                                    return {
+                                        "main_text": f"Ошибка вводимых данных. Введите целочисленное значение (больше 0 и меньше 2147483648).\
+                                            \nСтрока {row}, столбец {col+1}",
+                                        "detailed_text": None,
+                                    }
 
                             try:
                                 instance["num_fuel"] = int(
@@ -174,12 +188,14 @@ class TreesLiquid(QStandardItemModel):
                             except AttributeError:
                                 instance["num_fuel"] = "0"
                             except ValueError:
-                                return {
-                                    "main_text": f"Ошибка вводимых данных. \
-                                        Введите целочисленное значение (больше 0 и меньше 2147483648).\
-                                        \nСтрока {row}, столбец {col+2}",
-                                    "detailed_text": None,
-                                }
+                                if self.item(row, col + 1).text() == "":
+                                    instance["num_fuel"] = "0"
+                                else:
+                                    return {
+                                        "main_text": f"Ошибка вводимых данных. Введите целочисленное значение (больше 0 и меньше 2147483648).\
+                                            \nСтрока {row}, столбец {col+2}",
+                                        "detailed_text": None,
+                                    }
                             list_from_model.append(instance)
         return list_from_model
 
@@ -194,7 +210,9 @@ class TreesLiquid(QStandardItemModel):
             if self.item(self.species_row, col):
                 if code_species is not None:
                     if (
-                        getattr(self.item(self.species_row, col), "code_species")
+                        getattr(
+                            self.item(self.species_row, col), "code_species"
+                        )
                         == code_species
                     ):
                         return col
@@ -203,7 +221,9 @@ class TreesLiquid(QStandardItemModel):
                     is not None
                 ):
                     species_positions[
-                        getattr(self.item(self.species_row, col), "code_species")
+                        getattr(
+                            self.item(self.species_row, col), "code_species"
+                        )
                     ] = col
 
         if code_species is None:

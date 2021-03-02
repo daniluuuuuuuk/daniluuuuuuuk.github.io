@@ -13,7 +13,9 @@ from .models.trees_not_cutting import TreesNotCutting
 from .models.dictionary import Species, TrfHeight, KindSeeds
 from .services.waiting_spinner_widget import QtWaitingSpinner
 
-UI_MAINWINDOW = uic.loadUiType(BasicDir.get_module_dir("ui/trees_accounting.ui"))[0]
+UI_MAINWINDOW = uic.loadUiType(
+    BasicDir.get_module_dir("ui/trees_accounting.ui")
+)[0]
 UI_LIQUID_SPECIES = uic.loadUiType(
     BasicDir.get_module_dir("ui/select_liquid_species.ui")
 )[0]
@@ -60,10 +62,14 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
             QtWidgets.QHeaderView.Stretch
         )
         self.tableView_2.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
-        self.tableView_2.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.tableView_2.setSelectionMode(
+            QtWidgets.QAbstractItemView.SingleSelection
+        )
         self.tableView_2.doubleClicked.connect(self.edit_not_cutting_row)
 
-        self.spinner = QtWaitingSpinner(self, True, True, QtCore.Qt.ApplicationModal)
+        self.spinner = QtWaitingSpinner(
+            self, True, True, QtCore.Qt.ApplicationModal
+        )
 
     def db_import(self):
         """
@@ -94,7 +100,9 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
         self.tableView.setModel(self.trees_liquid)
 
         for col in range(self.trees_liquid.columnCount()):
-            if not col % 2:  # используем нечётные столбцы (именно там уст. наз. породы)
+            if (
+                not col % 2
+            ):  # используем нечётные столбцы (именно там уст. наз. породы)
                 self.formatting_trees_liquid_table(col)
                 #  Ставлю разряд высот
                 current_trf_height = (
@@ -103,7 +111,9 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
                     .trf_height
                 )
                 self.tableView.indexWidget(
-                    self.tableView.model().index(self.trees_liquid.trf_height_row, col)
+                    self.tableView.model().index(
+                        self.trees_liquid.trf_height_row, col
+                    )
                 ).setCurrentIndex(current_trf_height)
         self.statusBar().showMessage("Данные успешно загружены из БД", 3000)
 
@@ -170,10 +180,16 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
             названия породы TreesLiquid().species_row
         Создаёт виджет для выбора разряда высот.
         """
-        self.tableView.setSpan(self.trees_liquid.trf_height_row, required_column, 1, 2)
-        self.tableView.setSpan(self.trees_liquid.species_row, required_column, 1, 2)
+        self.tableView.setSpan(
+            self.trees_liquid.trf_height_row, required_column, 1, 2
+        )
+        self.tableView.setSpan(
+            self.trees_liquid.species_row, required_column, 1, 2
+        )
         self.tableView.setIndexWidget(
-            self.trees_liquid.index(self.trees_liquid.trf_height_row, required_column),
+            self.trees_liquid.index(
+                self.trees_liquid.trf_height_row, required_column
+            ),
             self.create_trf_widget(),
         )
         return True
@@ -191,7 +207,8 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
         self.exported_data.finished.connect(lambda: self.spinner.stop())
         self.exported_data.start()
         self.exported_data.signal_message_result.connect(
-            lambda messages: self.message.show(**messages), QtCore.Qt.QueuedConnection
+            lambda messages: self.message.show(**messages),
+            QtCore.Qt.QueuedConnection,
         )
         self.was_edited = False
 
@@ -205,15 +222,22 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
         if self.tableView.model().columnCount() > 1:
             export_file = QtWidgets.QFileDialog.getSaveFileName(
                 caption="Сохранение файла",
-                directory=os.path.expanduser("~") + "/Documents/" + self.uuid + ".json",
+                directory=os.path.expanduser("~")
+                + "/Documents/"
+                + self.uuid
+                + ".json",
                 filter="JSON (*.json)",
             )
             if export_file[0]:
                 self.lp_exported_data = LPExportedData(
                     self.att_data, self.tableView.model(), export_file[0]
                 )
-                self.lp_exported_data.started.connect(lambda: self.spinner.start())
-                self.lp_exported_data.finished.connect(lambda: self.spinner.stop())
+                self.lp_exported_data.started.connect(
+                    lambda: self.spinner.start()
+                )
+                self.lp_exported_data.finished.connect(
+                    lambda: self.spinner.stop()
+                )
                 self.lp_exported_data.start()
                 self.lp_exported_data.signal_message_result.connect(
                     lambda messages: self.message.show(**messages),
@@ -230,7 +254,10 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
         if self.tableView.model().columnCount() > 1:
             export_file = QtWidgets.QFileDialog.getSaveFileName(
                 caption="Сохранение файла",
-                directory=os.path.expanduser("~") + "/Documents/" + self.uuid + ".xlsx",
+                directory=os.path.expanduser("~")
+                + "/Documents/"
+                + self.uuid
+                + ".xlsx",
                 filter="XLS (*.xlsx)",
             )
             if export_file[0]:
@@ -240,8 +267,12 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
                     self.tableView_2.model(),
                     export_file[0],
                 )
-                self.xlsx_exported_data.started.connect(lambda: self.spinner.start())
-                self.xlsx_exported_data.finished.connect(lambda: self.spinner.stop())
+                self.xlsx_exported_data.started.connect(
+                    lambda: self.spinner.start()
+                )
+                self.xlsx_exported_data.finished.connect(
+                    lambda: self.spinner.stop()
+                )
                 self.xlsx_exported_data.start()
                 self.xlsx_exported_data.signal_message_result.connect(
                     lambda messages: self.xls_export_on_finish(
@@ -260,7 +291,8 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
                 self,
                 self.windowTitle(),
                 message["main_text"],
-                buttons=QtWidgets.QMessageBox.Open | QtWidgets.QMessageBox.Close,
+                buttons=QtWidgets.QMessageBox.Open
+                | QtWidgets.QMessageBox.Close,
             )
             if result == 8192:  # 8192 - вес кнопки (Открыть)
                 if platform.system() == "Windows":
@@ -294,11 +326,15 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
                 column_with_last_species = self.trees_liquid.columnCount() - 2
 
                 self.formatting_trees_liquid_table(column_with_last_species)
-                self.tableView.model().set_trf_for_spc(column_with_last_species, 0)
+                self.tableView.model().set_trf_for_spc(
+                    column_with_last_species, 0
+                )
 
             else:
                 QtWidgets.QMessageBox.warning(
-                    self, "Внимание", "Данная порода уже присутствует в таблице"
+                    self,
+                    "Внимание",
+                    "Данная порода уже присутствует в таблице",
                 )
 
     def add_gui_not_cutting_species(self):
@@ -333,8 +369,14 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
             name_spc = self.tableView.model().item(1, current_col).text()
         except AttributeError:
             try:
-                code_spc = self.tableView.model().item(1, current_col - 1).code_species
-                name_spc = self.tableView.model().item(1, current_col - 1).text()
+                code_spc = (
+                    self.tableView.model()
+                    .item(1, current_col - 1)
+                    .code_species
+                )
+                name_spc = (
+                    self.tableView.model().item(1, current_col - 1).text()
+                )
             except AttributeError:
                 QtWidgets.QMessageBox.critical(
                     self, "Ошибка", "Выберите породу в таблице для удаления"
@@ -357,7 +399,9 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
         """
         current_row = self.tableView_2.currentIndex().row()
         if current_row < 0:
-            QtWidgets.QMessageBox.critical(self, "Ошибка", "Выберите строку с записью.")
+            QtWidgets.QMessageBox.critical(
+                self, "Ошибка", "Выберите строку с записью."
+            )
             return False
         self.tableView_2.model().takeRow(current_row)
         self.was_edited = True
@@ -384,7 +428,9 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
         """
         current_row = self.tableView_2.currentIndex().row()
         not_cutting_data = self.tableView_2.model().as_list()
-        available_species = list(self.tableView.model().species_position().keys())
+        available_species = list(
+            self.tableView.model().species_position().keys()
+        )
 
         if type(not_cutting_data) is list:
             not_cutting_row_data = not_cutting_data[current_row]
@@ -429,6 +475,10 @@ class TaMainWindow(QtWidgets.QMainWindow, UI_MAINWINDOW):
                 self.message.show(
                     main_text="Ошибка вводимых данных. Введите целочисленное значение (больше 0 и меньше 2147483648)."
                 )
+        else:
+            self.tableView.model().summary_by_column(
+                self.tableView.currentIndex().column()
+            )
         self.origin_closeEditor(widget, hint)
 
     def closeEvent(self, event):
@@ -458,16 +508,20 @@ class TaSelectLiquidSpecies(QtWidgets.QDialog, UI_LIQUID_SPECIES):
         """
         Заполняю выпадающий список породами
         """
-        for spc in Species.select(Species.code_species, Species.name_species).order_by(
-            Species.name_species
-        ):
+        for spc in Species.select(
+            Species.code_species, Species.name_species
+        ).order_by(Species.name_species):
             self.comboBox.addItem(
                 spc.name_species, userData=QtCore.QVariant(spc.code_species)
             )
 
     def accept(self):
-        self.name_species = self.comboBox.itemText(self.comboBox.currentIndex())
-        self.code_species = self.comboBox.itemData(self.comboBox.currentIndex())
+        self.name_species = self.comboBox.itemText(
+            self.comboBox.currentIndex()
+        )
+        self.code_species = self.comboBox.itemData(
+            self.comboBox.currentIndex()
+        )
         super().accept()
 
     def exec(self):
@@ -480,7 +534,9 @@ class TaSelectNotCuttingSpecies(QtWidgets.QDialog, UI_NOT_CUTTING_SPECIES):
     GUI для выбора породы при добавлении/изменении записи
     """
 
-    def __init__(self, current_spc: list, current_data: dict = None, parent=None):
+    def __init__(
+        self, current_spc: list, current_data: dict = None, parent=None
+    ):
         QtWidgets.QDialog.__init__(self, parent)
         self.current_spc = current_spc
         self.current_data = current_data
@@ -513,7 +569,10 @@ class TaSelectNotCuttingSpecies(QtWidgets.QDialog, UI_NOT_CUTTING_SPECIES):
     def seeds_field_validation(self) -> bool:
         """Валидация вводимых полей"""
         try:
-            if int(self.lineEdit.text()) < 0 and int(self.lineEdit.text()) > 2147483648:
+            if (
+                int(self.lineEdit.text()) < 0
+                and int(self.lineEdit.text()) > 2147483648
+            ):
                 raise ValueError
 
             if (
@@ -546,13 +605,23 @@ class TaSelectNotCuttingSpecies(QtWidgets.QDialog, UI_NOT_CUTTING_SPECIES):
         self.comboBox_2.setCurrentText(current_seed_type_name)
 
     def accept(self):
-        self.name_species = self.comboBox.itemText(self.comboBox.currentIndex())
-        self.code_species = self.comboBox.itemData(self.comboBox.currentIndex())
+        self.name_species = self.comboBox.itemText(
+            self.comboBox.currentIndex()
+        )
+        self.code_species = self.comboBox.itemData(
+            self.comboBox.currentIndex()
+        )
         if not self.seeds_field_validation():
-            QtWidgets.QMessageBox.critical(self, "Ошибка", "Введены неверные данные")
+            QtWidgets.QMessageBox.critical(
+                self, "Ошибка", "Введены неверные данные"
+            )
             return False
-        self.seed_type_code = self.comboBox_2.itemData(self.comboBox_2.currentIndex())
-        self.name_kind_seeds = self.comboBox_2.itemText(self.comboBox_2.currentIndex())
+        self.seed_type_code = self.comboBox_2.itemData(
+            self.comboBox_2.currentIndex()
+        )
+        self.name_kind_seeds = self.comboBox_2.itemText(
+            self.comboBox_2.currentIndex()
+        )
         self.seed_dmr = self.lineEdit.text()
         self.seed_count = self.lineEdit_2.text()
         self.seed_number = self.lineEdit_3.text()
