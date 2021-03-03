@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'C:\Users\NLK\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\trial_area\ui\settingsDialog.ui'
+# Form implementation generated from reading ui file 'C:\Users\omelchuk-ev\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\trial_area\ui\settingsDialog.ui'
 #
 # Created by: PyQt5 UI code generator 5.11.3
 #
@@ -114,7 +114,7 @@ class Ui_settingsDialog(object):
         self.saveConfigButton.setCheckable(False)
         self.saveConfigButton.setObjectName("saveConfigButton")
         self.testDBConnection_pushButton = QtWidgets.QPushButton(self.bdSettings)
-        self.testDBConnection_pushButton.setGeometry(QtCore.QRect(14, 140, 241, 23))
+        self.testDBConnection_pushButton.setGeometry(QtCore.QRect(14, 140, 101, 23))
         self.testDBConnection_pushButton.setObjectName("testDBConnection_pushButton")
         self.BDNameLabel = QtWidgets.QLabel(self.bdSettings)
         self.BDNameLabel.setGeometry(QtCore.QRect(170, 50, 47, 13))
@@ -122,6 +122,9 @@ class Ui_settingsDialog(object):
         self.BDNameLineEdit = QtWidgets.QLineEdit(self.bdSettings)
         self.BDNameLineEdit.setGeometry(QtCore.QRect(210, 50, 121, 20))
         self.BDNameLineEdit.setObjectName("BDNameLineEdit")
+        self.importDB_pushButton = QtWidgets.QPushButton(self.bdSettings)
+        self.importDB_pushButton.setGeometry(QtCore.QRect(120, 140, 131, 23))
+        self.importDB_pushButton.setObjectName("importDB_pushButton")
         self.settingsWidget.addTab(self.bdSettings, "")
         self.btSettings = QtWidgets.QWidget()
         self.btSettings.setObjectName("btSettings")
@@ -185,6 +188,7 @@ class Ui_settingsDialog(object):
         self.saveConfigButton.setText(_translate("settingsDialog", "Сохранить"))
         self.testDBConnection_pushButton.setText(_translate("settingsDialog", "Тест соединения"))
         self.BDNameLabel.setText(_translate("settingsDialog", "Имя БД"))
+        self.importDB_pushButton.setText(_translate("settingsDialog", "Импортировать БД"))
         self.settingsWidget.setTabText(self.settingsWidget.indexOf(self.bdSettings), _translate("settingsDialog", "База данных"))
         self.fork_label.setText(_translate("settingsDialog", "Мерная вилка"))
         self.rangeFinder_label.setText(_translate("settingsDialog", "Дальномер"))
