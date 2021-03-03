@@ -13,6 +13,7 @@ from ....tools import config
 from qgis.core import QgsFeature, QgsDistanceArea, QgsGeometry, QgsUnitTypes
 from qgis.core import QgsCoordinateReferenceSystem, QgsCoordinateTransformContext
 from qgis.utils import iface
+from qgis.core import QgsProject
 
 class LesosekaInfo(QDialog):
 
@@ -254,6 +255,10 @@ class LesosekaInfo(QDialog):
         thread.started.connect(worker.run)
         thread.start()
 
+        attrs = self.getTempLesosekaAttributes()
+        if attrs:
+            self.populateValues(attrs)
+
         self.ui.date.setDateTime(QDateTime.currentDateTime())
         if layer:
             self.ui.area.setText(str(self.precalculateArea(layer)))
@@ -283,6 +288,17 @@ class LesosekaInfo(QDialog):
         return round(da.convertAreaMeasurement(
             tempArea, QgsUnitTypes.AreaHectares), 1)
 
+    def getTempLesosekaAttributes(self):
+        layer = QgsProject.instance().mapLayersByName(
+            "Лесосека временный слой")
+        if layer:
+            feature = list(layer[0].getFeatures())[0]
+            attributes = {}
+            for x in feature.fields():
+                attributes.update({x.name(): feature[x.name()]})
+            return attributes
+        return None
+    
     def populateValues(self, attributes):
         self.ui.gplho.addItem(str(attributes.get('vedomstvo_text')))
         self.ui.leshos.addItem(str(attributes.get('leshos_text')))
