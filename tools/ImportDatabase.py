@@ -65,6 +65,8 @@ class DataImport(QThread):
                     )
                     proc.wait()
 
-                self.signal_message_result.emit("Готово")
+                self.signal_message_result.emit(
+                    "Успешно выполнен импорт в базу данных."
+                )
             except Exception as e:
                 self.signal_message_result.emit(str(e))

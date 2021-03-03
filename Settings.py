@@ -401,7 +401,7 @@ class SettingsController(QtCore.QObject):
         result = QMessageBox.question(
             None,
             "",
-            "Текущая база данных будет УДАЛЕНА. Продолжить?",
+            "Данные базы данных будут ПЕРЕЗАПИСАНЫ. Продолжить?",
             QMessageBox.StandardButtons(QMessageBox.Yes | QMessageBox.No),
         )
         if result == QMessageBox.Yes:
@@ -419,15 +419,16 @@ class SettingsController(QtCore.QObject):
                 self.imported_data = DataImport(
                     db_info=db_info, filename=bu_file
                 )
-                self.imported_data.start()
-                self.imported_data.signal_message_result.connect(
-                    lambda x: print(x), QtCore.Qt.QueuedConnection
-                )
                 self.imported_data.started.connect(
                     lambda: self.spinner.start()
                 )
                 self.imported_data.finished.connect(
                     lambda: self.spinner.stop()
+                )
+                self.imported_data.start()
+                self.imported_data.signal_message_result.connect(
+                    lambda mes: QMessageBox.information(None, "", str(mes)),
+                    QtCore.Qt.QueuedConnection,
                 )
 
             else:
