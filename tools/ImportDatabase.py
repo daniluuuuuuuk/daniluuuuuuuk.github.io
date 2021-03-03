@@ -42,7 +42,8 @@ class DataImport(QThread):
         return True
 
     def run(self):
-        if self.pre_import():
+        pre_import = self.pre_import()
+        if type(pre_import) is bool:
             try:
                 command = (
                     f'"{util.resolvePath("bin/pg_restore.exe")}" --verbose --host={self.db_info["host"]} '
@@ -70,3 +71,6 @@ class DataImport(QThread):
                 )
             except Exception as e:
                 self.signal_message_result.emit(str(e))
+
+        else:
+            self.signal_message_result.emit(str(pre_import))
