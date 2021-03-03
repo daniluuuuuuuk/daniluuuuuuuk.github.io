@@ -11,6 +11,8 @@ from .gui.LesosekaInfoDialog import LesosekaInfo
 from .tools import GeoOperations
 from qgis.core import edit
 from .tools.Serializer import DbSerializer
+from qgis.utils import iface
+from qgis.PyQt.QtWidgets import QAction
 
 
 class CuttingArea:
@@ -282,6 +284,12 @@ class CuttingArea:
         destLYR = QgsProject.instance().mapLayersByName(destLYRName)[0]
 
         features = destLYR.getFeatures("uid = '{}'".format(self.uid))
+
+        if destLYR.isEditable():
+            # destLYR.rollback(True)
+            iface.setActiveLayer(destLYR)
+            iface.mainWindow().findChild(QAction, 'mActionToggleEditing').trigger()
+
         with edit(destLYR):
             for f in features:
                 destLYR.deleteFeature(f.id())

@@ -386,7 +386,7 @@
       <rect>
        <x>14</x>
        <y>140</y>
-       <width>241</width>
+       <width>101</width>
        <height>23</height>
       </rect>
      </property>
@@ -415,6 +415,19 @@
        <width>121</width>
        <height>20</height>
       </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="importDB_pushButton">
+     <property name="geometry">
+      <rect>
+       <x>120</x>
+       <y>140</y>
+       <width>131</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Импортировать БД</string>
      </property>
     </widget>
    </widget>

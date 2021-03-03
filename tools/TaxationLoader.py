@@ -63,7 +63,12 @@ class Loader(QgsTask):
     def __init__(self, description):
         super().__init__(description, QgsTask.CanCancel)
 
-        self.taxDetails = {}
+        self.taxDetails = {
+            "identity": None,
+            "bonitet": None,
+            "tl": None,
+            "tum": None,
+        }
         self.taxDetailsM10 = None
         self.lh_name = None
         self.lch_name = None
@@ -108,42 +113,49 @@ class Loader(QgsTask):
             )
         )[0][0]
 
-        (
-            self.taxDetails["identity"],
-            self.taxDetails["bonitet"],
-            self.taxDetails["tl"],
-            self.taxDetails["tum"],
-        ) = postgisConnection.getQueryResult(
-            """select identity, bon, tl, tum from "public".subcompartment_taxation where identity = '{}'""".format(
-                int(identity)
-            )
-        )[
-            0
-        ]
+        try:
+            (
+                self.taxDetails["identity"],
+                self.taxDetails["bonitet"],
+                self.taxDetails["tl"],
+                self.taxDetails["tum"],
+            ) = postgisConnection.getQueryResult(
+                """select identity, bon, tl, tum from "public".subcompartment_taxation where identity = '{}'""".format(
+                    int(identity)
+                )
+            )[
+                0
+            ]
+        except IndexError:
+            None
 
-        self.area = postgisConnection.getQueryResult(
-            """select area from "public".subcompartments where identity = '{}'""".format(
-                int(identity)
-            )
-        )[0][0]
+        try:
+            self.area = postgisConnection.getQueryResult(
+                """select area from "public".subcompartments where identity = '{}'""".format(
+                    int(identity)
+                )
+            )[0][0]
+        except IndexError:
+            None
 
         self.taxDetailsM10 = postgisConnection.getQueryResult(
             """select identity, formula, dmr, proish, poln, height, age, yarus, zapas from "public".subcompartment_taxation_m10 where identity = '{}'""".format(
                 int(identity)
             )
         )
-        for i in range(len(self.taxDetailsM10)):
-            self.taxDetailsM10[i] = {
-                "identity": self.taxDetailsM10[i][0],
-                "formula": self.taxDetailsM10[i][1],
-                "dmr": self.taxDetailsM10[i][2],
-                "proish": self.taxDetailsM10[i][3],
-                "poln": self.taxDetailsM10[i][4],
-                "height": self.taxDetailsM10[i][5],
-                "age": self.taxDetailsM10[i][6],
-                "yarus": self.taxDetailsM10[i][7],
-                "zapas": self.taxDetailsM10[i][8],
-            }
+        if len(self.taxDetailsM10) > 0:
+            for i in range(len(self.taxDetailsM10)):
+                self.taxDetailsM10[i] = {
+                    "identity": self.taxDetailsM10[i][0],
+                    "formula": self.taxDetailsM10[i][1],
+                    "dmr": self.taxDetailsM10[i][2],
+                    "proish": self.taxDetailsM10[i][3],
+                    "poln": self.taxDetailsM10[i][4],
+                    "height": self.taxDetailsM10[i][5],
+                    "age": self.taxDetailsM10[i][6],
+                    "yarus": self.taxDetailsM10[i][7],
+                    "zapas": self.taxDetailsM10[i][8],
+                }
 
         # postgisConnection.__del__()
 
