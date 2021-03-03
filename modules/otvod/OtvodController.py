@@ -21,6 +21,7 @@ from qgis.PyQt.QtWidgets import (
     QFileDialog,
     QTableWidgetItem,
 )
+from qgis.PyQt.QtWidgets import QAction
 from datetime import datetime
 from qgis.PyQt.QtCore import Qt
 from qgis.utils import iface
@@ -29,6 +30,8 @@ from .LayerManager import LayerManager
 from .icons.initIcons import IconSet
 from qgis.core import Qgis, QgsSnappingConfig, QgsTolerance
 from . import geomag
+from .tools.Serializer import DbSerializer
+from qgis.core import edit
 
 
 class OtvodController:
@@ -519,24 +522,69 @@ class OtvodController:
             self.tableWrapper.tableModel.refreshData()
 
     def saveCuttingArea(self):
+        
+        def getEditedUid():
+            layer = QgsProject.instance().mapLayersByName('Лесосека временный слой')
+            if layer:
+                feature = list(layer[0].getFeatures())[0]
+                return feature['uid']
+            return None
+
+        def saveDataToDatabase():
+            tableData = self.tableWrapper.getSerializableData()
+            data = [uid] + tableData
+            DbSerializer(data).saveToDb()
+
+        def copyFromTempLayer(sourceLYRName, destLYRName):
+            sourceLYR = QgsProject.instance().mapLayersByName(sourceLYRName)[0]
+            destLYR = QgsProject.instance().mapLayersByName(destLYRName)[0]
+
+            features = destLYR.getFeatures("uid = '{}'".format(uid))
+
+            if destLYR.isEditable():
+                iface.setActiveLayer(destLYR)
+                iface.mainWindow().findChild(QAction, 'mActionToggleEditing').trigger()
+
+            with edit(destLYR):
+                for f in features:
+                    destLYR.deleteFeature(f.id())
+
+            features = []
+            for feature in sourceLYR.getFeatures():
+                features.append(feature)
+            destLYR.startEditing()
+            data_provider = destLYR.dataProvider()
+            data_provider.addFeatures(features)
+            destLYR.commitChanges()
+
+        uid = getEditedUid()
+
         layer = QgsProject.instance().mapLayersByName("Результат обрезки")
         if layer:
             QgsProject.instance().removeMapLayers([layer[0].id()])
 
         self.canvas.refreshAllLayers()
 
-        if self.cuttingArea == None:
-            self.cuttingArea = self.canvasWidget.cuttingArea
-        if self.cuttingArea == None:
+        layer = QgsProject.instance().mapLayersByName("Лесосека временный слой")
+        if not layer:
             QMessageBox.information(
                 None,
                 "Ошибка модуля QGISLes",
                 "Отсутствует лесосека. Постройте лесосеку, после чего будет возможность ее сохранить",
             )
+
+        layer = QgsProject.instance().mapLayersByName("Привязка временный слой")
+        if layer:
+            copyFromTempLayer("Привязка временный слой", "Линия привязки")
+            copyFromTempLayer("Лесосека временный слой", "Лесосеки")
         else:
-            self.cuttingArea.save(self.tableWrapper.getSerializableData())
-            self.canvasWidget.btnControl.unlockReportBotton()
-            self.omw.outputLabel.setText("Лесосека сохранена")
+            copyFromTempLayer("Лесосека временный слой", "Лесосеки")
+
+        saveDataToDatabase()
+
+        self.canvasWidget.btnControl.unlockReportBotton()
+        self.omw.outputLabel.setText("Лесосека сохранена")
+
 
     def deleteCuttingArea(self):
         layerNamesToDelete = [
