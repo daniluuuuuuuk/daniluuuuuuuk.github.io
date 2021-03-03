@@ -229,7 +229,7 @@ class AreaController(QtCore.QObject):
             if result:
                 QMessageBox.information(None, 'Модуль отвода', 'Лесосека и ее данные были удалены из базы данных')
             iface.mapCanvas().refreshAllLayers()
-            self.ui.buttonBox.button(QDialogButtonBox.Close).click()
+            self.sd.close()
 
         reply = QMessageBox.question(QDialog(), 'Удаление лесосеки',
                                      'Лесосека и все ее данные будут удалены. Продолжить?', QMessageBox.Yes, QMessageBox.No)
