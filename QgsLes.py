@@ -5,7 +5,8 @@ from . import Filter, util, Settings, PostgisDB
 from qgis.core import QgsProject
 from .modules.otvod.OtvodController import OtvodController
 from .modules.otvod.tools.mapTools.RectangleMapTool import RectangleMapTool
-from .tools import CuttingAreaPeeker as peeker
+from .modules.otvod.tools.mapTools import PeekStratumFromMap as peeker
+# from .tools import CuttingAreaPeeker as peeker
 from qgis.gui import QgsMapToolZoom
 from qgis.core import Qgis, QgsApplication
 from .modules.trees_accounting.src.trees_accounting import TaMainWindow
