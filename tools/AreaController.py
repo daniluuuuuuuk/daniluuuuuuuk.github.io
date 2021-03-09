@@ -99,7 +99,7 @@ class AreaController(QtCore.QObject):
             "Лесосеки")[0]
         try:
             layer.startEditing()
-            self.feature['num_kv'] = int(self.ui.num_kv_lineEdit.text())
+            self.feature['num_kv'] = self.ui.num_kv_lineEdit.text()
             self.feature['area'] = float(str(self.ui.area_lineEdit.text()))
             self.feature['num'] = self.ui.num_lineEdit.text()
             self.feature['fio'] = self.ui.fio_lineEdit.text()
