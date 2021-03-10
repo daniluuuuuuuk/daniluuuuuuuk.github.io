@@ -58,6 +58,10 @@ class OtvodController:
             lambda: self.loadDataFromFile()
         )
 
+        self.omw.csvExport_action.triggered.connect(
+            lambda: self.exportToCsv()
+        )
+
         self.canvasWidget = CanvasWidget(
             self.omw, self.layers, self.rct, self.tableWrapper
         )
@@ -164,6 +168,28 @@ class OtvodController:
             self.project, self.canvas
         )
         self.omw.exportAsImage_PushButton.clicked.connect(self.generateImage)
+
+    def exportToCsv(self):
+        now = datetime.now()
+        dt_string = now.strftime("%d-%m-%Y %H.%M")
+        filename = QFileDialog.getSaveFileName(
+            None,
+            "Сохранить точки отвода",
+            "Данные отвода от " + dt_string,
+            "Точки отвода (*.csv)",
+        )[0]
+        if not filename:
+            return
+        else:
+            with open(filename, "w", encoding="utf8") as write_file:
+                data = self.tableWrapper.serializePointsToCsv()
+                for line in data:
+                    write_file.write(line + '\n')
+            self.omw.outputLabel.setText(
+            "<a href=file:///{}>Открыть папку</a>".format(
+                os.path.dirname(filename))
+            )
+            self.omw.outputLabel.setOpenExternalLinks(True)
 
     def generateImage(self):
         path = self.imgExporter.doJob(self.tableWrapper.getJSONRows())
@@ -440,6 +466,11 @@ class OtvodController:
                     ensure_ascii=False,
                     indent=4,
                 )
+            self.omw.outputLabel.setText(
+            "<a href=file:///{}>Открыть папку</a>".format(
+                os.path.dirname(filename))
+            )
+            self.omw.outputLabel.setOpenExternalLinks(True)
 
     def loadDataFromFile(self):
         try:

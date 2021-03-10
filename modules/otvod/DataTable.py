@@ -760,6 +760,20 @@ class DataTableWrapper:
         self.tableModel.pointsDict = cuttingArea.copy()
         self.tableModel.refreshData()
 
+    def serializePointsToCsv(self):
+        pointsDict = self.tableModel.pointsDict
+        bp = self.tableModel.bindingPoint
+        rows = ['№;X;Y;Type']
+        rows.append('0' + ';' + str(bp.x()) + ';' + str(bp.y()) + ';' + 'Точка привязки')
+        for point in pointsDict:
+            qgsPoint = pointsDict[point][0]
+            pointType = pointsDict[point][1]
+            row = str(point + 1) + ';' + str(qgsPoint.x()) + ';' + str(qgsPoint.y()) + ';' + str(pointType)
+            rows.append(row)
+        return rows
+
+        # print(self.tableModel.bindingPoint)
+
     def convertCoordFormat(self, coordType):
         self.tableModel.setRerender(False)
         currentTableType = self.tableModel.tabletype
