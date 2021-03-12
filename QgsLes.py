@@ -180,13 +180,13 @@ class QgsLes:
         )
         self.countAction.triggered.connect(self.countButtonClicked)
 
-        self.filterAreaAction = QAction(
-            QIcon(util.resolvePath("res\\icon6.png")),
-            "Панель инструментов",
-            self.iface.mainWindow(),
-        )
-        self.filterAreaAction.setCheckable(True)
-        self.filterAreaAction.triggered.connect(self.filterAreaButtonClicked)
+        # self.filterAreaAction = QAction(
+        #     QIcon(util.resolvePath("res\\icon6.png")),
+        #     "Панель инструментов",
+        #     self.iface.mainWindow(),
+        # )
+        # self.filterAreaAction.setCheckable(True)
+        # self.filterAreaAction.triggered.connect(self.filterAreaButtonClicked)
 
         self.settingsAction = QAction(
             QIcon(util.resolvePath("res\\settings.png")),
@@ -209,7 +209,7 @@ class QgsLes:
         self.qgsLesToolbar.addAction(self.otvodAction)
         self.qgsLesToolbar.addAction(self.countAction)
         self.qgsLesToolbar.addAction(self.controlAreaAction)
-        self.qgsLesToolbar.addAction(self.filterAreaAction)
+        # self.qgsLesToolbar.addAction(self.filterAreaAction)
         self.qgsLesToolbar.addAction(self.settingsAction)
         self.qgsLesToolbar.addAction(self.initProjectAction)
 
