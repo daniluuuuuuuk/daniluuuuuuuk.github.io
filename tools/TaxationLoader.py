@@ -145,6 +145,9 @@ class Loader(QgsTask):
         )
         if len(self.taxDetailsM10) > 0:
             for i in range(len(self.taxDetailsM10)):
+                self.taxDetailsM10[i] = [
+                    " " if v is None else v for v in self.taxDetailsM10[i]
+                ]
                 self.taxDetailsM10[i] = {
                     "identity": self.taxDetailsM10[i][0],
                     "formula": self.taxDetailsM10[i][1],
