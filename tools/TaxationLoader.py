@@ -2,6 +2,7 @@ from .. import PostgisDB
 from qgis.core import *
 from PyQt5 import QtCore
 from . import config
+from psycopg2 import ProgrammingError
 
 MESSAGE_CATEGORY = "Taxation Loader Task"
 
@@ -40,11 +41,11 @@ class Worker(QtCore.QObject):
             )
             self.loader.waitForFinished()
             ret = {
-                "lh_name": self.loader.lh_name,
-                "lch_name": self.loader.lch_name,
-                "num_kv": self.num_kv,
-                "num_vd": self.num_vd,
-                "area": self.loader.area,
+                "Лесхоз": self.loader.lh_name,
+                "Лесничество": self.loader.lch_name,
+                "Квартал": self.num_kv,
+                "Выдел": self.num_vd,
+                "Площадь": float(self.loader.area),
                 **self.loader.taxDetails,
             }
             ret["m10"] = self.loader.taxDetailsM10
@@ -63,12 +64,6 @@ class Loader(QgsTask):
     def __init__(self, description):
         super().__init__(description, QgsTask.CanCancel)
 
-        self.taxDetails = {
-            "identity": None,
-            "bonitet": None,
-            "tl": None,
-            "tum": None,
-        }
         self.taxDetailsM10 = None
         self.lh_name = None
         self.lch_name = None
@@ -112,22 +107,46 @@ class Loader(QgsTask):
                 lhCode, num_lch
             )
         )[0][0]
-
         try:
-            (
-                self.taxDetails["identity"],
-                self.taxDetails["bonitet"],
-                self.taxDetails["tl"],
-                self.taxDetails["tum"],
-            ) = postgisConnection.getQueryResult(
-                """select identity, bon, tl, tum from "public".subcompartment_taxation where identity = '{}'""".format(
-                    int(identity)
-                )
-            )[
-                0
-            ]
-        except IndexError:
-            None
+            sql_main_tax_description = """select 
+                st.bon as "Бонитет",
+                st.tl as "Тип леса",
+                st.tum as "ТУМ",
+                st.ptg as "ПТГ",
+                ds.name as "Проект. порода",
+                ds_2."name" as "Главная порода",
+                concat_ws(', ', x1.name_xmer, x2.name_xmer, x3.name_xmer) AS "Хоз. мероприятия"
+            from public.subcompartment_taxation st 
+                left join "dictionary".dict_species ds on st.por_m2 = ds.class_code_por
+                left join "dictionary".dict_species ds_2 on st.por_m3 = ds_2.class_code_por
+                left join "dictionary".xmer x1 on st.xmer1 = x1.code_xmer 
+                left join "dictionary".xmer x2 on st.xmer2 = x2.code_xmer 
+                left join "dictionary".xmer x3 on st.xmer3 = x3.code_xmer
+                    where st.identity = '{}'""".format(
+                int(identity)
+            )
+            self.taxDetails = postgisConnection.getQueryResult(
+                sql_main_tax_description, as_dict=True
+            )
+
+        except ProgrammingError:
+            sql_main_tax_description = """select 
+                st.bon as "Бонитет",
+                st.tl as "Тип леса",
+                st.tum as "ТУМ"
+            from public.subcompartment_taxation st 
+                where st.identity = '{}'""".format(
+                int(identity)
+            )
+            self.taxDetails = postgisConnection.getQueryResult(
+                sql_main_tax_description, as_dict=True
+            )
+        finally:
+            self.taxDetail = {}
+
+        for k, v in list(self.taxDetails.items()):  # Чистка от NULL
+            if v is None or v == "":
+                del self.taxDetails[k]
 
         try:
             self.area = postgisConnection.getQueryResult(

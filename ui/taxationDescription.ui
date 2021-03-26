@@ -14,183 +14,144 @@
    <string>Таксационные характеристики</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="spacing">
-    <number>3</number>
-   </property>
-   <property name="leftMargin">
-    <number>3</number>
-   </property>
-   <property name="topMargin">
-    <number>3</number>
-   </property>
-   <property name="rightMargin">
-    <number>3</number>
-   </property>
-   <property name="bottomMargin">
-    <number>3</number>
-   </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item alignment="Qt::AlignLeft">
-      <widget class="QTableWidget" name="tableWidget">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
+    <widget class="QSplitter" name="splitter">
+     <property name="minimumSize">
+      <size>
+       <width>902</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="opaqueResize">
+      <bool>true</bool>
+     </property>
+     <widget class="QTableWidget" name="tableWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="sizeIncrement">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="baseSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="gridStyle">
+       <enum>Qt::SolidLine</enum>
+      </property>
+      <attribute name="horizontalHeaderVisible">
+       <bool>true</bool>
+      </attribute>
+      <attribute name="horizontalHeaderDefaultSectionSize">
+       <number>100</number>
+      </attribute>
+      <attribute name="verticalHeaderVisible">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="verticalHeaderDefaultSectionSize">
+       <number>30</number>
+      </attribute>
+      <attribute name="verticalHeaderMinimumSectionSize">
+       <number>23</number>
+      </attribute>
+      <column>
+       <property name="text">
+        <string>Параметр</string>
        </property>
-       <property name="maximumSize">
-        <size>
-         <width>210</width>
-         <height>16777215</height>
-        </size>
+      </column>
+      <column>
+       <property name="text">
+        <string>Значение</string>
        </property>
-       <attribute name="horizontalHeaderVisible">
-        <bool>true</bool>
-       </attribute>
-       <attribute name="verticalHeaderVisible">
-        <bool>false</bool>
-       </attribute>
-       <row>
-        <property name="text">
-         <string>Новая строка</string>
-        </property>
-       </row>
-       <row>
-        <property name="text">
-         <string>Новая строка</string>
-        </property>
-       </row>
-       <row>
-        <property name="text">
-         <string>Новая строка</string>
-        </property>
-       </row>
-       <row>
-        <property name="text">
-         <string>Новая строка</string>
-        </property>
-       </row>
-       <row>
-        <property name="text">
-         <string>Новая строка</string>
-        </property>
-       </row>
-       <row>
-        <property name="text">
-         <string>Новая строка</string>
-        </property>
-       </row>
-       <row>
-        <property name="text">
-         <string>Новая строка</string>
-        </property>
-       </row>
-       <row>
-        <property name="text">
-         <string>Новая строка</string>
-        </property>
-       </row>
-       <column>
-        <property name="text">
-         <string>Параметр</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Значение</string>
-        </property>
-       </column>
-       <item row="0" column="0">
-        <property name="text">
-         <string>Лесхоз</string>
-        </property>
-       </item>
-       <item row="1" column="0">
-        <property name="text">
-         <string>Лесничество</string>
-        </property>
-       </item>
-       <item row="2" column="0">
-        <property name="text">
-         <string>Квартал</string>
-        </property>
-       </item>
-       <item row="3" column="0">
-        <property name="text">
-         <string>Выдел</string>
-        </property>
-       </item>
-       <item row="4" column="0">
-        <property name="text">
-         <string>Площадь</string>
-        </property>
-       </item>
-       <item row="5" column="0">
-        <property name="text">
-         <string>Бонитет</string>
-        </property>
-       </item>
-       <item row="6" column="0">
-        <property name="text">
-         <string>Тип леса</string>
-        </property>
-       </item>
-       <item row="7" column="0">
-        <property name="text">
-         <string>ТУМ</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item>
-      <widget class="QTableWidget" name="tableWidget_2">
-       <attribute name="verticalHeaderVisible">
-        <bool>false</bool>
-       </attribute>
-       <column>
-        <property name="text">
-         <string>  Ярус  </string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>  Диаметр  </string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>  Происхождение  </string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>  Полнота  </string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>  Высота  </string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>  Возраст  </string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>  Запас  </string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>  Формула состава  </string>
-        </property>
-       </column>
-      </widget>
-     </item>
-    </layout>
+      </column>
+     </widget>
+     <widget class="QTableWidget" name="tableWidget_2">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="gridStyle">
+       <enum>Qt::SolidLine</enum>
+      </property>
+      <attribute name="verticalHeaderVisible">
+       <bool>false</bool>
+      </attribute>
+      <column>
+       <property name="text">
+        <string>  Ярус  </string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>  Диаметр  </string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>  Происхождение  </string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>  Полнота  </string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>  Высота  </string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>  Возраст  </string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>  Запас  </string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>  Формула состава  </string>
+       </property>
+      </column>
+     </widget>
+    </widget>
    </item>
    <item alignment="Qt::AlignRight">
     <widget class="QPushButton" name="pushButton">
