@@ -1,4 +1,10 @@
-from qgis.core import QgsProject, QgsFeature, QgsMapSettings, QgsMapRendererSequentialJob, QgsCoordinateReferenceSystem
+from qgis.core import (
+    QgsProject,
+    QgsFeature,
+    QgsMapSettings,
+    QgsMapRendererSequentialJob,
+    QgsCoordinateReferenceSystem,
+)
 from qgis.PyQt.QtWidgets import QMessageBox
 import os
 from docx import Document
@@ -8,10 +14,11 @@ from docx.enum.style import WD_STYLE_TYPE
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from qgis.PyQt.QtCore import QSize
 from PIL import Image, ImageOps
+from ...tools import config
+from ... import util
 
 
 class Report:
-
     def __init__(self, table, canvas, layers):
         self.table = table
         self.canvas = canvas
@@ -28,81 +35,152 @@ class Report:
 
         document = Document()
 
-        style = document.styles['Normal']
+        style = document.styles["Normal"]
         font = style.font
-        font.name = 'Times New Roman'
+        font.name = "Times New Roman"
         font.size = Pt(12)
         header = document.add_paragraph()
-        header.add_run('КАРТА-СХЕМА').bold = True
+        header.add_run("КАРТА-СХЕМА").bold = True
         header.add_run(
-            '\nс обозначенными границами участка лесного фонда, предоставляемого для лесопользования\n').bold = True
+            "\nс обозначенными границами участка лесного фонда, предоставляемого для лесопользования\n"
+        ).bold = True
         header.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
         p = document.add_paragraph(
-            'Месторасположение лесосеки:\n'
-            'Юридическое лицо, ведущее лесное хозяйство:'
+            "Месторасположение лесосеки: {} ".format(self.getLocation())
+            + 'Юридическое лицо, ведущее лесное хозяйство: {} "{}"'.format(
+                str(self.getLhType()), str(self.areaAttributes["leshos_text"])
+            )
         )
         p.paragraph_format.left_indent = Inches(0.25)
+        p.paragraph_format.space_before = Pt(0)
+        p.paragraph_format.space_after = Pt(0)
 
         p = document.add_paragraph(
-            'Структурное подразделение юридического лица, ведущего лесное хозяйство:_______________'
-            ', лесной квартал №{}, таксационный выдел №{}, площадь лесосеки {} га.'.format(str(
-                self.areaAttributes["num_kv"]), str(self.areaAttributes["num_vd"]), str(self.areaAttributes["area"]))
+            "Структурное подразделение юридического лица, ведущего лесное хозяйство: {} л-во"
+            ", лесной квартал №{}, таксационный выдел №{}, площадь лесосеки {} га.".format(
+                str(self.areaAttributes["lesnich_text"]),
+                str(self.areaAttributes["num_kv"]),
+                str(self.areaAttributes["num_vds"]),
+                str(self.areaAttributes["area"]),
+            )
         )
         p.paragraph_format.first_line_indent = Inches(0.25)
+        p.paragraph_format.space_before = Pt(0)
 
-        p = document.add_paragraph('Масштаб: 1:10000')
+        p = document.add_paragraph("Масштаб: 1:10000")
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p.paragraph_format.first_line_indent = Inches(0.25)
 
-        in_img = os.path.join(QgsProject.instance().homePath(), 'output.png')
-        self.add_border(in_img, output_image=os.path.join(
-            QgsProject.instance().homePath(), "outputborder.png"), border=1)
+        in_img = os.path.join(QgsProject.instance().homePath(), "output.png")
+        self.add_border(
+            in_img,
+            output_image=os.path.join(
+                QgsProject.instance().homePath(), "outputborder.png"
+            ),
+            border=1,
+        )
 
-        document.add_picture(os.path.join(
-            QgsProject.instance().homePath(), "outputborder.png"))
+        document.add_picture(
+            os.path.join(QgsProject.instance().homePath(), "outputborder.png")
+        )
         last_paragraph = document.paragraphs[-1]
         last_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-        p = document.add_paragraph('Условные обозначения:')
+        p = document.add_paragraph("Условные обозначения:")
+        r = p.add_run()
+        r.add_picture((util.resolvePath("res\\binding_point.png")))
+        r.add_text(" точка привязки")
+        r = p.add_run()
+        r.add_picture((util.resolvePath("res\\anchor_point.png")))
+        r.add_text(" узел хода")
+        r = p.add_run()
+        r.add_picture((util.resolvePath("res\\anchor_line.png")))
+        r.add_text(" линия привязки")
+        r = p.add_run()
+        r.add_picture((util.resolvePath("res\\area.png")))
+        r.add_text(" лесосека")
 
         p = document.add_paragraph(
-            'Экспликация или координаты поворотных точек лесосеки:')
+            "Экспликация или координаты поворотных точек лесосеки:"
+        )
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         table = document.add_table(rows=1, cols=len(self.columnNames))
-        table.style = 'TableGrid'
+        table.style = "TableGrid"
 
         hdr_cells = table.rows[0].cells
 
         for x in range(0, len(self.columnNames)):
-            if self.columnNames[x] == 'GPS':
+            if self.columnNames[x] == "GPS":
                 pass
             else:
                 hdr_cells[x].text = self.columnNames[x]
-                hdr_cells[x].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                hdr_cells[x].paragraphs[
+                    0
+                ].alignment = WD_ALIGN_PARAGRAPH.CENTER
 
         for i in range(0, len(self.otvodAttributes)):
             row_cells = table.add_row().cells
             for y in range(len(self.otvodAttributes[i])):
                 row_cells[y].text = str(self.otvodAttributes[i][y])
-                row_cells[y].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                row_cells[y].paragraphs[
+                    0
+                ].alignment = WD_ALIGN_PARAGRAPH.CENTER
 
         p = document.add_paragraph(
-            '\nИсполнитель:{}'.format(self.areaAttributes["fio"]))
+            "\nИсполнитель:{}".format(self.areaAttributes["fio"])
+        )
 
-        path = os.path.join(QgsProject.instance().homePath(
-        ), 'Отвод_кв_{}.docx'.format(str(self.areaAttributes["num_kv"])))
-        document.save(path)
-        path = path.replace("\\", "\\\\")
-        path = path.replace("/", "\\\\")
-        path = path.replace(" ", "%20")
+        path = os.path.join(
+            self.getReportFolder(),
+            "Отвод кв. {} выд. {}.docx".format(
+                str(self.areaAttributes["num_kv"]),
+                str(self.areaAttributes["num_vds"]),
+            ),
+        )
+        try:
+            document.save(path)
+            path = path.replace("\\", "\\\\")
+            path = path.replace("/", "\\\\")
+            path = path.replace(" ", "%20")
+            return path
+        except Exception as e:
+            if "[Errno 22]" in str(e):
+                message = (
+                    str(e)
+                    + "\n Неправильный путь сохранения отчета."
+                    + "Проверьте настройки модуля."
+                )
+            elif "[Errno 13]" in str(e):
+                message = (
+                    str(e)
+                    + "\n Невозможно сохранить файл. "
+                    + "Закройте программу просмотра отчета и попробуйте снова."
+                )
+            else:
+                message = str(e)
+            QMessageBox.information(None, "Ошибка сохранения отчета", message)
+            return ""
 
-        return path
+    def getLhType(self):
+        cf = config.Configurer("enterprise")
+        settings = cf.readConfigs()
+        return settings.get("type")
+
+    def getReportFolder(self):
+        cf = config.Configurer("report")
+        settings = cf.readConfigs()
+        return settings.get("path")
+
+    def getLocation(self):
+        cf = config.Configurer("enterprise")
+        settings = cf.readConfigs()
+        return settings.get("location")
 
     def extractColumnNames(self, columnNames):
         newColumns = []
         for col in columnNames:
-            if col == 'GPS':
+            if col == "GPS":
                 pass
             else:
                 newColumns.append(col)
@@ -114,7 +192,7 @@ class Report:
         for row in data[1:]:
             for parameter in row:
                 dictt = []
-                for key, value in (row[parameter].items()):
+                for key, value in row[parameter].items():
                     dictt.append(value)
             otvodDict.append(dictt)
         return otvodDict
@@ -122,11 +200,12 @@ class Report:
     def getUid(self):
         try:
             layer = QgsProject.instance().mapLayersByName(
-                "Лесосека временный слой")[0]
+                "Лесосека временный слой"
+            )[0]
             features = []
             for feature in layer.getFeatures():
                 features.append(feature)
-            return features[0]['uid']
+            return features[0]["uid"]
         except Exception as e:
             QMessageBox.information(None, "Ошибка модуля QGis", str(e))
 
@@ -134,29 +213,38 @@ class Report:
         try:
             layer = QgsProject.instance().mapLayersByName("Лесосеки")[0]
             for feature in layer.getFeatures():
-                if feature['uid'] == self.uid:
+                if feature["uid"] == self.uid:
                     return feature
         except:
             QMessageBox.information(
-                None, "Ошибка модуля QGis", "Лесосека с таким идентификатором не найдена " + str(self.uid))
+                None,
+                "Ошибка модуля QGis",
+                "Лесосека с таким идентификатором не найдена " + str(self.uid),
+            )
 
     def getAreaAttributes(self):
         try:
             attrDict = {}
             attrDict["num_kv"] = self.feature["num_kv"]
-            attrDict["num_vd"] = self.feature["num_vd"]
+            attrDict["num_vds"] = self.feature["num_vds"]
             attrDict["area"] = self.feature["area"]
             attrDict["num"] = self.feature["num"]
             attrDict["useType"] = self.feature["usetype"]
             attrDict["cuttingType"] = self.feature["cuttingtyp"]
-            attrDict["plot"] = self.feature["plot"]
+            # attrDict["plot"] = self.feature["plot"]
             attrDict["fio"] = self.feature["fio"]
             attrDict["date"] = self.feature["date"]
             attrDict["info"] = self.feature["info"]
+            attrDict["leshos_text"] = self.feature["leshos_text"]
+            attrDict["lesnich_text"] = self.feature["lesnich_text"]
+
             return attrDict
         except Exception as e:
             QMessageBox.information(
-                None, "Ошибка модуля QGis", "Сначала сохраните лесосеку " + str(e))
+                None,
+                "Ошибка модуля QGis",
+                "Сначала сохраните лесосеку " + str(e),
+            )
 
     def saveImg(self, layers):
         settings = QgsMapSettings()
@@ -175,7 +263,7 @@ class Report:
         settings.setLayers(layers)
         # settings.setEllipsoid("WGS84")
         # print('После эллипсоида', settings.scale(), self.canvas.scale())
-        crs = QgsCoordinateReferenceSystem('EPSG:32635')
+        crs = QgsCoordinateReferenceSystem("EPSG:32635")
         # print('После координат', settings.scale(), self.canvas.scale())
         settings.setDestinationCrs(crs)
         # print('После дестинейшен СРС', settings.scale(), self.canvas.scale())
@@ -192,7 +280,7 @@ class Report:
     def add_border(self, input_image, output_image, border):
         img = Image.open(input_image)
         if isinstance(border, int) or isinstance(border, tuple):
-            bimg = ImageOps.expand(img, border=border, fill='black')
+            bimg = ImageOps.expand(img, border=border, fill="black")
         else:
-            raise RuntimeError('Border is not an image or tuple')
+            raise RuntimeError("Border is not an image or tuple")
         bimg.save(output_image, dpi=(96, 96))

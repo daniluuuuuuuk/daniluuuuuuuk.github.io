@@ -9,12 +9,13 @@ from qgis.PyQt.QtWidgets import QMessageBox
 class PeekStratumFromMap(QgsMapToolEmitPoint, QObject):
     signal = pyqtSignal(object)
 
-    def __init__(self, canvas):
+    def __init__(self, canvas, layerName):
         self.canvas = canvas
+        self.layerName = layerName
         QgsMapToolEmitPoint.__init__(self, self.canvas)
 
     def canvasReleaseEvent(self, e):
-        layers = QgsProject.instance().mapLayersByName('Лесосеки')
+        layers = QgsProject.instance().mapLayersByName(self.layerName)
         layer = layers[0]
         x = self.toMapCoordinates(e.pos()).x()
         y = self.toMapCoordinates(e.pos()).y()

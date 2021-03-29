@@ -12,7 +12,7 @@ class CuttingAreaTemp():
         self.point = point
         self.projectInstance = QgsProject.instance()
         self.symbol = self.setLayerSymbol()
-        self.properFields = ["num_lch", "num_kv", "num_vd", "area", "leshos"]
+        self.properFields = ["num_lch", "num_kv", "num_vds", "area", "leshos"]
         # self.attributes = self.feature.attributes()
         self.dictAttr = dictAttr  # атрибуты лесосеки
 

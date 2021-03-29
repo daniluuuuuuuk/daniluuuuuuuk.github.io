@@ -1,4 +1,3 @@
-# import some modules used in the example
 from qgis.core import *
 from .ForestObjectLoader import ForestObjectLoader
 from PyQt5 import QtCore, QtGui
@@ -20,10 +19,10 @@ class Worker(QtCore.QObject):
         try:
             self.loader.run(self.gplho, self.leshoz)
             self.loader.waitForFinished()
-            ret = [self.loader.allGplho, self.loader.allLeshozy, self.loader.allLesnichestva]
+            ret = [self.loader.allGplho, self.loader.allLeshozy, self.loader.allLesnichestva, self.loader.allRestatements, self.loader.lhTypesAndNames]
 
         except Exception as e:
-            pass
+            raise e
             # self.error.emit(e, traceback.format_exc())
         self.finished.emit(ret)
 

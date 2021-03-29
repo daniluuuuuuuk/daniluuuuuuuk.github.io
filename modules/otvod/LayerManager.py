@@ -10,12 +10,20 @@ class LayerManager:
         self.widget = layerWidget()
         self.dialog = QDialog() 
         self.checkBoxes = []
-        if self.initWidget():
-            self.changeLayers(self.checkBoxes)
             
     def changeLayers(self, checkBoxes):
         names = [checkbox.text() for checkbox in checkBoxes if checkbox.isChecked()]
         self.setupCanvasLayers(names)
+    
+    def addLayer(self, layer):
+        currentCanvasLayers = self.getCanvasLayerNames()
+        currentCanvasLayers.append(layer)
+        self.setupCanvasLayers(currentCanvasLayers)
+
+    def removeLayer(self, layer):
+        currentCanvasLayers = self.getCanvasLayerNames()
+        currentCanvasLayers.remove(layer)
+        self.setupCanvasLayers(currentCanvasLayers)
 
     def getCanvasLayerNames(self):
         return [x.name() for x in self.canvas.layers()]

@@ -3,13 +3,14 @@ from PyQt5.QtCore import pyqtSignal, QObject
 from PyQt5.QtGui import QColor
 from qgis.core import QgsProject
 from ...tools import GeoOperations
+from decimal import *
 
 
 class AzimuthMapTool(QgsMapToolEmitPoint, QObject):
 
     signal = pyqtSignal(object)
 
-    def __init__(self, canvas):
+    def __init__(self, canvas, inclination):
         self.canvas = canvas
         QgsMapToolEmitPoint.__init__(self, self.canvas)
 
@@ -21,6 +22,7 @@ class AzimuthMapTool(QgsMapToolEmitPoint, QObject):
         self.aimMarker = []
         self.vertexMarkers = []
         self.pointList = []
+        self.inclination = inclination
         self.reset()
 
     def canvasMoveEvent(self, event):
@@ -52,10 +54,16 @@ class AzimuthMapTool(QgsMapToolEmitPoint, QObject):
         elif self.firstPoint and not self.secondPoint:
             self.secondPoint = self.toMapCoordinates(e.pos())
             self.showPoint(self.secondPoint)
+            if len(self.pointList) <= 1:
+                return
             az = GeoOperations.calculateAzimuth(
-                self.pointList[0], self.pointList[1])
+                # self.pointList[0], self.pointList[1]) + Decimal(self.inclination)
+                self.pointList[0],
+                self.pointList[1],
+            )
             dist = GeoOperations.calculateDistance(
-                self.pointList[0], self.pointList[1])
+                self.pointList[0], self.pointList[1]
+            )
             self.signal.emit([az, dist])
         elif self.firstPoint and self.secondPoint:
             self.reset()

@@ -9,15 +9,16 @@ class PeekStratumFromMap(QgsMapToolEmitPoint, QObject):
 
     signal = pyqtSignal(object)
 
-    def __init__(self, canvas):
+    def __init__(self, canvas, layerName):
         self.canvas = canvas
+        self.layerName = layerName
         QgsMapToolEmitPoint.__init__(self, self.canvas)
 
     def canvasMoveEvent(self, event):
         pass
 
     def canvasReleaseEvent(self, e):
-        layers = QgsProject.instance().mapLayersByName('Выдела')
+        layers = QgsProject.instance().mapLayersByName(self.layerName)
         layer = layers[0]
         x = self.toMapCoordinates(e.pos()).x()
         y = self.toMapCoordinates(e.pos()).y()
@@ -28,9 +29,10 @@ class PeekStratumFromMap(QgsMapToolEmitPoint, QObject):
                             y + radius)
         layer.selectByRect(rect, False)
         self.canvas.setCurrentLayer(layer)
-        # self.canvas.zoomToSelected()
-        # print("====>", list(layer.getSelectedFeatures())[0])
-        self.signal.emit(list(layer.getSelectedFeatures())[0])
+        if list(layer.getSelectedFeatures()):
+            self.signal.emit(list(layer.getSelectedFeatures())[0])
+        else:
+            self.signal.emit(None)
         layer.removeSelection()
 
     def deactivate(self):
