@@ -1,6 +1,6 @@
 CREATE TABLE "dictionary".kind_seeds (
 	code_kind_seeds int4 NOT NULL,
-	name_kind_seeds varchar(30) NOT NULL,
+	name_kind_seeds varchar(50) NOT NULL,
 	CONSTRAINT kind_seeds_pkey PRIMARY KEY (code_kind_seeds)
 );
 

@@ -89,8 +89,14 @@ class TaxationDescription(QDialog, UI_TAX_DESCRIPTION):
         """
         Подготавливаю таблицы
         """
+        # Отношение ширины таблиц
+        self.splitter.setStretchFactor(0, 2)
+        self.splitter.setStretchFactor(1, 4)
         # Выставляю ширину столбцов
         self.tableWidget.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeToContents
+        )
+        self.tableWidget.verticalHeader().setSectionResizeMode(
             QHeaderView.ResizeToContents
         )
         self.tableWidget.horizontalHeader().setStretchLastSection(True)
@@ -111,7 +117,7 @@ class TaxationDescription(QDialog, UI_TAX_DESCRIPTION):
         self.tableWidget.setItemDelegate(AlignDelegate(self.tableWidget))
         self.tableWidget_2.setItemDelegate(AlignDelegate(self.tableWidget_2))
 
-    def fill_data(self, tax_data: dict) -> bool:
+    def fill_data(self, tax_data: dict):
         """
         Заполняю таблицу данными
 
@@ -121,21 +127,6 @@ class TaxationDescription(QDialog, UI_TAX_DESCRIPTION):
         Returns:
             bool: [В случае удачного заполнения возвращается True]
         """
-        # Заполняю первую таблицу:
-        self.tableWidget.setItem(0, 1, QTableWidgetItem(tax_data["lh_name"]))
-        self.tableWidget.setItem(1, 1, QTableWidgetItem(tax_data["lch_name"]))
-        self.tableWidget.setItem(
-            2, 1, QTableWidgetItem(str(tax_data["num_kv"]))
-        )
-        self.tableWidget.setItem(
-            3, 1, QTableWidgetItem(str(tax_data["num_vd"]))
-        )
-        self.tableWidget.setItem(4, 1, QTableWidgetItem(str(tax_data["area"])))
-        self.tableWidget.setItem(5, 1, QTableWidgetItem(tax_data["bonitet"]))
-        self.tableWidget.setItem(6, 1, QTableWidgetItem(tax_data["tl"]))
-        self.tableWidget.setItem(7, 1, QTableWidgetItem(tax_data["tum"]))
-
-        # Заполняю вторую таблицу:
 
         tax_data["m10"] = sorted(
             tax_data["m10"], key=lambda x: x["yarus"], reverse=True
@@ -158,4 +149,15 @@ class TaxationDescription(QDialog, UI_TAX_DESCRIPTION):
             )
             self.tableWidget_2.setItem(0, 7, QTableWidgetItem(yar["formula"]))
 
-        return True
+        del tax_data["m10"]
+        for row in range(len(tax_data.keys())):
+            self.tableWidget.insertRow(row)
+            self.tableWidget.setItem(
+                row, 0, QTableWidgetItem(list(tax_data.keys())[row])
+            )
+            self.tableWidget.setItem(
+                row, 1, QTableWidgetItem(str(list(tax_data.values())[row]))
+            )
+            self.tableWidget.item(row, 1).setToolTip(
+                str(list(tax_data.values())[row])
+            )
