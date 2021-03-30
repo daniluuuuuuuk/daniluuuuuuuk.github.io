@@ -35,11 +35,8 @@ class DataImport(QThread):
                 )
             )
         except ProgrammingError:
-            curPGSQL.execute(
-                sql.SQL("USE {};").format(
-                    sql.Identifier(self.db_info["database"])
-                )
-            )
+            None
+
         curPGSQL.execute(f"CREATE EXTENSION IF NOT exists postgis;")
 
         return True
