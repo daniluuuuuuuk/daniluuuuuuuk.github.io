@@ -1,7 +1,7 @@
 from PyQt5.QtCore import QThread, pyqtSignal
 import psycopg2
 import subprocess
-from psycopg2 import sql
+from psycopg2 import sql, ProgrammingError
 from .. import util
 
 
@@ -24,21 +24,24 @@ class DataImport(QThread):
         Returns:
             bool: [Успех подготовки БД к импорту]
         """
-        try:
-            dbconnection = psycopg2.connect(
-                **{**self.db_info, "database": None}
-            )
-            dbconnection.autocommit = True
+        dbconnection = psycopg2.connect(**{**self.db_info, "database": None})
+        dbconnection.autocommit = True
 
-            curPGSQL = dbconnection.cursor()
+        curPGSQL = dbconnection.cursor()
+        try:
             curPGSQL.execute(
                 sql.SQL("CREATE DATABASE {};").format(
                     sql.Identifier(self.db_info["database"])
                 )
             )
-            curPGSQL.execute(f"CREATE EXTENSION IF NOT exists postgis;")
-        except Exception as e:
-            return str(e)
+        except ProgrammingError:
+            curPGSQL.execute(
+                sql.SQL("USE {};").format(
+                    sql.Identifier(self.db_info["database"])
+                )
+            )
+        curPGSQL.execute(f"CREATE EXTENSION IF NOT exists postgis;")
+
         return True
 
     def run(self):
