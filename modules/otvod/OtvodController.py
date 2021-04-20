@@ -6,7 +6,7 @@ from .ui.SwitchButton import Switch
 from .gui.LesosekaInfoDialog import LesosekaInfo
 from .tools import GeoOperations, ImageExporter
 from .tools.tempFeatures.BindingPointBuilder import BindingPointBuilder
-from . import Report, LayoutManager
+from . import LayoutManager
 from .DataTable import DataTableWrapper
 from .OtvodSettingsDialog import OtvodSettingsWindow
 from ...tools import config
