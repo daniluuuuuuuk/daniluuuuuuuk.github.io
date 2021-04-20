@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QThread, pyqtSignal
+﻿from PyQt5.QtCore import QThread, pyqtSignal
 import psycopg2
 import subprocess
 from psycopg2 import sql, ProgrammingError

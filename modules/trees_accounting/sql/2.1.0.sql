@@ -1,22 +1,3 @@
-ALTER TABLE public.subcompartment_taxation ADD ptg int2 NULL;
-ALTER TABLE public.subcompartment_taxation ADD por_m3 int NULL;
-ALTER TABLE public.subcompartment_taxation ADD por_m2 int NULL;
-ALTER TABLE public.subcompartment_taxation ADD xmer1 int NULL;
-ALTER TABLE public.subcompartment_taxation ADD xmer2 int NULL;
-ALTER TABLE public.subcompartment_taxation ADD xmer3 int NULL;
-
-ALTER TABLE public.subcompartment_taxation ADD CONSTRAINT subcompartment_taxation_fk FOREIGN KEY (xmer1) REFERENCES "dictionary".xmer(code_xmer);
-ALTER TABLE public.subcompartment_taxation ADD CONSTRAINT subcompartment_taxation_fk_1 FOREIGN KEY (xmer2) REFERENCES "dictionary".xmer(code_xmer);
-ALTER TABLE public.subcompartment_taxation ADD CONSTRAINT subcompartment_taxation_fk_2 FOREIGN KEY (xmer3) REFERENCES "dictionary".xmer(code_xmer);
-ALTER TABLE public.subcompartment_taxation ADD CONSTRAINT subcompartment_taxation_fk_3 FOREIGN KEY (por_m3) REFERENCES "dictionary".dict_species(class_code_por);
-ALTER TABLE public.subcompartment_taxation ADD CONSTRAINT subcompartment_taxation_fk_4 FOREIGN KEY (por_m2) REFERENCES "dictionary".dict_species(class_code_por);
-
-
-
-
-
-
-
 CREATE TABLE dictionary.xmer (
 	code_xmer int4 NOT NULL,
 	name_xmer varchar NULL,
@@ -151,4 +132,25 @@ INSERT INTO dictionary.xmer (code_xmer, name_xmer) VALUES(2, NULL);
 INSERT INTO dictionary.xmer (code_xmer, name_xmer) VALUES(70, NULL);
 INSERT INTO dictionary.xmer (code_xmer, name_xmer) VALUES(1855, NULL);
 INSERT INTO dictionary.xmer (code_xmer, name_xmer) VALUES(1856, 'Расч.кв.просек');
+
+
+
+
+
+ALTER TABLE public.subcompartment_taxation ADD ptg int2 NULL;
+ALTER TABLE public.subcompartment_taxation ADD por_m3 int NULL;
+ALTER TABLE public.subcompartment_taxation ADD por_m2 int NULL;
+ALTER TABLE public.subcompartment_taxation ADD xmer1 int NULL;
+ALTER TABLE public.subcompartment_taxation ADD xmer2 int NULL;
+ALTER TABLE public.subcompartment_taxation ADD xmer3 int NULL;
+
+ALTER TABLE public.subcompartment_taxation ADD CONSTRAINT subcompartment_taxation_fk FOREIGN KEY (xmer1) REFERENCES "dictionary".xmer(code_xmer);
+ALTER TABLE public.subcompartment_taxation ADD CONSTRAINT subcompartment_taxation_fk_1 FOREIGN KEY (xmer2) REFERENCES "dictionary".xmer(code_xmer);
+ALTER TABLE public.subcompartment_taxation ADD CONSTRAINT subcompartment_taxation_fk_2 FOREIGN KEY (xmer3) REFERENCES "dictionary".xmer(code_xmer);
+ALTER TABLE public.subcompartment_taxation ADD CONSTRAINT subcompartment_taxation_fk_3 FOREIGN KEY (por_m3) REFERENCES "dictionary".dict_species(class_code_por);
+ALTER TABLE public.subcompartment_taxation ADD CONSTRAINT subcompartment_taxation_fk_4 FOREIGN KEY (por_m2) REFERENCES "dictionary".dict_species(class_code_por);
+
+
+
+
 
