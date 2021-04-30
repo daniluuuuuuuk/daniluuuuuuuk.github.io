@@ -43,11 +43,11 @@ class CanvasWidget(QgsMapCanvas):
         self.canvas = self.setupDefaultCanvas()
         self.canvas.scaleChanged.connect(self.onScaleChanged)
         self.initScalesBox()
-        self.cuttingArea = None
+        # self.cuttingArea = None
         self.btnControl = ButtonController(self.getButtons())
         self.btnControl.lockLesosekaButtons()
         self.panTool = QgsMapToolPan(self.canvas)
-        self.editedUid = None
+        # self.editedUid = None
 
         """Возвращает кнопки управления лесосекой
         """
@@ -232,16 +232,18 @@ class CanvasWidget(QgsMapCanvas):
             )
             return
 
-        self.cuttingArea = CuttingArea.CuttingArea(
+        # self.editedUid = self.getEditedUid()
+
+        cuttingArea = CuttingArea.CuttingArea(
             self.canvas,
             bindingPoint,
             layer,
             None,
             self.btnControl,
-            self.editedUid,
+            # self.editedUid,
         )
         self.canvas.setMapTool(self.panTool)
-        cuttingArea = self.cuttingArea.build()
+        cuttingArea = cuttingArea.build()
         if not cuttingArea:
             return
 
@@ -287,7 +289,7 @@ class CanvasWidget(QgsMapCanvas):
     def peekVydelFromMap(self, btn, btnState):
         def getSelectedFeature(selectedFeature):
             def getAreaPoints(areaData, areaPoints):
-                self.editedUid = areaData[0]
+                # self.editedUid = areaData[0]
                 self.omw.coord_radio_button.setChecked(True)
                 switch = self.omw.switchLayout.itemAt(0).widget()
                 if switch.isChecked():

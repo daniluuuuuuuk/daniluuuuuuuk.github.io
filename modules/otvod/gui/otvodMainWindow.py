@@ -8,7 +8,6 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -78,32 +77,20 @@ class Ui_MainWindow(object):
         self.tableWidget = QtWidgets.QWidget(self.centralwidget)
         self.tableWidget.setGeometry(QtCore.QRect(30, 40, 401, 341))
         self.tableWidget.setObjectName("tableWidget")
-        self.peekVydelFromMap_pushButton = QtWidgets.QPushButton(
-            self.centralwidget
-        )
-        self.peekVydelFromMap_pushButton.setGeometry(
-            QtCore.QRect(500, 10, 21, 21)
-        )
+        self.peekVydelFromMap_pushButton = QtWidgets.QPushButton(self.centralwidget)
+        self.peekVydelFromMap_pushButton.setGeometry(QtCore.QRect(500, 10, 21, 21))
         self.peekVydelFromMap_pushButton.setText("")
         self.peekVydelFromMap_pushButton.setCheckable(True)
-        self.peekVydelFromMap_pushButton.setObjectName(
-            "peekVydelFromMap_pushButton"
-        )
-        self.lesoseka_from_map_button = QtWidgets.QPushButton(
-            self.centralwidget
-        )
-        self.lesoseka_from_map_button.setGeometry(
-            QtCore.QRect(560, 10, 21, 21)
-        )
+        self.peekVydelFromMap_pushButton.setObjectName("peekVydelFromMap_pushButton")
+        self.lesoseka_from_map_button = QtWidgets.QPushButton(self.centralwidget)
+        self.lesoseka_from_map_button.setGeometry(QtCore.QRect(560, 10, 21, 21))
         self.lesoseka_from_map_button.setText("")
         self.lesoseka_from_map_button.setCheckable(True)
         self.lesoseka_from_map_button.setObjectName("lesoseka_from_map_button")
         self.horizontalLayoutWidget = QtWidgets.QWidget(self.centralwidget)
         self.horizontalLayoutWidget.setGeometry(QtCore.QRect(346, 390, 81, 21))
         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
-        self.switchPadLayout = QtWidgets.QHBoxLayout(
-            self.horizontalLayoutWidget
-        )
+        self.switchPadLayout = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget)
         self.switchPadLayout.setContentsMargins(0, 0, 0, 0)
         self.switchPadLayout.setObjectName("switchPadLayout")
         self.label_3 = QtWidgets.QLabel(self.horizontalLayoutWidget)
@@ -115,26 +102,16 @@ class Ui_MainWindow(object):
         self.label_2 = QtWidgets.QLabel(self.horizontalLayoutWidget)
         self.label_2.setObjectName("label_2")
         self.switchPadLayout.addWidget(self.label_2)
-        self.exportAsImage_PushButton = QtWidgets.QPushButton(
-            self.centralwidget
-        )
-        self.exportAsImage_PushButton.setGeometry(
-            QtCore.QRect(620, 10, 21, 21)
-        )
+        self.exportAsImage_PushButton = QtWidgets.QPushButton(self.centralwidget)
+        self.exportAsImage_PushButton.setGeometry(QtCore.QRect(620, 10, 21, 21))
         self.exportAsImage_PushButton.setText("")
         self.exportAsImage_PushButton.setCheckable(False)
         self.exportAsImage_PushButton.setObjectName("exportAsImage_PushButton")
-        self.lesoseka_from_map_points_button = QtWidgets.QPushButton(
-            self.centralwidget
-        )
-        self.lesoseka_from_map_points_button.setGeometry(
-            QtCore.QRect(590, 10, 21, 21)
-        )
+        self.lesoseka_from_map_points_button = QtWidgets.QPushButton(self.centralwidget)
+        self.lesoseka_from_map_points_button.setGeometry(QtCore.QRect(590, 10, 21, 21))
         self.lesoseka_from_map_points_button.setText("")
         self.lesoseka_from_map_points_button.setCheckable(True)
-        self.lesoseka_from_map_points_button.setObjectName(
-            "lesoseka_from_map_points_button"
-        )
+        self.lesoseka_from_map_points_button.setObjectName("lesoseka_from_map_points_button")
         self.inclinationSlider = QtWidgets.QSlider(self.centralwidget)
         self.inclinationSlider.setGeometry(QtCore.QRect(710, 390, 71, 22))
         self.inclinationSlider.setMinimum(-200)
@@ -151,38 +128,24 @@ class Ui_MainWindow(object):
         self.inclinationSlider.setTickInterval(100)
         self.inclinationSlider.setObjectName("inclinationSlider")
         self.horizontalLayoutWidget_3 = QtWidgets.QWidget(self.centralwidget)
-        self.horizontalLayoutWidget_3.setGeometry(
-            QtCore.QRect(30, 390, 296, 21)
-        )
+        self.horizontalLayoutWidget_3.setGeometry(QtCore.QRect(30, 390, 296, 21))
         self.horizontalLayoutWidget_3.setObjectName("horizontalLayoutWidget_3")
-        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(
-            self.horizontalLayoutWidget_3
-        )
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget_3)
         self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-        self.coord_radio_button = QtWidgets.QRadioButton(
-            self.horizontalLayoutWidget_3
-        )
+        self.coord_radio_button = QtWidgets.QRadioButton(self.horizontalLayoutWidget_3)
         self.coord_radio_button.setObjectName("coord_radio_button")
         self.horizontalLayout_2.addWidget(self.coord_radio_button)
-        self.azimuth_radio_button = QtWidgets.QRadioButton(
-            self.horizontalLayoutWidget_3
-        )
+        self.azimuth_radio_button = QtWidgets.QRadioButton(self.horizontalLayoutWidget_3)
         self.azimuth_radio_button.setObjectName("azimuth_radio_button")
         self.horizontalLayout_2.addWidget(self.azimuth_radio_button)
-        self.rumb_radio_button = QtWidgets.QRadioButton(
-            self.horizontalLayoutWidget_3
-        )
+        self.rumb_radio_button = QtWidgets.QRadioButton(self.horizontalLayoutWidget_3)
         self.rumb_radio_button.setObjectName("rumb_radio_button")
         self.horizontalLayout_2.addWidget(self.rumb_radio_button)
-        self.left_angle_radio_button = QtWidgets.QRadioButton(
-            self.horizontalLayoutWidget_3
-        )
+        self.left_angle_radio_button = QtWidgets.QRadioButton(self.horizontalLayoutWidget_3)
         self.left_angle_radio_button.setObjectName("left_angle_radio_button")
         self.horizontalLayout_2.addWidget(self.left_angle_radio_button)
-        self.right_angle_radio_button = QtWidgets.QRadioButton(
-            self.horizontalLayoutWidget_3
-        )
+        self.right_angle_radio_button = QtWidgets.QRadioButton(self.horizontalLayoutWidget_3)
         self.right_angle_radio_button.setObjectName("right_angle_radio_button")
         self.horizontalLayout_2.addWidget(self.right_angle_radio_button)
         self.handTool_button = QtWidgets.QPushButton(self.centralwidget)
@@ -233,16 +196,10 @@ class Ui_MainWindow(object):
         self.loadData_pushButton.setFont(font)
         self.loadData_pushButton.setText("")
         self.loadData_pushButton.setObjectName("loadData_pushButton")
-        self.magneticDeclination_pushButton = QtWidgets.QPushButton(
-            self.centralwidget
-        )
-        self.magneticDeclination_pushButton.setGeometry(
-            QtCore.QRect(790, 390, 21, 21)
-        )
+        self.magneticDeclination_pushButton = QtWidgets.QPushButton(self.centralwidget)
+        self.magneticDeclination_pushButton.setGeometry(QtCore.QRect(790, 390, 21, 21))
         self.magneticDeclination_pushButton.setText("")
-        self.magneticDeclination_pushButton.setObjectName(
-            "magneticDeclination_pushButton"
-        )
+        self.magneticDeclination_pushButton.setObjectName("magneticDeclination_pushButton")
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -267,8 +224,11 @@ class Ui_MainWindow(object):
         self.saveData_action.setObjectName("saveData_action")
         self.loadData_action = QtWidgets.QAction(MainWindow)
         self.loadData_action.setObjectName("loadData_action")
+        self.csvExport_action = QtWidgets.QAction(MainWindow)
+        self.csvExport_action.setObjectName("csvExport_action")
         self.menu_3.addAction(self.saveData_action)
         self.menu_3.addAction(self.loadData_action)
+        self.menu_3.addAction(self.csvExport_action)
         self.menubar.addAction(self.menu_3.menuAction())
         self.menubar.addAction(self.menu_info.menuAction())
 
@@ -277,132 +237,56 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(
-            _translate("MainWindow", "Модуль отвода лесосеки")
-        )
-        self.bindingPoint_Label.setText(
-            _translate("MainWindow", "Точка привязки:")
-        )
+        MainWindow.setWindowTitle(_translate("MainWindow", "Модуль отвода лесосеки"))
+        self.bindingPoint_Label.setText(_translate("MainWindow", "Точка привязки:"))
         self.x_Label.setText(_translate("MainWindow", "N:"))
         self.y_Label.setText(_translate("MainWindow", "E:"))
-        self.peekFromMap_PushButton.setToolTip(
-            _translate("MainWindow", "Выбрать точку на карте (Ctrl+Q)")
-        )
-        self.peekFromGPSPushButton.setToolTip(
-            _translate("MainWindow", "Точка привязки по GPS")
-        )
-        self.deleteNode_button.setToolTip(
-            _translate("MainWindow", "Удалить последнюю точку (Ctrl + -)")
-        )
+        self.peekFromMap_PushButton.setToolTip(_translate("MainWindow", "Выбрать точку на карте (Ctrl+Q)"))
+        self.peekFromGPSPushButton.setToolTip(_translate("MainWindow", "Точка привязки по GPS"))
+        self.deleteNode_button.setToolTip(_translate("MainWindow", "Удалить последнюю точку (Ctrl + -)"))
         self.deleteNode_button.setText(_translate("MainWindow", "-"))
-        self.addNode_button.setToolTip(
-            _translate("MainWindow", "Добавить точку (Ctrl + +)")
-        )
+        self.addNode_button.setToolTip(_translate("MainWindow", "Добавить точку (Ctrl + +)"))
         self.addNode_button.setText(_translate("MainWindow", "+"))
-        self.clearNodes_button.setToolTip(
-            _translate("MainWindow", "Удалить все узлы")
-        )
+        self.clearNodes_button.setToolTip(_translate("MainWindow", "Удалить все узлы"))
         self.clearNodes_button.setText(_translate("MainWindow", "✕"))
         self.sliderLabel.setText(_translate("MainWindow", "0"))
-        self.azimuthTool_pushButton.setToolTip(
-            _translate("MainWindow", "Измерение расстояния и азимута (Ctrl+A)")
-        )
-        self.peekVydelFromMap_pushButton.setToolTip(
-            _translate("MainWindow", "Загрузить данные лесосеки")
-        )
-        self.lesoseka_from_map_button.setToolTip(
-            _translate("MainWindow", "Вынос по границам выдела (Ctrl+W)")
-        )
-        self.label_3.setToolTip(
-            _translate(
-                "MainWindow",
-                "Decimal Degrees (Десятичный формат) (Ctrl+Shift+R)",
-            )
-        )
+        self.azimuthTool_pushButton.setToolTip(_translate("MainWindow", "Измерение расстояния и азимута (Ctrl+A)"))
+        self.peekVydelFromMap_pushButton.setToolTip(_translate("MainWindow", "Загрузить данные лесосеки"))
+        self.lesoseka_from_map_button.setToolTip(_translate("MainWindow", "Вынос по границам выдела (Ctrl+W)"))
+        self.label_3.setToolTip(_translate("MainWindow", "Decimal Degrees (Десятичный формат) (Ctrl+Shift+R)"))
         self.label_3.setText(_translate("MainWindow", "DD"))
-        self.label_2.setToolTip(
-            _translate(
-                "MainWindow",
-                "Degrees Minutes Seconds (Градусы, Минуты, Секунды) (Ctrl+Shift+R)",
-            )
-        )
+        self.label_2.setToolTip(_translate("MainWindow", "Degrees Minutes Seconds (Градусы, Минуты, Секунды) (Ctrl+Shift+R)"))
         self.label_2.setText(_translate("MainWindow", "DMS"))
-        self.exportAsImage_PushButton.setToolTip(
-            _translate("MainWindow", "Экспортировать как изображение")
-        )
-        self.lesoseka_from_map_points_button.setToolTip(
-            _translate("MainWindow", "Вынос по произвольным точкам (Ctrl+E)")
-        )
-        self.inclinationSlider.setToolTip(
-            _translate(
-                "MainWindow",
-                "Магнитное склонение (Ctrl+Вниз/Вверх, Ctrl+Shift+Вниз/Вверх)",
-            )
-        )
-        self.coord_radio_button.setToolTip(
-            _translate("MainWindow", "Координаты (Ctrl+1)")
-        )
+        self.exportAsImage_PushButton.setToolTip(_translate("MainWindow", "Экспортировать как изображение"))
+        self.lesoseka_from_map_points_button.setToolTip(_translate("MainWindow", "Вынос по произвольным точкам (Ctrl+E)"))
+        self.inclinationSlider.setToolTip(_translate("MainWindow", "Магнитное склонение (Ctrl+Вниз/Вверх, Ctrl+Shift+Вниз/Вверх)"))
+        self.coord_radio_button.setToolTip(_translate("MainWindow", "Координаты (Ctrl+1)"))
         self.coord_radio_button.setText(_translate("MainWindow", "КРД"))
-        self.azimuth_radio_button.setToolTip(
-            _translate("MainWindow", "Азимуты (Ctrl+2)")
-        )
+        self.azimuth_radio_button.setToolTip(_translate("MainWindow", "Азимуты (Ctrl+2)"))
         self.azimuth_radio_button.setText(_translate("MainWindow", "АЗТ"))
-        self.rumb_radio_button.setToolTip(
-            _translate("MainWindow", "Румбы (Ctrl+3)")
-        )
+        self.rumb_radio_button.setToolTip(_translate("MainWindow", "Румбы (Ctrl+3)"))
         self.rumb_radio_button.setText(_translate("MainWindow", "РМБ"))
-        self.left_angle_radio_button.setToolTip(
-            _translate("MainWindow", "Левые внутренние углы (Ctrl+4)")
-        )
+        self.left_angle_radio_button.setToolTip(_translate("MainWindow", "Левые внутренние углы (Ctrl+4)"))
         self.left_angle_radio_button.setText(_translate("MainWindow", "ЛВУ"))
-        self.right_angle_radio_button.setToolTip(
-            _translate("MainWindow", "Правые внутернние углы (Ctrl + 5)")
-        )
+        self.right_angle_radio_button.setToolTip(_translate("MainWindow", "Правые внутернние углы (Ctrl + 5)"))
         self.right_angle_radio_button.setText(_translate("MainWindow", "ПВУ"))
-        self.handTool_button.setToolTip(
-            _translate("MainWindow", "Навигация по карте (Ctrl+H)")
-        )
-        self.manageLayers_button.setToolTip(
-            _translate("MainWindow", "Настроить видимость слоев (Ctrl+L)")
-        )
-        self.generateReport_Button.setToolTip(
-            _translate("MainWindow", "Сформировать отчет")
-        )
-        self.buildLesoseka_Button.setToolTip(
-            _translate("MainWindow", "Построить лесосеку (Ctrl+B)")
-        )
-        self.editAttributes_button.setToolTip(
-            _translate("MainWindow", "Редактировать атрибуты")
-        )
-        self.deleteLesoseka_Button.setToolTip(
-            _translate("MainWindow", "Удалить лесосеку")
-        )
-        self.saveLesoseka_Button.setToolTip(
-            _translate("MainWindow", "Сохранить лесосеку")
-        )
-        self.saveData_pushButton.setToolTip(
-            _translate(
-                "MainWindow", "Сохранить данные отвода в файл (Ctrl + S)"
-            )
-        )
-        self.loadData_pushButton.setToolTip(
-            _translate("MainWindow", "Загрузить данные из файла (Ctrl + O)")
-        )
-        self.magneticDeclination_pushButton.setToolTip(
-            _translate(
-                "MainWindow",
-                "Магнитное склонение по данным всемирной магнитной модели сервиса NOAA\n"
-                " Satellite and Information Service центра National Geophysical Data Center",
-            )
-        )
+        self.handTool_button.setToolTip(_translate("MainWindow", "Навигация по карте (Ctrl+H)"))
+        self.manageLayers_button.setToolTip(_translate("MainWindow", "Настроить видимость слоев (Ctrl+L)"))
+        self.generateReport_Button.setToolTip(_translate("MainWindow", "Сформировать отчет"))
+        self.buildLesoseka_Button.setToolTip(_translate("MainWindow", "Построить лесосеку (Ctrl+B)"))
+        self.editAttributes_button.setToolTip(_translate("MainWindow", "Редактировать атрибуты"))
+        self.deleteLesoseka_Button.setToolTip(_translate("MainWindow", "Удалить лесосеку"))
+        self.saveLesoseka_Button.setToolTip(_translate("MainWindow", "Сохранить лесосеку"))
+        self.saveData_pushButton.setToolTip(_translate("MainWindow", "Сохранить данные отвода в файл (Ctrl + S)"))
+        self.loadData_pushButton.setToolTip(_translate("MainWindow", "Загрузить данные из файла (Ctrl + O)"))
+        self.magneticDeclination_pushButton.setToolTip(_translate("MainWindow", "Магнитное склонение по данным всемирной магнитной модели сервиса NOAA\n"
+" Satellite and Information Service центра National Geophysical Data Center"))
         self.menu_3.setTitle(_translate("MainWindow", "Данные отвода"))
         self.menu_info.setTitle(_translate("MainWindow", "Справка"))
         self.action.setText(_translate("MainWindow", "Сохранить"))
         self.action_2.setText(_translate("MainWindow", "Загрузить"))
         self.otvodSettingsAction.setText(_translate("MainWindow", "Параметры"))
-        self.saveData_action.setText(
-            _translate("MainWindow", "Сохранить (Ctrl+S)")
-        )
-        self.loadData_action.setText(
-            _translate("MainWindow", "Загрузить (Ctrl+O)")
-        )
+        self.saveData_action.setText(_translate("MainWindow", "Сохранить (Ctrl+S)"))
+        self.loadData_action.setText(_translate("MainWindow", "Загрузить (Ctrl+O)"))
+        self.csvExport_action.setText(_translate("MainWindow", "Экспорт в CSV"))
+

@@ -6,6 +6,7 @@ from . import util
 from .ForestObject import ForestObject, ForestEnterprise, Forestry, Quarter, Stratum
 from abc import ABCMeta, abstractmethod
 import re
+from qgis.utils import iface
 
 class FilterWidget(QWidget):
   def __init__(self, parent = None):
@@ -39,8 +40,6 @@ class FilterWidgetController:
 
 
     self.view = view
-    self.iface = iface
-    self.project = QgsProject.instance()
     
     self.fo = ForestObject()
 
@@ -96,11 +95,11 @@ class FilterWidgetController:
     if self.forestry.number == "" :
       QMessageBox.information(None, 'Ошибка', "Введите значение лесничества")
     elif self.forestry.number != "" and self.quarter.number == "":
-      util.zoomToForestry(self.forestry.number, self.project, self.iface)
+      util.zoomToForestry(self.forestry.number, QgsProject.instance(), iface)
     elif self.quarter.number != "" and self.stratum.number == "":
-      util.zoomToQuarter(self.forestry.number, self.quarter.number, self.project, self.iface)
+      util.zoomToQuarter(self.forestry.number, self.quarter.number, QgsProject.instance(), iface)
     else:
-      util.zoomToStratum(self.forestry.number, self.quarter.number, self.stratum.number, self.project, self.iface)
+      util.zoomToStratum(self.forestry.number, self.quarter.number, self.stratum.number, QgsProject.instance(), iface)
 
   def comboboxClear(self, *args):
     for arg in args:

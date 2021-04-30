@@ -675,6 +675,7 @@
     </property>
     <addaction name="saveData_action"/>
     <addaction name="loadData_action"/>
+    <addaction name="csvExport_action"/>
    </widget>
    <widget class="QMenu" name="menu_info">
     <property name="enabled">
@@ -710,6 +711,11 @@
   <action name="loadData_action">
    <property name="text">
     <string>Загрузить (Ctrl+O)</string>
+   </property>
+  </action>
+  <action name="csvExport_action">
+   <property name="text">
+    <string>Экспорт в CSV</string>
    </property>
   </action>
  </widget>
