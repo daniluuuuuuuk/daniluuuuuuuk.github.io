@@ -1,6 +1,13 @@
 from PyQt5 import QtWidgets
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QToolBar, QDialog, QLabel, QVBoxLayout
+from qgis.PyQt.QtWidgets import (
+    QAction,
+    QToolBar,
+    QDialog,
+    QLabel,
+    QVBoxLayout,
+    QPushButton,
+)
 from . import Filter, util, Settings, PostgisDB
 from qgis.core import QgsProject
 from .modules.otvod.OtvodController import OtvodController
@@ -143,11 +150,20 @@ class QgsLes:
             self.qgsLesToolbar.setObjectName("QGIS Отвод лесосек")
 
         if not self.runnable:
-            self.iface.messageBar().pushMessage(
+            # mes = self.iface.messageBar().createMessage(
+            #     "Ошибка модуля отвода",
+            #     "Отсутствует подключение к базе данных. Модуль отключен",
+            # )
+            widget = self.iface.messageBar().createMessage(
                 "Ошибка модуля отвода",
                 "Отсутствует подключение к базе данных. Модуль отключен",
-                level=Qgis.Critical,
-                duration=15,
+            )
+            button = QPushButton(widget)
+            button.setText("Настроить")
+            button.pressed.connect(lambda: Settings.SettingsController())
+            widget.layout().addWidget(button)
+            self.iface.messageBar().pushWidget(
+                widget, level=Qgis.Critical, duration=45
             )
             self.pluginIsActive = False
             return

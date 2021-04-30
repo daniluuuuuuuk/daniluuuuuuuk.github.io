@@ -19,7 +19,9 @@ class ImportedData(QThread):
 
     def get_att_data(self) -> dict:
         """Получение атрибутивных данных о лесосеке"""
-        current_area_att = Area.select().where(Area.uuid == self.uuid).dicts().get()
+        current_area_att = (
+            Area.select().where(Area.uuid == self.uuid).dicts().get()
+        )
 
         del current_area_att["geom"]
 
@@ -83,7 +85,9 @@ class ImportedData(QThread):
                     .code_trf_height
                 )
             )
-            self.trees_liquid.set_trf_for_spc(species_position[spc], current_trf_height)
+            self.trees_liquid.set_trf_for_spc(
+                species_position[spc], current_trf_height
+            )
 
         return None
 

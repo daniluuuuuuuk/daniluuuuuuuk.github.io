@@ -2,6 +2,7 @@ from .. import PostgisDB
 from qgis.core import *
 from PyQt5 import QtCore
 from . import config
+from psycopg2 import ProgrammingError
 
 MESSAGE_CATEGORY = "Taxation Loader Task"
 
@@ -40,11 +41,11 @@ class Worker(QtCore.QObject):
             )
             self.loader.waitForFinished()
             ret = {
-                "lh_name": self.loader.lh_name,
-                "lch_name": self.loader.lch_name,
-                "num_kv": self.num_kv,
-                "num_vd": self.num_vd,
-                "area": self.loader.area,
+                "Лесхоз": self.loader.lh_name,
+                "Лесничество": self.loader.lch_name,
+                "Квартал": self.num_kv,
+                "Выдел": self.num_vd,
+                "Площадь": float(self.loader.area),
                 **self.loader.taxDetails,
             }
             ret["m10"] = self.loader.taxDetailsM10
@@ -63,7 +64,6 @@ class Loader(QgsTask):
     def __init__(self, description):
         super().__init__(description, QgsTask.CanCancel)
 
-        self.taxDetails = {}
         self.taxDetailsM10 = None
         self.lh_name = None
         self.lch_name = None
@@ -107,43 +107,77 @@ class Loader(QgsTask):
                 lhCode, num_lch
             )
         )[0][0]
-
-        (
-            self.taxDetails["identity"],
-            self.taxDetails["bonitet"],
-            self.taxDetails["tl"],
-            self.taxDetails["tum"],
-        ) = postgisConnection.getQueryResult(
-            """select identity, bon, tl, tum from "public".subcompartment_taxation where identity = '{}'""".format(
+        try:
+            sql_main_tax_description = """select 
+                st.bon as "Бонитет",
+                st.tl as "Тип леса",
+                st.tum as "ТУМ",
+                st.ptg as "ПТГ",
+                ds.name as "Проект. порода",
+                ds_2."name" as "Главная порода",
+                concat_ws(', ', x1.name_xmer, x2.name_xmer, x3.name_xmer) AS "Хоз. мероприятия"
+            from public.subcompartment_taxation st 
+                left join "dictionary".dict_species ds on st.por_m2 = ds.class_code_por
+                left join "dictionary".dict_species ds_2 on st.por_m3 = ds_2.class_code_por
+                left join "dictionary".xmer x1 on st.xmer1 = x1.code_xmer 
+                left join "dictionary".xmer x2 on st.xmer2 = x2.code_xmer 
+                left join "dictionary".xmer x3 on st.xmer3 = x3.code_xmer
+                    where st.identity = '{}'""".format(
                 int(identity)
             )
-        )[
-            0
-        ]
+            self.taxDetails = postgisConnection.getQueryResult(
+                sql_main_tax_description, as_dict=True
+            )
 
-        self.area = postgisConnection.getQueryResult(
-            """select areadoc from "public".subcompartments where identity = '{}'""".format(
+        except ProgrammingError:
+            sql_main_tax_description = """select 
+                st.bon as "Бонитет",
+                st.tl as "Тип леса",
+                st.tum as "ТУМ"
+            from public.subcompartment_taxation st 
+                where st.identity = '{}'""".format(
                 int(identity)
             )
-        )[0][0]
+            self.taxDetails = postgisConnection.getQueryResult(
+                sql_main_tax_description, as_dict=True
+            )
+        finally:
+            self.taxDetail = {}
+
+        for k, v in list(self.taxDetails.items()):  # Чистка от NULL
+            if v is None or v == "":
+                del self.taxDetails[k]
+
+        try:
+            self.area = postgisConnection.getQueryResult(
+                """select area from "public".subcompartments where identity = '{}'""".format(
+                    int(identity)
+                )
+            )[0][0]
+        except IndexError:
+            None
 
         self.taxDetailsM10 = postgisConnection.getQueryResult(
             """select identity, formula, dmr, proish, poln, height, age, yarus, zapas from "public".subcompartment_taxation_m10 where identity = '{}'""".format(
                 int(identity)
             )
         )
-        for i in range(len(self.taxDetailsM10)):
-            self.taxDetailsM10[i] = {
-                "identity": self.taxDetailsM10[i][0],
-                "formula": self.taxDetailsM10[i][1],
-                "dmr": self.taxDetailsM10[i][2],
-                "proish": self.taxDetailsM10[i][3],
-                "poln": self.taxDetailsM10[i][4],
-                "height": self.taxDetailsM10[i][5],
-                "age": self.taxDetailsM10[i][6],
-                "yarus": self.taxDetailsM10[i][7],
-                "zapas": self.taxDetailsM10[i][8],
-            }
+        if len(self.taxDetailsM10) > 0:
+            for i in range(len(self.taxDetailsM10)):
+                self.taxDetailsM10[i] = [
+                    " " if v is None else v for v in self.taxDetailsM10[i]
+                ]
+                self.taxDetailsM10[i] = {
+                    "identity": self.taxDetailsM10[i][0],
+                    "formula": self.taxDetailsM10[i][1],
+                    "dmr": self.taxDetailsM10[i][2],
+                    "proish": self.taxDetailsM10[i][3],
+                    "poln": self.taxDetailsM10[i][4],
+                    "height": self.taxDetailsM10[i][5],
+                    "age": self.taxDetailsM10[i][6],
+                    "yarus": self.taxDetailsM10[i][7],
+                    "zapas": self.taxDetailsM10[i][8],
+                }
 
         # postgisConnection.__del__()
 

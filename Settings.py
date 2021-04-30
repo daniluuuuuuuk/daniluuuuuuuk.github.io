@@ -1,9 +1,9 @@
 from qgis.PyQt.QtWidgets import QDialog, QMessageBox, QToolButton, QFileDialog
 from .gui import settingsDialog, changePortDialog
 from .tools import config
+from .tools.ImportDatabase import DataImport
 from .tools import module_errors as er
 from .PostgisDB import PostGisDB
-from .BluetoothAdapter import BTAdapter
 from PyQt5 import QtCore
 from .modules.otvod.tools.threading.ForestObjectWorker import (
     Worker as ForestObjWorker,
@@ -13,6 +13,9 @@ from .modules.otvod.tools.threading.ForestObjectLoader import (
 )
 from qgis.utils import iface
 import os
+from .modules.trees_accounting.src.services.waiting_spinner_widget import (
+    QtWaitingSpinner,
+)
 
 
 class SettingsWindow(QDialog):
@@ -35,6 +38,10 @@ class SettingsController(QtCore.QObject):
         self.sd = SettingsWindow()
         self.sd.setModal(False)
         self.tableUi = self.sd.ui
+
+        self.spinner = QtWaitingSpinner(
+            self.sd, True, True, QtCore.Qt.ApplicationModal
+        )
 
         self.tabletypes = {
             "Координаты": 0,
@@ -61,22 +68,14 @@ class SettingsController(QtCore.QObject):
         self.populateEnterprise()
 
         self.populateBDSettings()
-        self.populateBTSettings()
 
         self.tableUi.saveConfigButton.clicked.connect(self.saveBDConfig)
+        self.tableUi.importDB_pushButton.clicked.connect(self.importDB)
         self.tableUi.testDBConnection_pushButton.clicked.connect(
             self.getDBConnectionState
         )
         self.tableUi.saveEnterpriseSettingsButton.clicked.connect(
             self.saveEnterpriseConfig
-        )
-
-        self.tableUi.changeForkComButton.clicked.connect(self.changeComPort)
-        self.tableUi.changeRangeFinderComButton.clicked.connect(
-            self.changeComPort
-        )
-        self.tableUi.SaveBTConfigPushButton.clicked.connect(
-            self.saveComPortConfig
         )
 
         self.tableUi.gplho_comboBox.currentTextChanged.connect(
@@ -292,48 +291,6 @@ class SettingsController(QtCore.QObject):
                 None, er.MODULE_ERROR, er.CONFIG_FILE_ERROR + str(e)
             )
 
-    def populateBTSettings(self):
-        cf = config.Configurer("bluetooth")
-        btsettings = cf.readConfigs()
-        self.tableUi.forkComPortlineEdit.setText(
-            btsettings.get("fork", "No data")
-        )
-        self.tableUi.rangeFinderLineEdit.setText(
-            btsettings.get("rangefinder", "No data")
-        )
-
-    def changeComPort(self, *args, **kwargs):
-        sender = self.sd.sender()
-
-        sd = comPortWindow()
-        ui = sd.ui
-
-        btAdapter = BTAdapter()
-        ui.comPortCombobox.addItems(
-            [x.device for x in btAdapter.getAvailablePorts()]
-        )
-        result = sd.exec()
-
-        if result == QDialog.Accepted:
-            port = ui.comPortCombobox.currentText()
-            if sender == self.tableUi.changeForkComButton:
-                self.tableUi.forkComPortlineEdit.setText(port)
-            elif sender == self.tableUi.changeRangeFinderComButton:
-                self.tableUi.rangeFinderLineEdit.setText(port)
-
-    def saveComPortConfig(self):
-        try:
-            settingsDict = {
-                "fork": self.tableUi.forkComPortlineEdit.text(),
-                "rangefinder": self.tableUi.rangeFinderLineEdit.text(),
-            }
-            cf = config.Configurer("bluetooth", settingsDict)
-            cf.writeConfigs()
-        except Exception as e:
-            QMessageBox.information(
-                None, er.MODULE_ERROR, er.CONFIG_FILE_ERROR + str(e)
-            )
-
     def saveBDConfig(self):
         try:
             settingsDict = {
@@ -368,3 +325,59 @@ class SettingsController(QtCore.QObject):
             QMessageBox.information(
                 None, er.MODULE_ERROR, er.DATABASE_CONNECTION_ERROR
             )
+
+    def importDB(self):
+        """
+        Импорт базы данных  из файла.
+        Перед импортом проверяется соединение с СУБД.
+        """
+
+        dbconnection = PostGisDB()
+        tc = dbconnection.testConnection(
+            host=self.tableUi.connectionLineEdit.text(),
+            port=self.tableUi.portLineEdit.text(),
+            user=self.tableUi.usernameLineEdit.text(),
+            password=self.tableUi.passwordLineEdit.text(),
+            database=None,
+        )
+        if not tc:
+            QMessageBox.information(
+                None, er.MODULE_ERROR, er.DBMS_CONNECTION_ERROR
+            )
+            return False
+
+        result = QMessageBox.question(
+            None,
+            "",
+            "Данные базы данных будут ПЕРЕЗАПИСАНЫ. Продолжить?",
+            QMessageBox.StandardButtons(QMessageBox.Yes | QMessageBox.No),
+        )
+        if result == QMessageBox.Yes:
+            bu_file = QFileDialog.getOpenFileName(None, "Выбор файла")[0]
+
+            if bu_file != "":
+                db_info = {
+                    "host": self.tableUi.connectionLineEdit.text(),
+                    "port": self.tableUi.portLineEdit.text(),
+                    "user": self.tableUi.usernameLineEdit.text(),
+                    "password": self.tableUi.passwordLineEdit.text(),
+                    "database": self.tableUi.BDNameLineEdit.text(),
+                }
+
+                self.imported_data = DataImport(
+                    db_info=db_info, filename=bu_file
+                )
+                self.imported_data.started.connect(
+                    lambda: self.spinner.start()
+                )
+                self.imported_data.finished.connect(
+                    lambda: self.spinner.stop()
+                )
+                self.imported_data.start()
+                self.imported_data.signal_message_result.connect(
+                    lambda mes: QMessageBox.information(None, "", str(mes)),
+                    QtCore.Qt.QueuedConnection,
+                )
+
+            else:
+                return False
