@@ -99,7 +99,7 @@ class AreaController(QtCore.QObject):
             "Лесосеки")[0]
         try:
             layer.startEditing()
-            self.feature['num_kv'] = int(self.ui.num_kv_lineEdit.text())
+            self.feature['num_kv'] = self.ui.num_kv_lineEdit.text()
             self.feature['area'] = float(str(self.ui.area_lineEdit.text()))
             self.feature['num'] = self.ui.num_lineEdit.text()
             self.feature['fio'] = self.ui.fio_lineEdit.text()
@@ -229,7 +229,7 @@ class AreaController(QtCore.QObject):
             if result:
                 QMessageBox.information(None, 'Модуль отвода', 'Лесосека и ее данные были удалены из базы данных')
             iface.mapCanvas().refreshAllLayers()
-            self.ui.buttonBox.button(QDialogButtonBox.Close).click()
+            self.sd.close()
 
         reply = QMessageBox.question(QDialog(), 'Удаление лесосеки',
                                      'Лесосека и все ее данные будут удалены. Продолжить?', QMessageBox.Yes, QMessageBox.No)

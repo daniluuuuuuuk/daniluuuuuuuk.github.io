@@ -17,7 +17,7 @@ from qgis.PyQt.QtWidgets import QAction
 
 class CuttingArea:
     def __init__(
-        self, canvas, bindingPoint, layer, feature, btnControl, editedUid
+        self, canvas, bindingPoint, layer, feature, btnControl
     ):
         super().__init__()
 
@@ -28,7 +28,10 @@ class CuttingArea:
         self.canvas = canvas
         self.bindingPoint = bindingPoint
         self.layer = layer
-        self.uid = editedUid
+        self.uid = self.getEditedUid()
+        if self.uid == None:
+            self.uid = str(uuid.uuid4())
+
         self.fields = self.feature.fields()
         self.dictAttr = None
 
@@ -38,8 +41,14 @@ class CuttingArea:
         self.cuttingAreaPoints = []
 
         self.btnControl = btnControl
-        if self.uid == None:
-            self.uid = str(uuid.uuid4())
+
+
+    def getEditedUid(self):
+        layer = QgsProject.instance().mapLayersByName('Лесосека временный слой')
+        if layer:
+            feature = list(layer[0].getFeatures())[0]
+            return feature['uid']
+        return None
 
     def getLesosekaProperties(self):
         dictAttr = {}
@@ -262,42 +271,3 @@ class CuttingArea:
             self.dictAttr,
         )
         return tempCuttingAreaBuilder.makeFeature()
-
-        """Сохранение лесосеки
-        """
-
-    def save(self, tableData):
-        if self.anchorLinePoints:
-            self.copyOnLayer("Привязка временный слой", "Линия привязки")
-            self.copyOnLayer("Лесосека временный слой", "Лесосеки")
-        else:
-            self.copyOnLayer("Лесосека временный слой", "Лесосеки")
-
-        data = [self.uid] + tableData
-        DbSerializer(data).saveToDb()
-
-        """Копирование лесосеки с временного слоя на слой из базы данных
-        """
-
-    def copyOnLayer(self, sourceLYRName, destLYRName):
-        sourceLYR = QgsProject.instance().mapLayersByName(sourceLYRName)[0]
-        destLYR = QgsProject.instance().mapLayersByName(destLYRName)[0]
-
-        features = destLYR.getFeatures("uid = '{}'".format(self.uid))
-
-        if destLYR.isEditable():
-            # destLYR.rollback(True)
-            iface.setActiveLayer(destLYR)
-            iface.mainWindow().findChild(QAction, 'mActionToggleEditing').trigger()
-
-        with edit(destLYR):
-            for f in features:
-                destLYR.deleteFeature(f.id())
-
-        features = []
-        for feature in sourceLYR.getFeatures():
-            features.append(feature)
-        destLYR.startEditing()
-        data_provider = destLYR.dataProvider()
-        data_provider.addFeatures(features)
-        destLYR.commitChanges()

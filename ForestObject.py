@@ -101,7 +101,7 @@ class ForestEnterprise(QtCore.QObject):
                 ),
                 """select name_organization from (select id_organization from "dictionary".organization
                 where code_organization = '{}') typed
-                join "dictionary".organization org on org.parent_id_organization = typed.id_organization""".format(
+                join "dictionary".organization org on org.parent_id_organization = typed.id_organization ORDER BY code_organization ASC""".format(
                     self.lhCode
                 ),
             ]
