@@ -90,11 +90,11 @@ class CanvasWidget(QgsMapCanvas):
         """
 
     def setupDefaultCanvas(self):
-        canvas = QgsMapCanvas(self.omw.canvasWidget)
+        canvas = QgsMapCanvas()
         canvas.setCanvasColor(QColor(255, 255, 255, 255))
         canvas.enableAntiAliasing(True)
-        canvas.setFixedWidth(371)
-        canvas.setFixedHeight(341)
+
+        self.omw.verticalLayout_4.addWidget(canvas)
 
         canvas.setLayers(self.layers)
 
