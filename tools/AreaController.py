@@ -217,7 +217,7 @@ class AreaController(QtCore.QObject):
         self.ui.dateEdit.setEnabled(val)
 
         self.ui.useType_comboBox.setEnabled(val)
-        self.ui.cuttingType_comboBox.setEnabled(val)        
+        self.ui.cuttingType_comboBox.setEnabled(val)
 
     def deleteArea(self):
 
