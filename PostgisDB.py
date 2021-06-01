@@ -32,7 +32,7 @@ class PostGisDB:
         except Exception as e:
             return False
 
-    def getQueryResult(self, query, as_dict=False):
+    def getQueryResult(self, query, as_dict=False, no_result=False):
         connection = self.setConnection()
         if connection:
             curPGSQL = connection.cursor()
@@ -45,7 +45,9 @@ class PostGisDB:
                     return dict(zip(keys, values))
                 return {}
 
-            return curPGSQL.fetchall()
+            connection.commit()
+            if not no_result:
+                return curPGSQL.fetchall()
         return []
 
     def testConnection(self, *args, **kwargs):

@@ -2,6 +2,7 @@ from qgis.PyQt.QtWidgets import QDialog, QMessageBox, QToolButton, QFileDialog
 from .gui import settingsDialog, changePortDialog
 from .tools import config
 from .tools.ImportDatabase import DataImport
+from .tools.SqlFileExecuter import SqlFileExecuter
 from .tools import module_errors as er
 from .PostgisDB import PostGisDB
 from PyQt5 import QtCore
@@ -89,6 +90,7 @@ class SettingsController(QtCore.QObject):
         self.tableUi.saveOtvodSettingsButton.clicked.connect(
             self.saveOtvodSettings
         )
+        self.tableUi.run_sql_pushButton.clicked.connect(self.runSqlScript)
         self.sd.exec()
 
         self.lhTypesAndNames = None
@@ -381,3 +383,30 @@ class SettingsController(QtCore.QObject):
 
             else:
                 return False
+
+    def runSqlScript(self):
+        """
+        Выполнение выбранного SQL скрипта
+        """
+
+        sql_path_file = QFileDialog.getOpenFileName(None, "Выбор файла")[0]
+
+        if sql_path_file != "":
+
+            self.sql_file_executer = SqlFileExecuter(
+                sql_file_path=sql_path_file
+            )
+            self.sql_file_executer.started.connect(
+                lambda: self.spinner.start()
+            )
+            self.sql_file_executer.finished.connect(
+                lambda: self.spinner.stop()
+            )
+            self.sql_file_executer.start()
+            self.sql_file_executer.signal_message_result.connect(
+                lambda mes: QMessageBox.information(None, "", str(mes)),
+                QtCore.Qt.QueuedConnection,
+            )
+
+        else:
+            return False

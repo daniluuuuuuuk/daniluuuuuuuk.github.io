@@ -5,3 +5,6 @@ test/
 modules/trial_area/src/trial_area.ini
 tmp/*
 /config.ini
+Installer
+!Installer/gisles-qgis-32.iss
+!Installer/gisles-qgis-64.iss
