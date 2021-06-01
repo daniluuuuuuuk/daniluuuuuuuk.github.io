@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>380</width>
-    <height>256</height>
+    <height>291</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>60</x>
-     <y>220</y>
+     <y>250</y>
      <width>301</width>
      <height>32</height>
     </rect>
@@ -41,7 +41,7 @@
      <x>10</x>
      <y>10</y>
      <width>351</width>
-     <height>201</height>
+     <height>231</height>
     </rect>
    </property>
    <property name="autoFillBackground">
@@ -93,9 +93,9 @@
     <widget class="QPushButton" name="saveOtvodSettingsButton">
      <property name="geometry">
       <rect>
-       <x>260</x>
-       <y>140</y>
-       <width>75</width>
+       <x>240</x>
+       <y>170</y>
+       <width>91</width>
        <height>23</height>
       </rect>
      </property>
@@ -202,9 +202,9 @@
     <widget class="QPushButton" name="saveEnterpriseSettingsButton">
      <property name="geometry">
       <rect>
-       <x>260</x>
-       <y>140</y>
-       <width>75</width>
+       <x>240</x>
+       <y>170</y>
+       <width>91</width>
        <height>23</height>
       </rect>
      </property>
@@ -368,9 +368,9 @@
     <widget class="QPushButton" name="saveConfigButton">
      <property name="geometry">
       <rect>
-       <x>260</x>
-       <y>140</y>
-       <width>75</width>
+       <x>240</x>
+       <y>170</y>
+       <width>91</width>
        <height>23</height>
       </rect>
      </property>
@@ -384,8 +384,8 @@
     <widget class="QPushButton" name="testDBConnection_pushButton">
      <property name="geometry">
       <rect>
-       <x>14</x>
-       <y>140</y>
+       <x>130</x>
+       <y>170</y>
        <width>101</width>
        <height>23</height>
       </rect>
@@ -420,7 +420,7 @@
     <widget class="QPushButton" name="importDB_pushButton">
      <property name="geometry">
       <rect>
-       <x>120</x>
+       <x>100</x>
        <y>140</y>
        <width>131</width>
        <height>23</height>
@@ -428,6 +428,19 @@
      </property>
      <property name="text">
       <string>Импортировать БД</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="run_sql_pushButton">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>140</y>
+       <width>91</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Выполнить SQL</string>
      </property>
     </widget>
    </widget>
@@ -464,9 +477,9 @@
     <widget class="QPushButton" name="SaveBTConfigPushButton">
      <property name="geometry">
       <rect>
-       <x>260</x>
-       <y>140</y>
-       <width>75</width>
+       <x>240</x>
+       <y>170</y>
+       <width>91</width>
        <height>23</height>
       </rect>
      </property>
