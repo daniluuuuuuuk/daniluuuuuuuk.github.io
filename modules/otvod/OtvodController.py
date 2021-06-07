@@ -10,6 +10,7 @@ from . import LayoutManager
 from .DataTable import DataTableWrapper
 from .OtvodSettingsDialog import OtvodSettingsWindow
 from ...tools import config
+from .tools.mapTools.MovePointMapTool import MovePointTool
 from .CuttingAreaAttributesEditor import CuttingAreaAttributesEditor
 from PyQt5.QtGui import QIcon
 from qgis.core import QgsProject, QgsPointXY, QgsPrintLayout
@@ -25,7 +26,7 @@ from qgis.PyQt.QtWidgets import QAction
 from datetime import datetime
 from qgis.PyQt.QtCore import Qt
 from qgis.utils import iface
-from qgis.gui import QgsMapToolPan
+from qgis.gui import QgsMapToolPan, QgsMapToolAdvancedDigitizing
 from .LayerManager import LayerManager
 from .icons.initIcons import IconSet
 from qgis.core import Qgis, QgsSnappingConfig, QgsTolerance
@@ -150,7 +151,9 @@ class OtvodController:
         self.omw.show()
         self.switch = self.initSwitchButton()
 
-        self.omw.handTool_button.clicked.connect(self.initHandTool)
+        # self.omw.handTool_button.clicked.connect(self.initHandTool)
+        self.omw.handTool_button.clicked.connect(self.enableMovePointTool)
+
         self.panTool = QgsMapToolPan(self.canvas)
 
         self.omw.manageLayers_button.clicked.connect(self.manageCanvasLayers)
@@ -168,6 +171,18 @@ class OtvodController:
             self.project, self.canvas
         )
         self.omw.exportAsImage_PushButton.clicked.connect(self.generateImage)
+
+    def enableMovePointTool(self):
+        layer = QgsProject.instance().mapLayersByName('Пикеты')
+        if layer:
+            self.mpt = MovePointTool(self.canvas, self.tableWrapper.tableModel)
+            self.canvas.setMapTool(self.mpt)
+        else:
+            QMessageBox.information(
+                None,
+                "Ошибка модуля QGISLes",
+                "Отсутствует слой пикетов",
+            )
 
     def exportToCsv(self):
         now = datetime.now()
