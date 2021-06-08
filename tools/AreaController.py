@@ -6,22 +6,26 @@ from ..gui import areaControllerDialog
 from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QMessageBox
 from qgis.PyQt.QtCore import QDate
 from ..modules.otvod.tools.Serializer import DbSerializer
-from ..modules.otvod.tools.threading.CuttingTypeWorker import Worker as CuttingTypeWorker
+from ..modules.otvod.tools.threading.CuttingTypeWorker import (
+    Worker as CuttingTypeWorker,
+)
 from ..modules.otvod.tools.threading.CuttingTypeLoader import CuttingTypeLoader
-from .AreaDataContainer import AreaDataPrintContainer, AreaCoordinatesTypeDialog
+from .AreaDataContainer import (
+    AreaDataPrintContainer,
+    AreaCoordinatesTypeDialog,
+)
 from ..modules.trees_accounting.src.trees_accounting import TaMainWindow
 from qgis.utils import iface
 
 
-MESSAGE_CATEGORY = 'Удаление лесосеки'
-AREA_POINTS_TABLE_NAME = 'area_points'
-AREA_DATA_TABLE_NAME = 'area_data'
-AREA_TABLE_NAME = 'area'
-AREA_LINE_TABLE_NAME = 'area_line'
+MESSAGE_CATEGORY = "Удаление лесосеки"
+AREA_POINTS_TABLE_NAME = "area_points"
+AREA_DATA_TABLE_NAME = "area_data"
+AREA_TABLE_NAME = "area"
+AREA_LINE_TABLE_NAME = "area_line"
 
 
 class AreaController(QtCore.QObject):
-
     def __init__(self, feature, parent=None):
         super(AreaController, self).__init__(parent)
         self.feature = feature
@@ -35,7 +39,7 @@ class AreaController(QtCore.QObject):
         self.cuttingAreaTypes = []
         self.currentCuttingAreaTypes = []
         self.setupValues()
-        self.setupButtons()    
+        self.setupButtons()
         self.window = self.sd.show()
 
     @property
@@ -49,22 +53,27 @@ class AreaController(QtCore.QObject):
 
     def modeChanged(self):
         self.changeFormEnableState(self.editMode)
-        self.ui.buttonBox.button(QDialogButtonBox.Apply).setEnabled(self.editMode)
+        self.ui.buttonBox.button(QDialogButtonBox.Apply).setEnabled(
+            self.editMode
+        )
         self.ui.delete_pushButton.setEnabled(not self.editMode)
         self.ui.edit_pushButton.setChecked(self.editMode)
 
     def setupButtons(self):
         self.ui.buttonBox.button(QDialogButtonBox.Apply).setEnabled(False)
         self.ui.edit_pushButton.clicked.connect(self.changeEditMode)
-        self.ui.buttonBox.button(QDialogButtonBox.Apply).clicked.connect(self.saveChanges)
+        self.ui.buttonBox.button(QDialogButtonBox.Apply).clicked.connect(
+            self.saveChanges
+        )
         self.ui.count_pushButton.clicked.connect(self.showCountWindow)
         self.ui.delete_pushButton.clicked.connect(self.deleteArea)
         self.ui.buttonBox.button(QDialogButtonBox.Close).setVisible(False)
-        self.ui.useType_comboBox.currentTextChanged.connect(self.useTypeChanged)
+        self.ui.useType_comboBox.currentTextChanged.connect(
+            self.useTypeChanged
+        )
         self.ui.print_pushButton.clicked.connect(self.printArea)
 
     def printArea(self):
-        
         def areaPointsLoaded(data, points):
             dc = AreaDataPrintContainer(data, points, self.feature, layoutData)
             dc.buildPointsLayer()
@@ -74,9 +83,9 @@ class AreaController(QtCore.QObject):
 
         def dialogData(dialog):
             layoutData = {
-                'type' : dialog.coordTypeGroup.checkedButton().text(),
-                'format' : dialog.coordFormatGroup.checkedButton().text(),
-                'scale' : dialog.scaleCombobox.currentText()
+                "type": dialog.coordTypeGroup.checkedButton().text(),
+                "format": dialog.coordFormatGroup.checkedButton().text(),
+                "scale": dialog.scaleCombobox.currentText(),
             }
             return layoutData
 
@@ -95,38 +104,43 @@ class AreaController(QtCore.QObject):
         self.rst.show()
 
     def saveChanges(self):
-        layer = QgsProject.instance().mapLayersByName(
-            "Лесосеки")[0]
+        layer = QgsProject.instance().mapLayersByName("Лесосеки")[0]
         try:
             layer.startEditing()
-            self.feature['num_kv'] = self.ui.num_kv_lineEdit.text()
-            self.feature['area'] = float(str(self.ui.area_lineEdit.text()))
-            self.feature['num'] = self.ui.num_lineEdit.text()
-            self.feature['fio'] = self.ui.fio_lineEdit.text()
-            self.feature['date'] = self.ui.dateEdit.text()
-            self.feature['info'] = self.ui.info_textEdit.toPlainText()
-            self.feature['num_vds'] = self.ui.num_vd_lineEdit.text()
-            self.feature['leshos_text'] = self.ui.leshos_comboBox.currentText()
-            self.feature['lesnich_text'] = self.ui.lesnich_comboBox.currentText()
-            self.feature['vedomstvo_text'] = self.ui.gplho_comboBox.currentText()
-            self.feature['useType'] = self.ui.useType_comboBox.currentText()
-            self.feature['cuttingTyp'] = self.ui.cuttingType_comboBox.currentText()
+            self.feature["num_kv"] = self.ui.num_kv_lineEdit.text()
+            self.feature["area"] = float(str(self.ui.area_lineEdit.text()))
+            self.feature["num"] = self.ui.num_lineEdit.text()
+            self.feature["fio"] = self.ui.fio_lineEdit.text()
+            self.feature["date"] = self.ui.dateEdit.text()
+            self.feature["info"] = self.ui.info_textEdit.toPlainText()
+            self.feature["num_vds"] = self.ui.num_vd_lineEdit.text()
+            self.feature["leshos_text"] = self.ui.leshos_comboBox.currentText()
+            self.feature[
+                "lesnich_text"
+            ] = self.ui.lesnich_comboBox.currentText()
+            self.feature[
+                "vedomstvo_text"
+            ] = self.ui.gplho_comboBox.currentText()
+            self.feature["useType"] = self.ui.useType_comboBox.currentText()
+            self.feature[
+                "cuttingTyp"
+            ] = self.ui.cuttingType_comboBox.currentText()
             self.currentCuttingAreaTypes = [
                 self.ui.useType_comboBox.currentText(),
-                self.ui.cuttingType_comboBox.currentText()
+                self.ui.cuttingType_comboBox.currentText(),
             ]
             layer.updateFeature(self.feature)
             layer.commitChanges()
             self.cuttingAreaTypes = []
         except Exception as e:
-            QMessageBox.information(None, 'Ошибка', str(e))
+            QMessageBox.information(None, "Ошибка", str(e))
         self.editMode = False
 
     def changeEditMode(self):
         self.currentCuttingAreaTypes = [
             self.ui.useType_comboBox.currentText(),
-            self.ui.cuttingType_comboBox.currentText()
-        ]            
+            self.ui.cuttingType_comboBox.currentText(),
+        ]
         self.editMode = not self.editMode
         if self.editMode:
             self.setUseTypes()
@@ -134,10 +148,16 @@ class AreaController(QtCore.QObject):
             self.setupValues()
 
     def setUseTypes(self):
-        useTypes = ['Рубки главного пользования', 'Рубки промежуточного пользования', 'Прочие рубки']
+        useTypes = [
+            "Рубки главного пользования",
+            "Рубки промежуточного пользования",
+            "Прочие рубки",
+        ]
         self.ui.useType_comboBox.clear()
         self.ui.useType_comboBox.addItems(useTypes)
-        index = self.ui.useType_comboBox.findText(self.currentCuttingAreaTypes[0])
+        index = self.ui.useType_comboBox.findText(
+            self.currentCuttingAreaTypes[0]
+        )
         if index >= 0:
             self.ui.useType_comboBox.setCurrentIndex(index)
 
@@ -150,7 +170,7 @@ class AreaController(QtCore.QObject):
             arg.setCurrentIndex(-1)
 
     def useTypeChanged(self):
-        if self.ui.useType_comboBox.currentText() == '':
+        if self.ui.useType_comboBox.currentText() == "":
             return
 
         def workerFinished(result):
@@ -161,7 +181,9 @@ class AreaController(QtCore.QObject):
             self.comboboxClear(self.ui.cuttingType_comboBox)
             self.clearComboboxIndex(self.ui.cuttingType_comboBox)
             self.ui.cuttingType_comboBox.addItems(result)
-            index = self.ui.cuttingType_comboBox.findText(self.currentCuttingAreaTypes[1])
+            index = self.ui.cuttingType_comboBox.findText(
+                self.currentCuttingAreaTypes[1]
+            )
             if index >= 0:
                 self.ui.cuttingType_comboBox.setCurrentIndex(index)
             if not self.defaultAreaTypes:
@@ -176,28 +198,28 @@ class AreaController(QtCore.QObject):
         self.thread.start()
 
     def setupValues(self):
-
         def setupComboboxes():
-            self.ui.leshos_comboBox.addItem(self.feature['leshos_text'])
-            self.ui.gplho_comboBox.addItem(self.feature['vedomstvo_text'])
-            self.ui.lesnich_comboBox.addItem(self.feature['lesnich_text'])
+            self.ui.leshos_comboBox.addItem(self.feature["leshos_text"])
+            self.ui.gplho_comboBox.addItem(self.feature["vedomstvo_text"])
+            self.ui.lesnich_comboBox.addItem(self.feature["lesnich_text"])
             self.ui.useType_comboBox.clear()
             self.ui.cuttingType_comboBox.clear()
-            self.ui.useType_comboBox.addItem(self.feature['usetype'])
-            self.ui.cuttingType_comboBox.addItem(self.feature['cuttingtyp'])
+            self.ui.useType_comboBox.addItem(self.feature["usetype"])
+            self.ui.cuttingType_comboBox.addItem(self.feature["cuttingtyp"])
             self.ui.gplho_comboBox.setEnabled(False)
             self.ui.leshos_comboBox.setEnabled(False)
             self.ui.lesnich_comboBox.setEnabled(False)
 
-
         def setupLineEdits():
-            self.ui.num_kv_lineEdit.setText(str(self.feature['num_kv']))
-            self.ui.num_vd_lineEdit.setText(str(self.feature['num_vds']))
-            self.ui.area_lineEdit.setText(str(self.feature['area']))
-            self.ui.num_lineEdit.setText(str(self.feature['num']))
-            self.ui.fio_lineEdit.setText(str(self.feature['fio']))
-            self.ui.info_textEdit.setText(str(self.feature['info']))
-            self.ui.dateEdit.setDate(QDate.fromString(str(self.feature['date']), 'dd.MM.yyyy'))
+            self.ui.num_kv_lineEdit.setText(str(self.feature["num_kv"]))
+            self.ui.num_vd_lineEdit.setText(str(self.feature["num_vds"]))
+            self.ui.area_lineEdit.setText(str(self.feature["area"]))
+            self.ui.num_lineEdit.setText(str(self.feature["num"]))
+            self.ui.fio_lineEdit.setText(str(self.feature["fio"]))
+            self.ui.info_textEdit.setText(str(self.feature["info"]))
+            self.ui.dateEdit.setDate(
+                QDate.fromString(str(self.feature["date"]), "dd.MM.yyyy")
+            )
 
         self.ui.useType_comboBox.blockSignals(True)
         self.ui.cuttingType_comboBox.blockSignals(True)
@@ -217,25 +239,33 @@ class AreaController(QtCore.QObject):
         self.ui.dateEdit.setEnabled(val)
 
         self.ui.useType_comboBox.setEnabled(val)
-        self.ui.cuttingType_comboBox.setEnabled(val)        
+        self.ui.cuttingType_comboBox.setEnabled(val)
 
     def deleteArea(self):
-
         def workerFinished(result):
             worker.deleteLater()
             thread.quit()
             thread.wait()
             thread.deleteLater()
             if result:
-                QMessageBox.information(None, 'Модуль отвода', 'Лесосека и ее данные были удалены из базы данных')
+                QMessageBox.information(
+                    None,
+                    "Модуль отвода",
+                    "Лесосека и ее данные были удалены из базы данных",
+                )
             iface.mapCanvas().refreshAllLayers()
             self.sd.close()
 
-        reply = QMessageBox.question(QDialog(), 'Удаление лесосеки',
-                                     'Лесосека и все ее данные будут удалены. Продолжить?', QMessageBox.Yes, QMessageBox.No)
+        reply = QMessageBox.question(
+            QDialog(),
+            "Удаление лесосеки",
+            "Лесосека и все ее данные будут удалены. Продолжить?",
+            QMessageBox.Yes,
+            QMessageBox.No,
+        )
         if reply == QMessageBox.Yes:
             thread = QtCore.QThread()
-            worker = Worker(self.feature['uid'])
+            worker = Worker(self.feature["uid"])
             worker.moveToThread(thread)
             worker.finished.connect(workerFinished)
             thread.started.connect(worker.run)
@@ -252,8 +282,12 @@ class SettingsWindow(QDialog):
 
     def closeEvent(self, event):
 
-        layerNamesToDelete = ["Лесосека", "Точка привязки",
-        "Привязка", "Пикеты"]
+        layerNamesToDelete = [
+            "Лесосека",
+            "Точка привязки",
+            "Привязка",
+            "Пикеты",
+        ]
 
         for name in layerNamesToDelete:
             layer = QgsProject.instance().mapLayersByName(name)
@@ -263,13 +297,13 @@ class SettingsWindow(QDialog):
         iface.mapCanvas().refresh()
         self.deleteLater()
 
-class Worker(QtCore.QObject):
 
+class Worker(QtCore.QObject):
     def __init__(self, uid):
         QtCore.QObject.__init__(self)
         self.killed = False
         self.uid = uid
-        self.remover = RemoveAreaTask('Remove Area from Database')
+        self.remover = RemoveAreaTask("Remove Area from Database")
 
     def run(self):
         ret = None
@@ -288,8 +322,8 @@ class Worker(QtCore.QObject):
 
     finished = QtCore.pyqtSignal(object)
 
-class RemoveAreaTask(QgsTask):
 
+class RemoveAreaTask(QgsTask):
     def __init__(self, description):
         super().__init__(description, QgsTask.CanCancel)
 
@@ -298,49 +332,70 @@ class RemoveAreaTask(QgsTask):
     def deleteArea(self, uid):
         postgisConnection = PostgisDB.PostGisDB()
         cursor = postgisConnection.connection.cursor()
-        cursor.execute("DELETE FROM {table} WHERE area_uid='{area_uid}'"
-        .format(table=AREA_DATA_TABLE_NAME, area_uid=uid))
+        cursor.execute(
+            "DELETE FROM {table} WHERE area_uid='{area_uid}'".format(
+                table=AREA_DATA_TABLE_NAME, area_uid=uid
+            )
+        )
         postgisConnection.connection.commit()
-        cursor.execute("DELETE FROM {table} WHERE area_uid='{area_uid}'"
-        .format(table=AREA_POINTS_TABLE_NAME, area_uid=uid))
+        cursor.execute(
+            "DELETE FROM {table} WHERE area_uid='{area_uid}'".format(
+                table=AREA_POINTS_TABLE_NAME, area_uid=uid
+            )
+        )
         postgisConnection.connection.commit()
-        cursor.execute("DELETE FROM {table} WHERE uid='{area_uid}'"
-        .format(table=AREA_TABLE_NAME, area_uid=uid))
+        cursor.execute(
+            "DELETE FROM {table} WHERE uid='{area_uid}'".format(
+                table=AREA_TABLE_NAME, area_uid=uid
+            )
+        )
         postgisConnection.connection.commit()
-        cursor.execute("DELETE FROM {table} WHERE uid='{area_uid}'"
-        .format(table=AREA_LINE_TABLE_NAME, area_uid=uid))
+        cursor.execute(
+            "DELETE FROM {table} WHERE uid='{area_uid}'".format(
+                table=AREA_LINE_TABLE_NAME, area_uid=uid
+            )
+        )
         postgisConnection.connection.commit()
 
     def run(self, uid):
-        QgsMessageLog.logMessage('\nStarted task "{}"'.format(
-            self.description()), MESSAGE_CATEGORY, Qgis.Info)
+        QgsMessageLog.logMessage(
+            '\nStarted task "{}"'.format(self.description()),
+            MESSAGE_CATEGORY,
+            Qgis.Info,
+        )
         self.deleteArea(uid)
         return True
 
     def finished(self, result):
         if result:
             QgsMessageLog.logMessage(
-                'Task "{name}" completed\n'
-                .format(
-                    name=self.description()),
-                MESSAGE_CATEGORY, Qgis.Success)
+                'Task "{name}" completed\n'.format(name=self.description()),
+                MESSAGE_CATEGORY,
+                Qgis.Success,
+            )
         else:
             if self.exception is None:
                 QgsMessageLog.logMessage(
                     'Task "{name}" not successful but without exception '
-                    '(probably the task was manually canceled by the '
-                    'user)'.format(
-                        name=self.description()),
-                    MESSAGE_CATEGORY, Qgis.Warning)
+                    "(probably the task was manually canceled by the "
+                    "user)".format(name=self.description()),
+                    MESSAGE_CATEGORY,
+                    Qgis.Warning,
+                )
             else:
                 QgsMessageLog.logMessage(
                     'Task "{name}" Exception: {exception}'.format(
-                        name=self.description(), exception=self.exception),
-                    MESSAGE_CATEGORY, Qgis.Critical)
+                        name=self.description(), exception=self.exception
+                    ),
+                    MESSAGE_CATEGORY,
+                    Qgis.Critical,
+                )
                 raise self.exception
 
     def cancel(self):
         QgsMessageLog.logMessage(
             'Task "{name}" was cancelled'.format(name=self.description()),
-            MESSAGE_CATEGORY, Qgis.Info)
+            MESSAGE_CATEGORY,
+            Qgis.Info,
+        )
         super().cancel()
