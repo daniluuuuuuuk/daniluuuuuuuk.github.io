@@ -23,6 +23,9 @@ AREA_POINTS_TABLE_NAME = "area_points"
 AREA_DATA_TABLE_NAME = "area_data"
 AREA_TABLE_NAME = "area"
 AREA_LINE_TABLE_NAME = "area_line"
+TREES_TRF_HEIGHT_TABLE_NAME = "trees_trf_height"
+TREES_NOT_CUTTING_TABLE_NAME = "trees_not_cutting"
+TREES_TABLE_NAME = "trees"
 
 
 class AreaController(QtCore.QObject):
@@ -353,6 +356,24 @@ class RemoveAreaTask(QgsTask):
         cursor.execute(
             "DELETE FROM {table} WHERE uid='{area_uid}'".format(
                 table=AREA_LINE_TABLE_NAME, area_uid=uid
+            )
+        )
+        postgisConnection.connection.commit()
+        cursor.execute(
+            "DELETE FROM {table} WHERE area_uuid='{area_uuid}'".format(
+                table=TREES_TRF_HEIGHT_TABLE_NAME, area_uuid=uid
+            )
+        )
+        postgisConnection.connection.commit()
+        cursor.execute(
+            "DELETE FROM {table} WHERE area_uuid='{area_uuid}'".format(
+                table=TREES_NOT_CUTTING_TABLE_NAME, area_uuid=uid
+            )
+        )
+        postgisConnection.connection.commit()
+        cursor.execute(
+            "DELETE FROM {table} WHERE area_uuid='{area_uuid}'".format(
+                table=TREES_TABLE_NAME, area_uuid=uid
             )
         )
         postgisConnection.connection.commit()
