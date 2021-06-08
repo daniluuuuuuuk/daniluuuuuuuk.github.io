@@ -39,11 +39,14 @@ class PostGisDB:
             curPGSQL.execute(query)
 
             if as_dict:
+                result_list = []
                 keys = [desc[0] for desc in curPGSQL.description]
-                values = curPGSQL.fetchone()
-                if values:  # Данные присутствуют в бд
-                    return dict(zip(keys, values))
-                return {}
+                values = curPGSQL.fetchall()
+                for value in values:
+                    result_list.append(dict(zip(keys, value)))
+                if not len(result_list):
+                    return [{}]
+                return result_list
 
             connection.commit()
             if not no_result:

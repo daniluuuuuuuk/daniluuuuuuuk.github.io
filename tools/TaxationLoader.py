@@ -127,7 +127,7 @@ class Loader(QgsTask):
             )
             self.taxDetails = postgisConnection.getQueryResult(
                 sql_main_tax_description, as_dict=True
-            )
+            )[0]
 
         except ProgrammingError:
             sql_main_tax_description = """select 
@@ -140,7 +140,7 @@ class Loader(QgsTask):
             )
             self.taxDetails = postgisConnection.getQueryResult(
                 sql_main_tax_description, as_dict=True
-            )
+            )[0]
         finally:
             self.taxDetail = {}
 
