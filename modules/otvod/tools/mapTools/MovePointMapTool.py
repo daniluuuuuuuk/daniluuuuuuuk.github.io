@@ -258,23 +258,7 @@ class MovePointTool(QgsMapTool, QObject):
                 lineTypes = [getLineType(i - 1), getLineType(i), getLineType(i + 1)]
             return lineTypes
 
-        # def getCalcOrder(lineTypes):
-        #     calcOrder = []
-        #     for n, tp in enumerate(lineTypes):
-        #         if tp == 'Точка' or tp == 'Привязка':
-        #             calcOrder.append('Азимут')
-        #         elif tp == 'Лесосека':
-        #             if n == 0:
-        #                 calcOrder.append('Угол')
-        #             elif lineTypes[n - 1] == 'Точка' or lineTypes[n - 1] == 'Привязка':
-        #                 calcOrder.append('Азимут')
-        #             else:
-        #                 calcOrder.append('Угол')
-        #     return calcOrder
-
         return getLineTypes()
-        # order = getCalcOrder(lineTypes)
-        # print(order)
 
         
     def roundUp(self, angle):
@@ -291,23 +275,6 @@ class MovePointTool(QgsMapTool, QObject):
         distance = geop.calculateDistance(point35Prev, point35Next)
 
         return (azimuth, distance)
-
-    # def findFirstPointOfArea(self):
-    #     firstPointOfArea = None
-    #     lineTypeColumn = None
-    #     if self.table.coordType == 0:
-    #         lineTypeColumn = 3
-    #     else:
-    #         lineTypeColumn = 5
-    #     for row in range(0, self.table.rowCount() - 1):
-    #         lineWidget = self.table.cellWidget(row, lineTypeColumn)
-    #         if row == 0 and lineWidget.currentText() == 'Лесосека':
-    #             firstPointOfArea = row + 1
-    #         elif (row > 0 and 
-    #             self.table.cellWidget(row - 1, lineTypeColumn).currentText() == 'Привязка' and
-    #             lineWidget.currentText() == 'Лесосека'):
-    #             firstPointOfArea = row + 1
-    #     return firstPointOfArea
 
     def azimuthToAngle(self, azimuthOne, azimuthTwo, angleType):
         if (angleType == 3):

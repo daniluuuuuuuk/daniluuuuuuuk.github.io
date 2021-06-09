@@ -71,12 +71,13 @@ class ThematicController:
     def getStyleName(self, thematic):
         stylesDbMapping = {
             '': 'Vydela',
+            "Породы": "Porody_map",
             "Бонитет": "Bonitet_map",
             "ТУМ": "Tum_map",
             "Запас": "Zapas_map",
             "Полнота": "Polnota_map",
-            "Лесосеки: виды пользования": "",
-            "Лесосеки: виды рубок": "",
+            "Проектируемые хозмероприятия": "Xmer_map",
+            "Лесосеки: виды пользования": "UseType_map",
         }
         return stylesDbMapping.get(thematic)
 
@@ -159,7 +160,6 @@ class TaxTableLoader(QgsTask):
             self.layer.addJoin(joinObject)
 
         for table in self.tables:
-            # table = QgsProject.instance().mapLayersByName(table_name)[0]
             join(table)
 
     def loadTables(self):
@@ -208,18 +208,16 @@ class ChooseThematicMapDialog(QDialog):
 
     def btnClicked(self, btn):
         if self.buttonBox.buttonRole(btn) == 7:
-            self.thematicCombobox.setCurrentIndex(0)
-            self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).click()
-        self.close()
+            self.thematicCombobox.setCurrentIndex(-1)
 
     def createThematicMapWidget(self):
         groupBox = QGroupBox('Критерий окраски')
         vbox = QVBoxLayout()
         combo = QComboBox()
         combo.addItems([
-            '', 'Бонитет','ТУМ',
-            'Запас', 'Полнота', 'Лесосеки: виды пользования',
-            'Лесосеки: виды рубок'
+            '', 'Породы', 'Бонитет','ТУМ',
+            'Запас', 'Полнота', 'Проектируемые хозмероприятия',
+            'Лесосеки: виды пользования',
             ])
         combo.setCurrentIndex(0)
         vbox.addWidget(combo)
