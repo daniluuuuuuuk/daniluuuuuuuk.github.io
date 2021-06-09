@@ -140,7 +140,19 @@ class LayoutManager:
             text-align: center;\
             }'
 
-    def composeHtmlLayout(self, layout, tableRows, topPosition):
+    def cutSecondPointNumber(self, tableRows):
+        coordTable = False
+        for row in tableRows[0]:
+            if '°' in row:
+                coordTable = True
+
+        if coordTable:
+            for row in tableRows[1:]:
+                row[0] = row[0].split('-')[0]
+        return tableRows
+
+    def composeHtmlLayout(self, layout, tableRows, topPosition):                   
+        tableRows = self.cutSecondPointNumber(tableRows)
         rows = len(tableRows)
         layout_html = QgsLayoutItemHtml(layout)
         html_frame = QgsLayoutFrame(layout, layout_html)
