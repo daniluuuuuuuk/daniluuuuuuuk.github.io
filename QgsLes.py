@@ -21,6 +21,7 @@ from .modules.trees_accounting.src.trees_accounting import TaMainWindow
 from .tools.ProjectInitializer import QgsProjectInitializer
 from .tools.TaxationLoader import Worker as taxWorker
 from .tools import config, AreaController, AreaFilter
+from .tools.ThematicController import ThematicController, ChooseThematicMapDialog
 
 from .gui.taxationDescription import (
     TaxationDescription as TaxationDescriptionDialog,
@@ -184,6 +185,13 @@ class QgsLes:
         )
         self.controlAreaAction.triggered.connect(self.controlAreaClicked)
 
+        self.thematicAction = QAction(
+            QIcon(util.resolvePath("res\\icon-7.png")),
+            "Тематические карты",
+            self.iface.mainWindow(),
+        )
+        self.thematicAction.triggered.connect(self.thematicClicked)        
+
         self.taxationAction = QAction(
             QIcon(util.resolvePath("res\\info.png")),
             "Информация о выделе",
@@ -237,6 +245,7 @@ class QgsLes:
         self.qgsLesToolbar.addAction(self.otvodAction)
         self.qgsLesToolbar.addAction(self.countAction)
         self.qgsLesToolbar.addAction(self.controlAreaAction)
+        self.qgsLesToolbar.addAction(self.thematicAction)
         # self.qgsLesToolbar.addAction(self.filterAreaAction)
         self.qgsLesToolbar.addAction(self.settingsAction)
         self.qgsLesToolbar.addAction(self.initProjectAction)
@@ -260,6 +269,19 @@ class QgsLes:
             )
             self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockWidget)
 
+    def thematicClicked(self):
+        
+        def rerenderStyle():
+            thMap = self.dialog.thematicCombobox.currentText()
+            thMapCtrlr = ThematicController(self.dialog, thMap)
+
+        self.dialog = ChooseThematicMapDialog()
+        self.dialog.thematicCombobox.currentIndexChanged.connect(rerenderStyle)
+        self.dialog.exec()
+        # if self.dialog.exec() == QDialog.Applied:
+        #     thMap = self.dialog.thematicCombobox.currentText()
+        #     thMapCtrlr = ThematicController(thMap)
+
     def controlAreaClicked(self):
         def getResult(feature):
             if feature:
@@ -270,10 +292,14 @@ class QgsLes:
                 QtWidgets.QMessageBox.warning(
                     None, "Ошибка", "Не выбрана лесосека."
                 )
-
+        self.showInfoMessage("А теперь нажмите на лесосеку")
         self.pkr = peeker.PeekStratumFromMap(self.canvas, "Лесосеки")
         self.canvas.setMapTool(self.pkr)
         self.pkr.signal.connect(getResult)
+
+    def showInfoMessage(self, text):
+        self.iface.messageBar().pushMessage("", text, level=Qgis.Info, duration=3)
+
 
     def initProjectClicked(self):
         self.initializer = QgsProjectInitializer(
@@ -297,7 +323,7 @@ class QgsLes:
 
             zoomTool = QgsMapToolZoom(self.canvas, False)
             self.canvas.setMapTool(zoomTool)
-
+        self.showInfoMessage("Укажите выдел")
         self.pkr = peeker.PeekStratumFromMap(self.canvas, "Выдела")
         self.canvas.setMapTool(self.pkr)
         self.pkr.signal.connect(getResult)
@@ -326,7 +352,7 @@ class QgsLes:
             currentMapTool = self.canvas.mapTool()
         except:
             pass
-
+        self.showInfoMessage("Выделите область на карте")
         self.rmt = RectangleMapTool(self.canvas)
         self.rmt.signal.connect(getMapRect)
         self.canvas.setMapTool(self.rmt)
@@ -344,7 +370,7 @@ class QgsLes:
 
             zoomTool = QgsMapToolZoom(self.canvas, False)
             self.canvas.setMapTool(zoomTool)
-
+        self.showInfoMessage("А теперь нажмите на лесосеку")
         self.pkr = peeker.PeekStratumFromMap(self.canvas, "Лесосеки")
         self.canvas.setMapTool(self.pkr)
         self.pkr.signal.connect(getResult)

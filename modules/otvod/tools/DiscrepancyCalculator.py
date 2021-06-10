@@ -104,16 +104,3 @@ class DiscrepancyCalculator:
                 elif angle > 360:
                     angle -= 360
                 self.pointsDict.get(number).append(angle)
-
-
-if __name__ == "__main__":
-    pointsList = [
-        QgsPointXY(634949.7395154417026788, 6041304.52622585743665695),
-        QgsPointXY(635029.07146056334022433, 6041420.9825291782617569),
-        QgsPointXY(635383.69381886976771057, 6041257.0739208348095417),
-        QgsPointXY(635032.28667706274427474, 6041226.66965983249247074),
-        QgsPointXY(634890.79190736170858145, 6041166.9532755883410573),
-        QgsPointXY(634949.47610439569689333, 6041304.16026490926742554),
-    ]
-
-    discCalc = DiscrepancyCalculator(pointsList)
