@@ -15,6 +15,7 @@ class MovePointTool(QgsMapTool, QObject):
         QgsMapTool.__init__(self, mapCanvas)
         self.setCursor(Qt.CrossCursor)
         self.table = table
+        self.inclination = Decimal(self.table.magneticInclination).quantize(Decimal('.1'))
         self.dragging = False
         self.featureId = None
 
@@ -117,12 +118,6 @@ class MovePointTool(QgsMapTool, QObject):
                     azimuth, distance = self.calcAzimuthAndDistance(nextFeatureId=i, bindingPoint=self.getBindingPoint())
                     rumb = geop.azimuthToRumb(azimuth)
 
-                    # point35Prev = self.getBindingPoint()
-                    # point35Next = self.getFeatureById(i).geometry().asPoint()
-
-                    # azimuth = geop.calculateAzimuth(point35Prev, point35Next)
-                    # distance = geop.calculateDistance(point35Prev, point35Next)
-
                     if self.table.coordType == 0:
                         self.setRumbCombobox(i - 1, 3, rumb[0][1])
                         self.setTableItem(i - 1, [rumb[0][0], distance])
@@ -136,11 +131,6 @@ class MovePointTool(QgsMapTool, QObject):
 
             azimuth, distance = self.calcAzimuthAndDistance(i, i + 1)
 
-            # point35Prev = self.getFeatureById(i).geometry().asPoint()
-            # point35Next = self.getFeatureById(i + 1).geometry().asPoint()
-
-            # azimuth = geop.calculateAzimuth(point35Prev, point35Next)
-            # distance = geop.calculateDistance(point35Prev, point35Next)
             rumb = geop.azimuthToRumb(azimuth)
 
             if self.table.coordType == 0:
@@ -271,10 +261,19 @@ class MovePointTool(QgsMapTool, QObject):
             point35Prev = self.getFeatureById(prevFeatureId).geometry().asPoint()
         point35Next = self.getFeatureById(nextFeatureId).geometry().asPoint()
 
-        azimuth = geop.calculateAzimuth(point35Prev, point35Next)
+        azimuth = geop.calculateAzimuth(point35Prev, point35Next) - self.inclination
+        azValidated = self.validatedAzimuth(azimuth)
         distance = geop.calculateDistance(point35Prev, point35Next)
 
-        return (azimuth, distance)
+        return (azValidated, distance)
+
+    def validatedAzimuth(self, azimuth):
+        if azimuth > 360:
+            return azimuth - 360
+        elif azimuth < 0:
+            return 360 - abs(azimuth)
+        else:
+            return azimuth
 
     def azimuthToAngle(self, azimuthOne, azimuthTwo, angleType):
         if (angleType == 3):

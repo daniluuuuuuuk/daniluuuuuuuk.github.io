@@ -285,8 +285,8 @@ class QgsLes:
     def controlAreaClicked(self):
         def getResult(feature):
             if feature:
-                zoomTool = QgsMapToolZoom(self.canvas, False)
-                self.canvas.setMapTool(zoomTool)
+                # zoomTool = QgsMapToolZoom(self.canvas, False)
+                # self.canvas.setMapTool(zoomTool)
                 self.ctrlr = AreaController.AreaController(feature)
             else:
                 QtWidgets.QMessageBox.warning(
@@ -321,8 +321,8 @@ class QgsLes:
                 txwrker.finished.connect(showTaxationDetails)
                 txwrker.run()
 
-            zoomTool = QgsMapToolZoom(self.canvas, False)
-            self.canvas.setMapTool(zoomTool)
+            # zoomTool = QgsMapToolZoom(self.canvas, False)
+            # self.canvas.setMapTool(zoomTool)
         self.showInfoMessage("Укажите выдел")
         self.pkr = peeker.PeekStratumFromMap(self.canvas, "Выдела")
         self.canvas.setMapTool(self.pkr)

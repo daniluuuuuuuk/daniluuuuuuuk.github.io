@@ -140,19 +140,19 @@ class LayoutManager:
             text-align: center;\
             }'
 
-    def cutSecondPointNumber(self, tableRows):
-        coordTable = False
-        for row in tableRows[0]:
-            if '°' in row:
-                coordTable = True
+    # def cutSecondPointNumber(self, tableRows):
+    #     coordTable = False
+    #     for row in tableRows[0]:
+    #         if '°' in row:
+    #             coordTable = True
 
-        if coordTable:
-            for row in tableRows[1:]:
-                row[0] = row[0].split('-')[0]
-        return tableRows
+    #     if coordTable:
+    #         for row in tableRows[1:]:
+    #             row[0] = row[0].split('-')[0]
+    #     return tableRows
 
     def composeHtmlLayout(self, layout, tableRows, topPosition):                   
-        tableRows = self.cutSecondPointNumber(tableRows)
+        # tableRows = self.cutSecondPointNumber(tableRows)
         rows = len(tableRows)
         layout_html = QgsLayoutItemHtml(layout)
         html_frame = QgsLayoutFrame(layout, layout_html)
@@ -301,7 +301,8 @@ class LayoutManager:
             tableChunks = self.getRowsChunked(tableRows[15:])
             i = 1
             for chnk in tableChunks:
-                topPosition = i * A4_PAGE_HEIGHT + 125            
+                chnk.insert(0, tableRows[0])
+                topPosition = i * A4_PAGE_HEIGHT + 125
                 tableHtmlLayout = self.composeHtmlLayout(layout, chnk, topPosition)
                 i += 1
 
