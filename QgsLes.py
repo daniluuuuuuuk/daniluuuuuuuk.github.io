@@ -13,6 +13,7 @@ from qgis.core import QgsProject
 from .modules.otvod.OtvodController import OtvodController
 from .modules.otvod.tools.mapTools.RectangleMapTool import RectangleMapTool
 from .modules.otvod.tools.mapTools import PeekStratumFromMap as peeker
+
 # from .tools import CuttingAreaPeeker as peeker
 from qgis.gui import QgsMapToolZoom
 from qgis.core import Qgis, QgsApplication
@@ -25,6 +26,7 @@ from .tools.ThematicController import ThematicController, ChooseThematicMapDialo
 from .gui.taxationDescription import (
     TaxationDescription as TaxationDescriptionDialog,
 )
+from .gui.exportImportCuttingAreasDialog import ExportImportCuttingAreaWindow
 from qgis.PyQt.QtCore import Qt
 
 
@@ -222,6 +224,16 @@ class QgsLes:
             lambda: Settings.SettingsController()
         )
 
+        self.exportImportAction = QAction(
+            QIcon(util.resolvePath("res\\export_import.png")),
+            "Экспорт/Импорт лесосек",
+            self.iface.mainWindow(),
+        )
+
+        self.exportImportAction.triggered.connect(
+            self.exportImportCuttingAreaClicked
+        )
+
         self.initProjectAction = QAction(
             QIcon(util.resolvePath("res\\download.png")),
             "Инициализировать проект",
@@ -237,6 +249,7 @@ class QgsLes:
         # self.qgsLesToolbar.addAction(self.filterAreaAction)
         self.qgsLesToolbar.addAction(self.settingsAction)
         self.qgsLesToolbar.addAction(self.initProjectAction)
+        self.qgsLesToolbar.addAction(self.exportImportAction)
 
         if QgsProject.instance().mapLayersByName("Выдела"):
             self.initFilter()
@@ -361,3 +374,7 @@ class QgsLes:
         self.pkr = peeker.PeekStratumFromMap(self.canvas, "Лесосеки")
         self.canvas.setMapTool(self.pkr)
         self.pkr.signal.connect(getResult)
+
+    def exportImportCuttingAreaClicked(self):
+        export_import_cutting_area_window = ExportImportCuttingAreaWindow()
+        export_import_cutting_area_window.exec()

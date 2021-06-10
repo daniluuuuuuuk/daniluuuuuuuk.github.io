@@ -41,6 +41,10 @@ class OtvodController:
         self.rct = rct
 
         self.omw = MainWindow(self)
+        # self.omw.tableWidget.setGeometry(QtCore.QRect(0, 0, 401, 341))
+
+        # print(self.omw.tableWidget)
+        # print(self.omw.verticalLayout_6)
 
         self.tableType = self.getConfigTableType()
         self.coordType = self.getConfigCoordType()
@@ -59,9 +63,7 @@ class OtvodController:
             lambda: self.loadDataFromFile()
         )
 
-        self.omw.csvExport_action.triggered.connect(
-            lambda: self.exportToCsv()
-        )
+        self.omw.csvExport_action.triggered.connect(lambda: self.exportToCsv())
 
         self.canvasWidget = CanvasWidget(
             self.omw, self.layers, self.rct, self.tableWrapper
@@ -199,10 +201,11 @@ class OtvodController:
             with open(filename, "w", encoding="utf8") as write_file:
                 data = self.tableWrapper.serializePointsToCsv()
                 for line in data:
-                    write_file.write(line + '\n')
+                    write_file.write(line + "\n")
             self.omw.outputLabel.setText(
-            "<a href=file:///{}>Открыть папку</a>".format(
-                os.path.dirname(filename))
+                "<a href=file:///{}>Открыть папку</a>".format(
+                    os.path.dirname(filename)
+                )
             )
             self.omw.outputLabel.setOpenExternalLinks(True)
 
@@ -390,8 +393,10 @@ class OtvodController:
             self.omw.x_coord_LineEdit.setText(str(round(gpsCoords[1], 10)))
 
     def loadDataTable(self):
+        # print(self.omw.tableWidget.setLayout(self.omw.horizontalLayout))
+        # self.omw.verticalLayout_6.addWidget(self.omw.tableWidget)
         datatable = DataTableWrapper(
-            self.omw.tableWidget,
+            self.omw.verticalLayout_6,
             int(self.tableType),
             int(self.coordType),
             0,
@@ -482,8 +487,9 @@ class OtvodController:
                     indent=4,
                 )
             self.omw.outputLabel.setText(
-            "<a href=file:///{}>Открыть папку</a>".format(
-                os.path.dirname(filename))
+                "<a href=file:///{}>Открыть папку</a>".format(
+                    os.path.dirname(filename)
+                )
             )
             self.omw.outputLabel.setOpenExternalLinks(True)
 
@@ -568,12 +574,13 @@ class OtvodController:
             self.tableWrapper.tableModel.refreshData()
 
     def saveCuttingArea(self):
-        
         def getEditedUid():
-            layer = QgsProject.instance().mapLayersByName('Лесосека временный слой')
+            layer = QgsProject.instance().mapLayersByName(
+                "Лесосека временный слой"
+            )
             if layer:
                 feature = list(layer[0].getFeatures())[0]
-                return feature['uid']
+                return feature["uid"]
             return None
 
         def saveDataToDatabase():
@@ -589,7 +596,9 @@ class OtvodController:
 
             if destLYR.isEditable():
                 iface.setActiveLayer(destLYR)
-                iface.mainWindow().findChild(QAction, 'mActionToggleEditing').trigger()
+                iface.mainWindow().findChild(
+                    QAction, "mActionToggleEditing"
+                ).trigger()
 
             with edit(destLYR):
                 for f in features:
@@ -611,7 +620,9 @@ class OtvodController:
 
         self.canvas.refreshAllLayers()
 
-        layer = QgsProject.instance().mapLayersByName("Лесосека временный слой")
+        layer = QgsProject.instance().mapLayersByName(
+            "Лесосека временный слой"
+        )
         if not layer:
             QMessageBox.information(
                 None,
@@ -619,7 +630,9 @@ class OtvodController:
                 "Отсутствует лесосека. Постройте лесосеку, после чего будет возможность ее сохранить",
             )
 
-        layer = QgsProject.instance().mapLayersByName("Привязка временный слой")
+        layer = QgsProject.instance().mapLayersByName(
+            "Привязка временный слой"
+        )
         if layer:
             copyFromTempLayer("Привязка временный слой", "Линия привязки")
             copyFromTempLayer("Лесосека временный слой", "Лесосеки")
@@ -630,7 +643,6 @@ class OtvodController:
 
         self.canvasWidget.btnControl.unlockReportBotton()
         self.omw.outputLabel.setText("Лесосека сохранена")
-
 
     def deleteCuttingArea(self):
         layerNamesToDelete = [

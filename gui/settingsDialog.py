@@ -14,16 +14,18 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_settingsDialog(object):
     def setupUi(self, settingsDialog):
         settingsDialog.setObjectName("settingsDialog")
-        settingsDialog.resize(380, 256)
+        settingsDialog.resize(380, 291)
         self.buttonBox = QtWidgets.QDialogButtonBox(settingsDialog)
-        self.buttonBox.setGeometry(QtCore.QRect(60, 220, 301, 32))
+        self.buttonBox.setGeometry(QtCore.QRect(60, 250, 301, 32))
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
+        self.buttonBox.setStandardButtons(
+            QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok
+        )
         self.buttonBox.setCenterButtons(False)
         self.buttonBox.setObjectName("buttonBox")
         self.settingsWidget = QtWidgets.QTabWidget(settingsDialog)
         self.settingsWidget.setEnabled(True)
-        self.settingsWidget.setGeometry(QtCore.QRect(10, 10, 351, 201))
+        self.settingsWidget.setGeometry(QtCore.QRect(10, 10, 351, 231))
         self.settingsWidget.setAutoFillBackground(False)
         self.settingsWidget.setObjectName("settingsWidget")
         self.otvodSettings = QtWidgets.QWidget()
@@ -37,8 +39,12 @@ class Ui_settingsDialog(object):
         self.toolButton = QtWidgets.QToolButton(self.otvodSettings)
         self.toolButton.setGeometry(QtCore.QRect(314, 20, 21, 20))
         self.toolButton.setObjectName("toolButton")
-        self.saveOtvodSettingsButton = QtWidgets.QPushButton(self.otvodSettings)
-        self.saveOtvodSettingsButton.setGeometry(QtCore.QRect(260, 140, 75, 23))
+        self.saveOtvodSettingsButton = QtWidgets.QPushButton(
+            self.otvodSettings
+        )
+        self.saveOtvodSettingsButton.setGeometry(
+            QtCore.QRect(240, 170, 91, 23)
+        )
         self.saveOtvodSettingsButton.setObjectName("saveOtvodSettingsButton")
         self.label = QtWidgets.QLabel(self.otvodSettings)
         self.label.setGeometry(QtCore.QRect(10, 50, 101, 41))
@@ -66,9 +72,15 @@ class Ui_settingsDialog(object):
         self.lesnich_label = QtWidgets.QLabel(self.mdolSettings)
         self.lesnich_label.setGeometry(QtCore.QRect(10, 100, 91, 16))
         self.lesnich_label.setObjectName("lesnich_label")
-        self.saveEnterpriseSettingsButton = QtWidgets.QPushButton(self.mdolSettings)
-        self.saveEnterpriseSettingsButton.setGeometry(QtCore.QRect(260, 140, 75, 23))
-        self.saveEnterpriseSettingsButton.setObjectName("saveEnterpriseSettingsButton")
+        self.saveEnterpriseSettingsButton = QtWidgets.QPushButton(
+            self.mdolSettings
+        )
+        self.saveEnterpriseSettingsButton.setGeometry(
+            QtCore.QRect(240, 170, 91, 23)
+        )
+        self.saveEnterpriseSettingsButton.setObjectName(
+            "saveEnterpriseSettingsButton"
+        )
         self.leshoz_comboBox = QtWidgets.QComboBox(self.mdolSettings)
         self.leshoz_comboBox.setGeometry(QtCore.QRect(120, 70, 211, 22))
         self.leshoz_comboBox.setObjectName("leshoz_comboBox")
@@ -113,12 +125,18 @@ class Ui_settingsDialog(object):
         self.passwordLineEdit.setEchoMode(QtWidgets.QLineEdit.Password)
         self.passwordLineEdit.setObjectName("passwordLineEdit")
         self.saveConfigButton = QtWidgets.QPushButton(self.bdSettings)
-        self.saveConfigButton.setGeometry(QtCore.QRect(260, 140, 75, 23))
+        self.saveConfigButton.setGeometry(QtCore.QRect(240, 170, 91, 23))
         self.saveConfigButton.setCheckable(False)
         self.saveConfigButton.setObjectName("saveConfigButton")
-        self.testDBConnection_pushButton = QtWidgets.QPushButton(self.bdSettings)
-        self.testDBConnection_pushButton.setGeometry(QtCore.QRect(14, 140, 101, 23))
-        self.testDBConnection_pushButton.setObjectName("testDBConnection_pushButton")
+        self.testDBConnection_pushButton = QtWidgets.QPushButton(
+            self.bdSettings
+        )
+        self.testDBConnection_pushButton.setGeometry(
+            QtCore.QRect(130, 170, 101, 23)
+        )
+        self.testDBConnection_pushButton.setObjectName(
+            "testDBConnection_pushButton"
+        )
         self.BDNameLabel = QtWidgets.QLabel(self.bdSettings)
         self.BDNameLabel.setGeometry(QtCore.QRect(170, 50, 47, 13))
         self.BDNameLabel.setObjectName("BDNameLabel")
@@ -126,8 +144,11 @@ class Ui_settingsDialog(object):
         self.BDNameLineEdit.setGeometry(QtCore.QRect(210, 50, 121, 20))
         self.BDNameLineEdit.setObjectName("BDNameLineEdit")
         self.importDB_pushButton = QtWidgets.QPushButton(self.bdSettings)
-        self.importDB_pushButton.setGeometry(QtCore.QRect(120, 140, 131, 23))
+        self.importDB_pushButton.setGeometry(QtCore.QRect(100, 140, 131, 23))
         self.importDB_pushButton.setObjectName("importDB_pushButton")
+        self.run_sql_pushButton = QtWidgets.QPushButton(self.bdSettings)
+        self.run_sql_pushButton.setGeometry(QtCore.QRect(240, 140, 91, 23))
+        self.run_sql_pushButton.setObjectName("run_sql_pushButton")
         self.settingsWidget.addTab(self.bdSettings, "")
 
         self.retranslateUi(settingsDialog)
@@ -138,25 +159,57 @@ class Ui_settingsDialog(object):
 
     def retranslateUi(self, settingsDialog):
         _translate = QtCore.QCoreApplication.translate
-        settingsDialog.setWindowTitle(_translate("settingsDialog", "Настройки QgsLes"))
+        settingsDialog.setWindowTitle(
+            _translate("settingsDialog", "Настройки QgsLes")
+        )
         self.reportLabel.setText(_translate("settingsDialog", "Путь к отчету"))
         self.toolButton.setText(_translate("settingsDialog", "..."))
-        self.saveOtvodSettingsButton.setText(_translate("settingsDialog", "Сохранить"))
+        self.saveOtvodSettingsButton.setText(
+            _translate("settingsDialog", "Сохранить")
+        )
         self.label.setText(_translate("settingsDialog", "Формат данных"))
         self.label_2.setText(_translate("settingsDialog", "Формат координат"))
-        self.settingsWidget.setTabText(self.settingsWidget.indexOf(self.otvodSettings), _translate("settingsDialog", "Отвод лесосек"))
-        self.gplho_label.setText(_translate("settingsDialog", "ГПЛХО/ Ведомство"))
+        self.settingsWidget.setTabText(
+            self.settingsWidget.indexOf(self.otvodSettings),
+            _translate("settingsDialog", "Отвод лесосек"),
+        )
+        self.gplho_label.setText(
+            _translate("settingsDialog", "ГПЛХО/ Ведомство")
+        )
         self.leshoz_label.setText(_translate("settingsDialog", "Учреждение"))
         self.lesnich_label.setText(_translate("settingsDialog", "Лесничество"))
-        self.saveEnterpriseSettingsButton.setText(_translate("settingsDialog", "Сохранить"))
-        self.location_label.setText(_translate("settingsDialog", "Местоположение"))
-        self.settingsWidget.setTabText(self.settingsWidget.indexOf(self.mdolSettings), _translate("settingsDialog", "Хозяйство"))
-        self.hostLabel.setText(_translate("settingsDialog", "Адрес соединения"))
+        self.saveEnterpriseSettingsButton.setText(
+            _translate("settingsDialog", "Сохранить")
+        )
+        self.location_label.setText(
+            _translate("settingsDialog", "Местоположение")
+        )
+        self.settingsWidget.setTabText(
+            self.settingsWidget.indexOf(self.mdolSettings),
+            _translate("settingsDialog", "Хозяйство"),
+        )
+        self.hostLabel.setText(
+            _translate("settingsDialog", "Адрес соединения")
+        )
         self.portLabel.setText(_translate("settingsDialog", "Порт"))
-        self.usernameLabel.setText(_translate("settingsDialog", "Имя пользователя"))
+        self.usernameLabel.setText(
+            _translate("settingsDialog", "Имя пользователя")
+        )
         self.passwordLabel.setText(_translate("settingsDialog", "Пароль"))
-        self.saveConfigButton.setText(_translate("settingsDialog", "Сохранить"))
-        self.testDBConnection_pushButton.setText(_translate("settingsDialog", "Тест соединения"))
+        self.saveConfigButton.setText(
+            _translate("settingsDialog", "Сохранить")
+        )
+        self.testDBConnection_pushButton.setText(
+            _translate("settingsDialog", "Тест соединения")
+        )
         self.BDNameLabel.setText(_translate("settingsDialog", "Имя БД"))
-        self.importDB_pushButton.setText(_translate("settingsDialog", "Импортировать БД"))
-        self.settingsWidget.setTabText(self.settingsWidget.indexOf(self.bdSettings), _translate("settingsDialog", "База данных"))
+        self.importDB_pushButton.setText(
+            _translate("settingsDialog", "Импортировать БД")
+        )
+        self.run_sql_pushButton.setText(
+            _translate("settingsDialog", "Выполнить SQL")
+        )
+        self.settingsWidget.setTabText(
+            self.settingsWidget.indexOf(self.bdSettings),
+            _translate("settingsDialog", "База данных"),
+        )
