@@ -153,8 +153,8 @@ class OtvodController:
         self.omw.show()
         self.switch = self.initSwitchButton()
 
-        # self.omw.handTool_button.clicked.connect(self.initHandTool)
-        self.omw.handTool_button.clicked.connect(self.enableMovePointTool)
+        self.omw.handTool_button.clicked.connect(self.initHandTool)
+        self.omw.movePoint_button.clicked.connect(self.enableMovePointTool)
 
         self.panTool = QgsMapToolPan(self.canvas)
 
