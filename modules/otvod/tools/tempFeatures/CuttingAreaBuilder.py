@@ -11,7 +11,7 @@ class CuttingAreaBuilder():
 
     def setLayerSymbol(self):
         symbol = QgsFillSymbol.createSimple(
-            {'color': '0,0,0,0', 'color_border': '0,0,0,255', 'style': 'dense5'})
+            {'color': '0,0,0,0', 'color_border': '0,0,0,255', 'style': 'dense5', 'width_border':'0.6'})
         return symbol
 
     def makeFeature(self):
