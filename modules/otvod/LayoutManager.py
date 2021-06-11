@@ -78,8 +78,8 @@ class LayoutManager:
         return layout
 
     def getBaseLayers(self):
-        layerNamesToShow = ["Выдела", "Кварталы", "Лесосека временный слой",
-        "Привязка временный слой", "Пикеты", "Точка привязки", "Привязка", "Лесосека"]
+        layerNamesToShow = ["Кварталы", "Лесосека временный слой",
+        "Привязка временный слой", "Пикеты", "Точка привязки", "Привязка", "Лесосека", "Выдела"]
         layers = []
         for name in layerNamesToShow:
             layer = QgsProject.instance().mapLayersByName(name)
