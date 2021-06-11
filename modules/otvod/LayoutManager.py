@@ -211,7 +211,7 @@ class LayoutManager:
         
         def setScaleLabel():           
             mainlabel = QgsLayoutItemLabel(layout)
-            mainlabel.setText('Масштаб: {}'.format(round(self.scale)))
+            mainlabel.setText('Масштаб: 1:{}'.format(round(self.scale)))
             mainlabel.setFont(QFont('Times New Roman', 11))
             layout.addLayoutItem(mainlabel)
             mainlabel.adjustSizeToText()
