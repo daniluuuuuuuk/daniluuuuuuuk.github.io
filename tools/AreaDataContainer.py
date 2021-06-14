@@ -69,6 +69,8 @@ class AreaDataPrintContainer:
                 ftCvt = FormatConverter(tableList, 0, 1)
                 self.tableList = crd = ftCvt.convertToDMS()
                 self.columnNames = ["№", "X, °", "X, ′", "X, ″", "Y, °", "Y, ′", "Y, ″", "Тип"]
+        elif self.areaData['type'] == 'Углы, координаты, румбы':
+            self.tableList = self.convert2All(tableList, cvt, needFormatConvert)
         elif self.areaData['type'] == 'Азимуты':
             self.tableList = self.convert2az(tableList, cvt, needFormatConvert)
         elif self.areaData['type'] == 'Румбы':
@@ -77,6 +79,41 @@ class AreaDataPrintContainer:
             self.tableList = self.convert2lft(tableList, cvt, needFormatConvert)
         elif self.areaData['type'] == 'Правые углы':
             self.tableList = self.convert2rgt(tableList, cvt, needFormatConvert)
+
+    def convert2All(self, tableList, cvt, needFormatConvert):
+        crd = tableList
+        rgt = cvt.convertCoord2Angle(self.bindingPoint, self.points, 4, 0)
+        rmbs = cvt.convertDDCoord2Rumb(self.bindingPoint, self.points)
+        if needFormatConvert:
+            ftCvt = FormatConverter(crd, 0, 1)
+            crd = ftCvt.convertToDMS()
+            ftCvt = FormatConverter(rgt, 4, 1)
+            rgt = ftCvt.convertToDMS()
+            ftCvt = FormatConverter(rmbs, 2, 1)
+            rmbs = ftCvt.convertToDMS()
+        self.columnNames = ["№", "Величина угла", "Координата точки", "Румб линий", "Длина, м", "Тип"]
+        allRows = self.getAllInOneAsList(crd, rgt, rmbs, needFormatConvert)
+        return allRows
+
+    def getAllInOneAsList(self, crd, rgt, rmbs, needFormatConvert):
+        tableList = []
+        rowsCount = len(crd)
+        for x in range(0, rowsCount):
+            if needFormatConvert:
+                row = [
+                    crd[x][0], str(int(float(rgt[x][1]))) + '°' + str(int(float(rgt[x][2]))) + '′' + str(int(float(rgt[x][3]))) + '″',
+                    str(int(float(crd[x][1]))) + '°' + str(int(float(crd[x][2]))) + '′' + str(int(float(crd[x][3]))) 
+                    + '″; ' + str(int(float(crd[x][4]))) + '°' + str(int(float(crd[x][5]))) + '′' + str(int(float(crd[x][6]))) + '″',
+                    str(int(float(rmbs[x][1]))) + '°' + str(int(float(rmbs[x][2]))) + '′' + str(int(float(rmbs[x][3]))) + '″' + rmbs[x][5],
+                    rmbs[x][4], rmbs[x][6]
+                ]
+            else:
+                row = [
+                    crd[x][0], rgt[x][1] + '°', crd[x][1] + '; ' + crd[x][2],
+                    rmbs[x][1] + '° ' + rmbs[x][3], rmbs[x][2], rmbs[x][4]
+                    ]
+            tableList.append(row)
+        return tableList
 
     def convert2az(self, tableList, cvt, needFormatConvert):
         azth = cvt.convertDDCoord2Azimuth(self.bindingPoint, self.points)
@@ -123,7 +160,7 @@ class AreaDataPrintContainer:
             uri = "polygon?crs=epsg:32635"
             layer = QgsVectorLayer(uri, layerName, "memory")
             layer.renderer().setSymbol(QgsFillSymbol.createSimple(
-            {'color': '255,0,0,100', 'color_border': '0,0,0,255', 'style': 'dense7'}))
+            {'color': '255,0,0,100', 'color_border': '0,0,0,255', 'style': 'dense5'}))
 
         layer.setCrs(QgsCoordinateReferenceSystem(32635))
         self.projectInstance.addMapLayer(layer)
@@ -218,6 +255,7 @@ class AreaCoordinatesTypeDialog(QDialog):
 
     def createCoordTypeGroup(self):
         groupBox = QGroupBox("Тип данных")
+        typeRadio0 = QRadioButton("Углы, координаты, румбы")
         typeRadio1 = QRadioButton("Координаты")
         typeRadio2 = QRadioButton("Азимуты")
         typeRadio3 = QRadioButton("Румбы")
@@ -227,6 +265,7 @@ class AreaCoordinatesTypeDialog(QDialog):
         typeRadio1.setChecked(True)
 
         vbox2 = QVBoxLayout()
+        vbox2.addWidget(typeRadio0)
         vbox2.addWidget(typeRadio1)
         vbox2.addWidget(typeRadio2)
         vbox2.addWidget(typeRadio3)
@@ -235,6 +274,7 @@ class AreaCoordinatesTypeDialog(QDialog):
         vbox2.addStretch(1)
         groupBox.setLayout(vbox2)
 
+        self.coordTypeGroup.addButton(typeRadio0)
         self.coordTypeGroup.addButton(typeRadio1)
         self.coordTypeGroup.addButton(typeRadio2)
         self.coordTypeGroup.addButton(typeRadio3)
