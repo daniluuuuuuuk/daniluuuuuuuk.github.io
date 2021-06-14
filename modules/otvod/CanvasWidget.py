@@ -18,6 +18,8 @@ from PyQt5.QtGui import QColor
 from qgis.gui import QgsMapCanvas, QgsMapToolZoom, QgsMapToolPan
 from qgis.PyQt.QtCore import QObject
 from .LayerManager import LayerManager
+from qgis.core import QgsGeometry, edit
+from qgis.core import QgsDistanceArea, QgsUnitTypes, QgsCoordinateTransformContext
 
 
 class CanvasWidget(QgsMapCanvas):
@@ -255,8 +257,39 @@ class CanvasWidget(QgsMapCanvas):
         self.omw.coord_radio_button.setChecked(True)
         self.table.makeTableFromCuttingArea(bindingPoint, cuttingArea)
         # self.table.deleteLastTemperatePoint()
+        self.processOverlappingAnotherArea()
         self.showAreaByVydel()
         # self.omw.inclinationSlider.setValue(0)
+
+    def processOverlappingAnotherArea(self):
+
+        def calculateArea(geometry):
+            da = QgsDistanceArea()
+            da.setEllipsoid("WGS84")
+            trctxt = QgsCoordinateTransformContext()
+            da.setSourceCrs(QgsCoordinateReferenceSystem(32635), trctxt)
+            tempArea = da.measureArea(geometry)
+            calculatedArea = round(da.convertAreaMeasurement(
+                tempArea, QgsUnitTypes.AreaHectares), 1)
+            return calculatedArea
+
+        layerAreaTemp = QgsProject.instance().mapLayersByName('Лесосека временный слой')
+        layerArea = QgsProject.instance().mapLayersByName('Лесосеки')[0]
+        for feat in layerArea.getFeatures():
+            area = list(layerAreaTemp[0].getFeatures())[0]
+            if area.geometry().contains(feat.geometry()):
+                reply = QMessageBox.question(
+                    QDialog(),
+                    "Наложение лесосек",
+                    "Данная лесосека полностью перекрывает другую. Вырезать старую лесосеку из новой?",
+                    QMessageBox.Yes,
+                    QMessageBox.No,
+                )
+                if reply == QMessageBox.Yes:
+                    with edit(layerAreaTemp[0]):
+                        diffGeom = area.geometry().difference(feat.geometry())
+                        layerAreaTemp[0].changeGeometry(area.id(), diffGeom)
+                        layerAreaTemp[0].changeAttributeValue(area.id(), area.fieldNameIndex('area'), calculateArea(diffGeom))
 
     def showAreaByVydel(self):
         calc = VydelAreaCalculator()
