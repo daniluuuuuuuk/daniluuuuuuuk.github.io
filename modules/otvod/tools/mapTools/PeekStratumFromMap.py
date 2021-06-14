@@ -29,7 +29,7 @@ class PeekStratumFromMap(QgsMapToolEmitPoint, QObject):
                             y + radius)
         layer.selectByRect(rect, False)
         self.canvas.setCurrentLayer(layer)
-        self.canvas.zoomToSelected()
+        # self.canvas.zoomToSelected()
         features = list(layer.getSelectedFeatures())
         if len(features) > 1:
 
@@ -83,7 +83,7 @@ class MultipleAreaChoiceDialog(QDialog):
         self.setLayout(self.layout)
 
         self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)        
+        self.buttonBox.rejected.connect(self.reject)
 
     def createAreaListGroup(self):
         

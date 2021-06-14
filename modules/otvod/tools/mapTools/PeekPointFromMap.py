@@ -31,16 +31,16 @@ class PeekPointFromMap(QgsMapToolEmitPoint, QObject):
         self.showAimPoint(point)
 
     def showAimPoint(self, point):
-        matchres = self.snapUtils.snapToMap(point)  # QgsPointLocator.Match
-        if matchres.isValid():
-            m = QgsVertexMarker(self.canvas)
-            m.setColor(QColor(255, 0, 255))
-            m.setIconSize(7)
-            # or ICON_CROSS, ICON_X, ICON_BOX
-            m.setIconType(QgsVertexMarker.ICON_BOX)
-            m.setPenWidth(2)
-            m.setCenter(matchres.point())
-            self.aimMarker.append(m)
+        # matchres = self.snapUtils.snapToMap(point)  # QgsPointLocator.Match
+        # if matchres.isValid():
+        m = QgsVertexMarker(self.canvas)
+        m.setColor(QColor(255, 0, 255))
+        m.setIconSize(7)
+        # or ICON_CROSS, ICON_X, ICON_BOX
+        m.setIconType(QgsVertexMarker.ICON_BOX)
+        m.setPenWidth(2)
+        m.setCenter(point)
+        self.aimMarker.append(m)
 
     def reset(self):
         try:
@@ -65,19 +65,19 @@ class PeekPointFromMap(QgsMapToolEmitPoint, QObject):
         self.reset()
 
     def showPoint(self, point):
-        matchres = self.snapUtils.snapToMap(point)  # QgsPointLocator.Match
-        if matchres.isValid():
-            m = QgsVertexMarker(self.canvas)
-            m.setColor(QColor(0, 255, 0))
-            m.setIconSize(7)
-            # or ICON_CROSS, ICON_X, ICON_BOX
-            m.setIconType(QgsVertexMarker.ICON_X)
-            m.setPenWidth(2)
-            m.setCenter(matchres.point())
-            self.vertexPoint.append(m)
-            self.signal.emit(matchres.point())
-        else:
-            print("Не удалось сделать привязку к точке")
+        # matchres = self.snapUtils.snapToMap(point)  # QgsPointLocator.Match
+        # if matchres.isValid():
+        m = QgsVertexMarker(self.canvas)
+        m.setColor(QColor(0, 255, 0))
+        m.setIconSize(7)
+        # or ICON_CROSS, ICON_X, ICON_BOX
+        m.setIconType(QgsVertexMarker.ICON_X)
+        m.setPenWidth(2)
+        m.setCenter(point)
+        self.vertexPoint.append(m)
+        self.signal.emit(point)
+        # else:
+        #     print("Не удалось сделать привязку к точке")
 
     def deactivate(self):
         self.reset()

@@ -15,11 +15,11 @@ class QgsProjectInitializer:
         self.iface = iface
         self.setCrs()
         self.settings = None
-        self.layerDbNames = {'hidroline': 'Гидрография линейная', 'hidropoly': 'Гидрография площадная', 'compartments': 'Кварталы',
-                             'area': 'Лесосеки', 'settlements': 'Населенные пункты', 'area_line': 'Линия привязки', 'roads': 'Дороги', 'subcompartments': 'Выдела',
+        self.layerDbNames = {'subcompartments': 'Выдела', 'hidroline': 'Гидрография линейная', 'hidropoly': 'Гидрография площадная', 'compartments': 'Кварталы',
+                             'area': 'Лесосеки', 'settlements': 'Населенные пункты', 'area_line': 'Линия привязки', 'roads': 'Дороги', 
                              'forestry_borders': 'Границы лесничеств'}
-        self.layerStyleNames = {'hidroline': 'Hidroline', 'hidropoly': 'Hidropoly', 'compartments': 'Kvartaly',
-                             'area': 'Lesoseki', 'settlements': 'Nas punkt', 'area_line': 'Privyazka', 'roads': 'Dorogi', 'subcompartments': 'Vydela',
+        self.layerStyleNames = {'subcompartments': 'Vydela', 'hidroline': 'Hidroline', 'hidropoly': 'Hidropoly', 'compartments': 'Kvartaly',
+                             'area': 'Lesoseki', 'settlements': 'Nas punkt', 'area_line': 'Privyazka', 'roads': 'Dorogi',
                              'forestry_borders': 'Granitsy lesnich'}
         try:
             self.cf = config.Configurer('dbconnection')
