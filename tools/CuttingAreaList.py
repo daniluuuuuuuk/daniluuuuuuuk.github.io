@@ -32,7 +32,7 @@ class CuttingAreaScrollList(QScrollArea):
         Получение текущих лесосек
         """
         area_table = PostGisDB().getQueryResult(
-            """select lesnich_text as "Лесничество", num_kv as "Квартал", num_vds as "Выдел", usetype as "Вид пользования", cuttingtyp as "Вид рубки", uid as "UUID" from area;""",
+            """select lesnich_text as "Лесничество", num_kv as "Квартал", num_vds as "Выдел", num as "Номер лесосеки", usetype as "Вид пользования", cuttingtyp as "Вид рубки", uid as "UUID" from area;""",
             as_dict=True,
         )
         return area_table

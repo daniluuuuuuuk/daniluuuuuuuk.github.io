@@ -9,15 +9,15 @@ class CuttingAreaExport(QThread):
     """
 
     signal_message_result = pyqtSignal(str)
-    CUTTING_AREAS_TABLES = (
-        {"area": "uid"},
-        {"area_data": "area_uid"},
-        {"area_line": "uid"},
-        {"area_points": "area_uid"},
-        {"trees": "area_uuid"},
-        {"trees_not_cutting": "area_uuid"},
-        {"trees_trf_height": "area_uuid"},
-    )
+    CUTTING_AREAS_TABLES = {
+        "area": "uid",
+        "area_data": "area_uid",
+        "area_line": "uid",
+        "area_points": "area_uid",
+        "trees": "area_uuid",
+        "trees_not_cutting": "area_uuid",
+        "trees_trf_height": "area_uuid",
+    }
 
     def __init__(
         self,
@@ -38,9 +38,8 @@ class CuttingAreaExport(QThread):
         output_data = {}
 
         try:
-            for table in self.CUTTING_AREAS_TABLES:
-                table_name = list(table.keys())[0]
-                field_name = list(table.values())[0]
+            for table_name in self.CUTTING_AREAS_TABLES:
+                field_name = self.CUTTING_AREAS_TABLES.get(table_name)
 
                 sql_data = PostgisDB.PostGisDB().getQueryResult(
                     f"select * from {table_name} where {field_name} in ({str(self.uuid_list)[1:-1]})",

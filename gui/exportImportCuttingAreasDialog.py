@@ -4,7 +4,7 @@ from PyQt5 import QtWidgets, uic, QtCore
 
 from ..tools.CuttingAreaList import CuttingAreaScrollList
 from ..tools.CuttingAreaExport import CuttingAreaExport
-from ..tools.CuttingAreaImport import CuttingAreaImport
+from ..tools.CuttingAreaImport import CuttingAreaImport, SearchDuplicates
 from ..tools.LayoutObjectsIterator import LayoutObjectsIterator
 from ..util import resolvePath
 from ..modules.trees_accounting.src.services.waiting_spinner_widget import (
@@ -77,28 +77,68 @@ class ExportImportCuttingAreaWindow(
                 QtCore.Qt.QueuedConnection,
             )
 
-    def import_cutting_areas(self):
-        if self.lineEdit.text():
-            self.cutting_area_import = CuttingAreaImport(
-                path_to_file=self.lineEdit.text(),
+    def check_imported_cutting_areas(meth):
+        def wrapper(self, duplicated_uuid):
+            if self.lineEdit.text():
+                self.check_import = SearchDuplicates(
+                    path_to_file=self.lineEdit.text()
+                )
+                self.check_import.started.connect(lambda: self.spinner.start())
+                self.check_import.finished.connect(lambda: self.spinner.stop())
+                self.check_import.start()
+                self.check_import.signal_data_result.connect(
+                    lambda duplicated_cutting_areas: meth(
+                        self,
+                        duplicated_cutting_areas,
+                        self.check_import.uuid_in_db,
+                    ),
+                    QtCore.Qt.QueuedConnection,
+                )
+            else:
+                QtWidgets.QMessageBox.critical(
+                    None, "", "Выберите файл для импорта."
+                )
+
+        return wrapper
+
+    @check_imported_cutting_areas
+    def import_cutting_areas(
+        self,
+        duplicated_cutting_areas=False,
+        duplicated_cutting_areas_uuid=False,
+    ):
+        action_code = 3
+        if duplicated_cutting_areas:
+            msgBox = QtWidgets.QMessageBox()
+            msgBox.setIcon(QtWidgets.QMessageBox.Icon.Warning)
+            msgBox.setText(
+                "Данные о текущих лесосеках уже присутствуют в базе данных, выберите действие:"
             )
-            self.cutting_area_import.started.connect(
-                lambda: self.spinner.start()
-            )
-            self.cutting_area_import.finished.connect(
-                lambda: self.spinner.stop()
-            )
-            self.cutting_area_import.start()
-            self.cutting_area_import.signal_message_result.connect(
-                lambda mes: QtWidgets.QMessageBox.information(
-                    None, "", str(mes)
-                ),
-                QtCore.Qt.QueuedConnection,
-            )
-        else:
-            QtWidgets.QMessageBox.critical(
-                None, "", "Выберите файл для импорта."
-            )
+            msgBox.setDetailedText(duplicated_cutting_areas)
+            msgBox.addButton("Заменить", QtWidgets.QMessageBox.YesRole)  # 0
+            msgBox.addButton(
+                "Пропустить",
+                QtWidgets.QMessageBox.NoRole,
+            )  # 1
+            msgBox.addButton(
+                "Отменить импорт", QtWidgets.QMessageBox.RejectRole
+            )  # 2
+            action_code = msgBox.exec_()
+            if action_code == 2:
+                return False
+
+        self.cutting_area_import = CuttingAreaImport(
+            path_to_file=self.lineEdit.text(),
+            action_code=action_code,
+            competitors_list=duplicated_cutting_areas_uuid,
+        )
+        self.cutting_area_import.started.connect(lambda: self.spinner.start())
+        self.cutting_area_import.finished.connect(lambda: self.spinner.stop())
+        self.cutting_area_import.start()
+        self.cutting_area_import.signal_message_result.connect(
+            lambda mes: QtWidgets.QMessageBox.information(None, "", str(mes)),
+            QtCore.Qt.QueuedConnection,
+        )
 
     def select_all_cutting_areas(self):
         """
