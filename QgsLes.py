@@ -382,7 +382,12 @@ class QgsLes:
         self.pkr.signal.connect(getResult)
 
     def exportImportCuttingAreaClicked(self):
+        
+        def getSelectedUids():
+            lr = QgsProject.instance().mapLayersByName("Лесосеки")[0]
+            return [feature['uid'] for feature in lr.selectedFeatures()]
+
         export_import_cutting_area_window = ExportImportCuttingAreaWindow(
-            selected_cutting_areas=[]
+            selected_cutting_areas=getSelectedUids()
         )
         export_import_cutting_area_window.exec()
