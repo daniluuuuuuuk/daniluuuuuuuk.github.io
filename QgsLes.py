@@ -263,7 +263,7 @@ class QgsLes:
         if not checked and self.dockWidget:
             self.iface.removeDockWidget(self.dockWidget)
         else:
-            self.dockWidget = AreaFilter.AreaFilterDockWidget()
+            self.dockWidget = AreaFilter.AreaFilterDockWidget(self.filterAreaAction)
             self.filgetAreaCtrlr = AreaFilter.AreaFilterController(
                 self.dockWidget
             )

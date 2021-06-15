@@ -225,11 +225,16 @@ class AreaFilterController:
         return expression
 
 class AreaFilterDockWidget(QDockWidget):
-    def __init__(self):
+    def __init__(self, filterAreaAction):
         QDockWidget.__init__(self)
         self.ui = Ui_Tools()
         self.ui.setupUi(self)
+        self.filterAreaAction = filterAreaAction
         self.ui.tabWidget.setTabIcon(0, QIcon(util.resolvePath("res\\icon-.png")))
+        self.closeEvent = self.disableActionButton
+    
+    def disableActionButton(self, event):
+        self.filterAreaAction.trigger()
 
 class Worker(QtCore.QObject):
 
