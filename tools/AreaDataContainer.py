@@ -160,7 +160,7 @@ class AreaDataPrintContainer:
             uri = "polygon?crs=epsg:32635"
             layer = QgsVectorLayer(uri, layerName, "memory")
             layer.renderer().setSymbol(QgsFillSymbol.createSimple(
-            {'color': '255,0,0,100', 'color_border': '0,0,0,255', 'style': 'dense5'}))
+            {'color': '255,0,0,100', 'color_border': '0,0,0,255', 'style': 'dense5', 'width_border':'0.6'}))
 
         layer.setCrs(QgsCoordinateReferenceSystem(32635))
         self.projectInstance.addMapLayer(layer)

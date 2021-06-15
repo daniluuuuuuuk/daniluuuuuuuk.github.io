@@ -22,6 +22,7 @@ class BuildFromMapTool(QgsMapToolEmitPoint, QWidget):
         self.snapUtils.setConfig(self.snapConfig)
 
         self.inclination = inclination
+        self.snappingEnabled = True
 
         self.aimMarker = []
         self.vertexMarkers = []
@@ -35,6 +36,8 @@ class BuildFromMapTool(QgsMapToolEmitPoint, QWidget):
 
     def keyPressEvent(self, event):
         modifiers = QApplication.keyboardModifiers()
+        if event.modifiers() == Qt.ControlModifier:
+            self.snappingEnabled = False
         if self.pointList:
             if modifiers == Qt.ControlModifier and event.key() == 90:
                 self.canvas.scene().removeItem(self.vertexMarkers[-1])
@@ -46,6 +49,10 @@ class BuildFromMapTool(QgsMapToolEmitPoint, QWidget):
                     self.canvas.scene().removeItem(self.measureLineRubber)
                     self.measureLineRubber = QgsRubberBand(self.canvas, False)
                     self.measureLineRubber.setColor(QColor(255, 0, 0))
+    
+    def keyReleaseEvent(self, event):
+        if event.key() == 16777249:
+            self.snappingEnabled = True
 
     def canvasMoveEvent(self, event):
         if self.aimMarker:
@@ -90,18 +97,27 @@ class BuildFromMapTool(QgsMapToolEmitPoint, QWidget):
         return self.pointList[-1][0]
 
     def showAimPoint(self, point):
-        matchres = self.snapUtils.snapToMap(point)  # QgsPointLocator.Match
-        if matchres.isValid():
-            m = QgsVertexMarker(self.canvas)
-            m.setColor(QColor(255, 0, 255))
-            m.setIconSize(7)
-            m.setIconType(QgsVertexMarker.ICON_BOX)
-            m.setPenWidth(2)
-            m.setCenter(matchres.point())
-            self.aimMarker.append(m)
-            self.drawMeasureLine(matchres.point())
+        m = self.getAimMarker()
+        if self.snappingEnabled:
+            matchres = self.snapUtils.snapToMap(point)  # QgsPointLocator.Match
+            if matchres.isValid():
+                m.setCenter(matchres.point())
+                self.aimMarker.append(m)
+                self.drawMeasureLine(matchres.point())
+            else:
+                self.drawMeasureLine(point)
         else:
+            m.setCenter(point)
+            self.aimMarker.append(m)
             self.drawMeasureLine(point)
+
+    def getAimMarker(self):
+        m = QgsVertexMarker(self.canvas)
+        m.setColor(QColor(255, 0, 255))
+        m.setIconSize(7)
+        m.setIconType(QgsVertexMarker.ICON_BOX)
+        m.setPenWidth(2)
+        return m
 
     def getVertexMarker(self):
         m = QgsVertexMarker(self.canvas)
@@ -114,21 +130,38 @@ class BuildFromMapTool(QgsMapToolEmitPoint, QWidget):
     def canvasPressEvent(self, e):
         lineType = None
         point = self.toMapCoordinates(e.pos())
-        matchres = self.snapUtils.snapToMap(point)  # QgsPointLocator.Match
-        if matchres.isValid():
+        if self.snappingEnabled:
+            matchres = self.snapUtils.snapToMap(point)  # QgsPointLocator.Match
+            if matchres.isValid():
+                m = self.getVertexMarker()
+                m.setCenter(matchres.point())
+                self.vertexMarkers.append(m)
+                pointIndex = self.ifPointExists(matchres.point())
+                if (pointIndex is not None):
+                    self.pointList.append([matchres.point(), lineType])
+                    self.rubberBand.setToGeometry(
+                        QgsGeometry.fromPolylineXY(self.getPointsFromList()), None)
+                    self.setLineType(pointIndex)
+                    self.signal.emit(self.pointList)
+                    self.deactivate()
+                else:
+                    self.pointList.append([matchres.point(), lineType])
+                    self.rubberBand.setToGeometry(
+                        QgsGeometry.fromPolylineXY(self.getPointsFromList()), None)
+        else:
             m = self.getVertexMarker()
-            m.setCenter(matchres.point())
+            m.setCenter(point)
             self.vertexMarkers.append(m)
-            pointIndex = self.ifPointExists(matchres.point())
+            pointIndex = self.ifPointExists(point)
             if (pointIndex is not None):
-                self.pointList.append([matchres.point(), lineType])
+                self.pointList.append([point, lineType])
                 self.rubberBand.setToGeometry(
                     QgsGeometry.fromPolylineXY(self.getPointsFromList()), None)
                 self.setLineType(pointIndex)
                 self.signal.emit(self.pointList)
                 self.deactivate()
             else:
-                self.pointList.append([matchres.point(), lineType])
+                self.pointList.append([point, lineType])
                 self.rubberBand.setToGeometry(
                     QgsGeometry.fromPolylineXY(self.getPointsFromList()), None)
 

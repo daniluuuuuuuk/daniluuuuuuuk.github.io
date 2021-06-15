@@ -7,6 +7,9 @@ from .. import PostgisDB, util
 from qgis.core import Qgis, QgsTask, QgsMessageLog
 from qgis.utils import iface
 from functools import partial
+from ..modules.trees_accounting.src.services.waiting_spinner_widget import (
+    QtWaitingSpinner,
+)
 
 
 MESSAGE_CATEGORY = 'Поиск атрибутов'
@@ -15,6 +18,10 @@ class AreaFilterController:
 
     def __init__(self, widget):
         self.widget = widget
+        self.spinner = QtWaitingSpinner(
+            self.widget, True, True, QtCore.Qt.ApplicationModal
+        )        
+        self.spinner.start()        
         self._ids = []
         self._currentId = 0
         self.widget.ui.filter_pushButton.clicked.connect(self.filterAreas)
@@ -23,8 +30,10 @@ class AreaFilterController:
         # self.layer.removeSelection()
         self.setupButtonSignals()
         self.setupControlButtons(False)
+
         self.initValues()
         self.deselectAllLayers()
+        
 
     @property
     def ids(self):
@@ -117,6 +126,7 @@ class AreaFilterController:
             self.thread.deleteLater()
             self.appendWidget(result)
 
+
         self.thread = QtCore.QThread(iface.mainWindow())
         self.worker = Worker(self.layer)
         self.worker.moveToThread(self.thread)
@@ -133,6 +143,7 @@ class AreaFilterController:
         self.widget.ui.cuttingType_comboBox.addItems(str(i) for i in data['cuttingtyp'])
         self.widget.ui.fio_comboBox.addItems(str(i) for i in data['fio'])
         self.negateComboboxes()
+        self.spinner.stop()
 
     def negateComboboxes(self):
         self.widget.ui.lesnich_comboBox.setCurrentIndex(-1)
@@ -210,7 +221,7 @@ class AreaFilterController:
         if self.widget.ui.info.text():
             query = " \"info\" like '%{}%' ".format(self.widget.ui.info.text())
             expression += ' and ' + query if expression else expression + query
-        print(expression)
+        # print(expression)
         return expression
 
 class AreaFilterDockWidget(QDockWidget):
