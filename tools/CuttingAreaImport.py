@@ -85,7 +85,8 @@ class CuttingAreaImport(QThread):
                     sql_commands += f"insert into {table} ({','.join(list(record.keys()))}) values {str(tuple(record.values())) if len(record.values())>1 else str(record.values()).replace('{', '(').replace('}', ')')};\n"
         try:
             if sql_commands == "":
-                return True
+                self.signal_message_result.emit("Нечего импортировать.")
+                return False
             PostgisDB.PostGisDB().getQueryResult(sql_commands, no_result=True)
         except Exception as mes:
             self.signal_message_result.emit(
@@ -97,7 +98,7 @@ class CuttingAreaImport(QThread):
 
     def run(self):
         if self.write_data_to_db(self.read_to_file()):
-            self.signal_message_result.emit("Лесосеки успешно импортировны.")
+            self.signal_message_result.emit("Лесосеки успешно импортированы.")
 
 
 class SearchDuplicates(QThread):
