@@ -19,10 +19,12 @@ UI_EXPORT_IMPORT_CUTTING_AREAS = uic.loadUiType(
 class ExportImportCuttingAreaWindow(
     QtWidgets.QDialog, UI_EXPORT_IMPORT_CUTTING_AREAS
 ):
-    def __init__(self, parent=None):
+    def __init__(self, selected_cutting_areas, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
         self.setupUi(self)
-        self.cutting_area_scroll_list = CuttingAreaScrollList()
+        self.cutting_area_scroll_list = CuttingAreaScrollList(
+            selected_cutting_areas
+        )
         self.cutting_areas_container = (
             self.cutting_area_scroll_list.cutting_areas_container
         )

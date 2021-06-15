@@ -21,7 +21,10 @@ from .modules.trees_accounting.src.trees_accounting import TaMainWindow
 from .tools.ProjectInitializer import QgsProjectInitializer
 from .tools.TaxationLoader import Worker as taxWorker
 from .tools import config, AreaController, AreaFilter
-from .tools.ThematicController import ThematicController, ChooseThematicMapDialog
+from .tools.ThematicController import (
+    ThematicController,
+    ChooseThematicMapDialog,
+)
 
 from .gui.taxationDescription import (
     TaxationDescription as TaxationDescriptionDialog,
@@ -190,7 +193,7 @@ class QgsLes:
             "Тематические карты",
             self.iface.mainWindow(),
         )
-        self.thematicAction.triggered.connect(self.thematicClicked)        
+        self.thematicAction.triggered.connect(self.thematicClicked)
 
         self.taxationAction = QAction(
             QIcon(util.resolvePath("res\\info.png")),
@@ -270,7 +273,6 @@ class QgsLes:
             self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockWidget)
 
     def thematicClicked(self):
-        
         def rerenderStyle():
             thMap = self.dialog.thematicCombobox.currentText()
             thMapCtrlr = ThematicController(self.dialog, thMap)
@@ -292,14 +294,16 @@ class QgsLes:
                 QtWidgets.QMessageBox.warning(
                     None, "Ошибка", "Не выбрана лесосека."
                 )
+
         self.showInfoMessage("А теперь нажмите на лесосеку")
         self.pkr = peeker.PeekStratumFromMap(self.canvas, "Лесосеки")
         self.canvas.setMapTool(self.pkr)
         self.pkr.signal.connect(getResult)
 
     def showInfoMessage(self, text):
-        self.iface.messageBar().pushMessage("", text, level=Qgis.Info, duration=3)
-
+        self.iface.messageBar().pushMessage(
+            "", text, level=Qgis.Info, duration=3
+        )
 
     def initProjectClicked(self):
         self.initializer = QgsProjectInitializer(
@@ -323,6 +327,7 @@ class QgsLes:
 
             # zoomTool = QgsMapToolZoom(self.canvas, False)
             # self.canvas.setMapTool(zoomTool)
+
         self.showInfoMessage("Укажите выдел")
         self.pkr = peeker.PeekStratumFromMap(self.canvas, "Выдела")
         self.canvas.setMapTool(self.pkr)
@@ -370,11 +375,14 @@ class QgsLes:
 
             zoomTool = QgsMapToolZoom(self.canvas, False)
             self.canvas.setMapTool(zoomTool)
+
         self.showInfoMessage("А теперь нажмите на лесосеку")
         self.pkr = peeker.PeekStratumFromMap(self.canvas, "Лесосеки")
         self.canvas.setMapTool(self.pkr)
         self.pkr.signal.connect(getResult)
 
     def exportImportCuttingAreaClicked(self):
-        export_import_cutting_area_window = ExportImportCuttingAreaWindow()
+        export_import_cutting_area_window = ExportImportCuttingAreaWindow(
+            selected_cutting_areas=[]
+        )
         export_import_cutting_area_window.exec()
