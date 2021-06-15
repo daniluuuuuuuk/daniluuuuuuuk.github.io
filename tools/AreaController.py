@@ -92,6 +92,7 @@ class AreaController(QtCore.QObject):
             }
             return layoutData
 
+        iface.mapCanvas().zoomToFeatureExtent(self.feature.geometry().boundingBox())
         self.dialog = AreaCoordinatesTypeDialog()
         if self.dialog.exec() == QDialog.Accepted:
             layoutData = dialogData(self.dialog)
