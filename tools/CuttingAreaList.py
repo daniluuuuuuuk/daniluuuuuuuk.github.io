@@ -57,9 +57,10 @@ class CuttingAreaScrollList(QScrollArea):
                 setattr(cb, "uuid", cutting_area.get("UUID", False))
                 self.cutting_areas_container.addWidget(cb)
             else:
-                self.cutting_areas_container.addWidget(
-                    QLabel("Лесосеки отсутствуют")
-                )
+                pass
+                # self.cutting_areas_container.addWidget(
+                #     QLabel("Лесосеки отсутствуют")
+                # )
 
         self.cutting_areas_container.addStretch(1)
 
@@ -79,5 +80,4 @@ class CuttingAreaScrollList(QScrollArea):
         ):
             if cutting_area_cb.checkState():
                 cutting_area_uuid.append(getattr(cutting_area_cb, "uuid"))
-
         return cutting_area_uuid

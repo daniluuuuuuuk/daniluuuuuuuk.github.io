@@ -50,6 +50,12 @@ class ExportImportCuttingAreaWindow(
         """
         Экспорт выбранных лесосек
         """
+        if self.cutting_area_scroll_list.selected_areas_uuid == []:
+            QtWidgets.QMessageBox.information(
+                None, "", "Отсутствуют лесосеки для экспорта."
+            )
+            return False
+
         export_file = QtWidgets.QFileDialog.getSaveFileName(
             caption="Сохранение файла",
             directory=os.path.expanduser("~")
