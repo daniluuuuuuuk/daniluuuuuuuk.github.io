@@ -82,16 +82,26 @@ class ThematicController:
         return stylesDbMapping.get(thematic)
 
     def setLayerStyle(self):
-        styles = self.layer.listStylesInDatabase()
-        styledoc = QDomDocument()
-        styleIndex = styles[2].index(self.getStyleName(self.thematic))
-        styleTuple = self.layer.getStyleFromDatabase(str(styles[1][styleIndex]))
-        styleqml = styleTuple[0]
-        styledoc.setContent(styleqml)
-        self.layer.importNamedStyle(styledoc)
-        iface.layerTreeView().refreshLayerSymbology(self.layer.id())
-        self.layer.triggerRepaint()
-        self.expandLayer()
+        def setStyle(layer=None, style=None):
+            if layer:
+                layer = QgsProject.instance().mapLayersByName(layer)[0]
+            else:
+                layer = self.layer
+
+            styles = layer.listStylesInDatabase()
+            styledoc = QDomDocument()
+            styleIndex = styles[2].index(style)
+            styleTuple = layer.getStyleFromDatabase(str(styles[1][styleIndex]))
+            styleqml = styleTuple[0]
+            styledoc.setContent(styleqml)
+            layer.importNamedStyle(styledoc)
+            iface.layerTreeView().refreshLayerSymbology(layer.id())
+            layer.triggerRepaint()
+            self.expandLayer()
+
+        setStyle(style=self.getStyleName(self.thematic))
+        if self.thematic == '':
+            setStyle('Лесосеки', 'Lesoseki')
 
     def expandLayer(self):
         root = QgsProject.instance().layerTreeRoot()
