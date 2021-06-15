@@ -10,6 +10,7 @@ from functools import partial
 from ..modules.trees_accounting.src.services.waiting_spinner_widget import (
     QtWaitingSpinner,
 )
+from ..gui.exportImportCuttingAreasDialog import ExportImportCuttingAreaWindow
 
 
 MESSAGE_CATEGORY = 'Поиск атрибутов'
@@ -26,6 +27,7 @@ class AreaFilterController:
         self._currentId = 0
         self.widget.ui.filter_pushButton.clicked.connect(self.filterAreas)
         self.widget.ui.clear_pushButton.clicked.connect(self.clearWidgetData)
+        self.widget.ui.export_pushButton.clicked.connect(self.exportAreas)
         self.layer = QgsProject.instance().mapLayersByName("Лесосеки")[0]
         # self.layer.removeSelection()
         self.setupButtonSignals()
@@ -53,6 +55,7 @@ class AreaFilterController:
         self._currentId = value
         if value == len(self.ids):
             self.widget.ui.next_pushButton.setEnabled(False)
+            self.widget.ui.export_pushButton.setEnabled(True)
         elif value == 0:
             self.widget.ui.prev_pushButton.setEnabled(False)
         else:
@@ -62,6 +65,16 @@ class AreaFilterController:
         for a in iface.attributesToolBar().actions(): 
             if a.objectName() == 'mActionDeselectAll':
                 a.trigger()
+
+    def exportAreas(self):
+        def getSelectedUids():
+            lr = QgsProject.instance().mapLayersByName("Лесосеки")[0]
+            return [feature['uid'] for feature in lr.selectedFeatures()]
+
+        export_import_cutting_area_window = ExportImportCuttingAreaWindow(
+            selected_cutting_areas=getSelectedUids()
+        )
+        export_import_cutting_area_window.exec()
 
     def setupButtonSignals(self):
         self.widget.ui.prev_pushButton.clicked.connect(partial(self.zoomToIndex, -1))
@@ -115,7 +128,6 @@ class AreaFilterController:
     def setupControlButtons(self, status):
         self.widget.ui.prev_pushButton.setEnabled(status)
         self.widget.ui.next_pushButton.setEnabled(status)
-        self.widget.ui.export_pushButton.setEnabled(status)
     
     def initValues(self):
 
@@ -225,11 +237,16 @@ class AreaFilterController:
         return expression
 
 class AreaFilterDockWidget(QDockWidget):
-    def __init__(self):
+    def __init__(self, filterAreaAction):
         QDockWidget.__init__(self)
         self.ui = Ui_Tools()
         self.ui.setupUi(self)
+        self.filterAreaAction = filterAreaAction
         self.ui.tabWidget.setTabIcon(0, QIcon(util.resolvePath("res\\icon-.png")))
+        self.closeEvent = self.disableActionButton
+    
+    def disableActionButton(self, event):
+        self.filterAreaAction.trigger()
 
 class Worker(QtCore.QObject):
 
