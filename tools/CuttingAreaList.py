@@ -13,7 +13,7 @@ from .LayoutObjectsIterator import LayoutObjectsIterator
 
 
 class CuttingAreaScrollList(QScrollArea):
-    def __init__(self, parent=None):
+    def __init__(self, selected_cutting_areas=[], parent=None):
         super().__init__(parent)
 
         self.setWidgetResizable(True)
@@ -24,6 +24,8 @@ class CuttingAreaScrollList(QScrollArea):
             self.scrollAreaWidgetContents
         )
         self.setWidget(self.scrollAreaWidgetContents)
+
+        self.selected_cutting_areas = selected_cutting_areas
 
         self.fill_list()
 
@@ -36,6 +38,15 @@ class CuttingAreaScrollList(QScrollArea):
             as_dict=True,
         )
         return area_table
+
+    def set_checked_selected_cutting_areas(self):
+        for cutting_area_cb in LayoutObjectsIterator(
+            layout=self.cutting_areas_container
+        ):
+            cutting_area_cb.setChecked(False)
+
+            if getattr(cutting_area_cb, "uuid") in self.selected_cutting_areas:
+                cutting_area_cb.setChecked(True)
 
     def fill_list(self):
         """
@@ -58,11 +69,10 @@ class CuttingAreaScrollList(QScrollArea):
                 self.cutting_areas_container.addWidget(cb)
             else:
                 pass
-                # self.cutting_areas_container.addWidget(
-                #     QLabel("Лесосеки отсутствуют")
-                # )
 
         self.cutting_areas_container.addStretch(1)
+        if self.selected_cutting_areas != []:
+            self.set_checked_selected_cutting_areas()
 
     @property
     def selected_areas_uuid(self) -> list:
