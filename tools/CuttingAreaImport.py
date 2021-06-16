@@ -107,7 +107,7 @@ class SearchDuplicates(QThread):
     """
 
     signal_message_result = pyqtSignal(str)
-    signal_data_result = pyqtSignal(str)
+    signal_data_result = pyqtSignal(object)
 
     def __init__(
         self,
@@ -151,20 +151,22 @@ class SearchDuplicates(QThread):
 
     def get_cutting_areas_attributes(self):
         dupl_uuids = self.search_duplicates_uuid()
+        if not len(dupl_uuids):
+            return False
         cutting_areas_attributes = PostgisDB.PostGisDB().getQueryResult(
             f"""select lesnich_text as "Л-во", num_kv as "кв.", num_vds as "выд.", num as "№ лесосеки" from area where uid in {str(tuple(dupl_uuids)) if len(dupl_uuids)>1 else str(dupl_uuids).replace('{', '(').replace('}', ')')};""",
             as_dict=True,
         )
-        temp = ""
+        duplicated_cutting_areas = ""
         for cua in cutting_areas_attributes:
 
-            temp += (
+            duplicated_cutting_areas += (
                 "; ".join(
                     ["%s: %s" % (key, value) for (key, value) in cua.items()]
                 )
                 + "\n"
             )
-        return temp
+        return duplicated_cutting_areas
 
     def run(self):
         self.signal_data_result.emit(self.get_cutting_areas_attributes())

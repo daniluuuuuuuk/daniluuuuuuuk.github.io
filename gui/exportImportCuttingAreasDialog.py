@@ -123,9 +123,11 @@ class ExportImportCuttingAreaWindow(
                 "Данные о текущих лесосеках уже присутствуют в базе данных, выберите действие:"
             )
             msgBox.setDetailedText(duplicated_cutting_areas)
-            msgBox.addButton("Заменить", QtWidgets.QMessageBox.YesRole)  # 0
             msgBox.addButton(
-                "Пропустить",
+                "Заменить все", QtWidgets.QMessageBox.YesRole
+            )  # 0
+            msgBox.addButton(
+                "Пропустить все",
                 QtWidgets.QMessageBox.NoRole,
             )  # 1
             msgBox.addButton(

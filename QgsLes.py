@@ -137,12 +137,12 @@ class QgsLes:
         self.filter = Filter.FilterWidget()
         self.filterAction = self.filter.getFilterWidget()
         self.qgsLesToolbar.addWidget(self.filterAction)
-        self.filterButtonAction = QAction(
-            QIcon(util.resolvePath("res\\icon3.png")),
-            "Поиск",
-            self.iface.mainWindow(),
-        )
-        self.filterAction.setDefaultAction(self.filterButtonAction)
+        # self.filterButtonAction = QAction(
+        #     QIcon(util.resolvePath("res\\icon3.png")),
+        #     "Поиск",
+        #     self.iface.mainWindow(),
+        # )
+        # self.filterAction.setDefaultAction(self.filterButtonAction)
         self.ctrl = Filter.FilterWidgetController(self.filter, self.iface)
 
     def initGui(self):
@@ -266,7 +266,9 @@ class QgsLes:
         if not checked and self.dockWidget:
             self.iface.removeDockWidget(self.dockWidget)
         else:
-            self.dockWidget = AreaFilter.AreaFilterDockWidget(self.filterAreaAction)
+            self.dockWidget = AreaFilter.AreaFilterDockWidget(
+                self.filterAreaAction
+            )
             self.filgetAreaCtrlr = AreaFilter.AreaFilterController(
                 self.dockWidget
             )
@@ -382,10 +384,9 @@ class QgsLes:
         self.pkr.signal.connect(getResult)
 
     def exportImportCuttingAreaClicked(self):
-        
         def getSelectedUids():
             lr = QgsProject.instance().mapLayersByName("Лесосеки")[0]
-            return [feature['uid'] for feature in lr.selectedFeatures()]
+            return [feature["uid"] for feature in lr.selectedFeatures()]
 
         export_import_cutting_area_window = ExportImportCuttingAreaWindow(
             selected_cutting_areas=getSelectedUids()

@@ -1,6 +1,7 @@
+import os
 from .. import PostgisDB
 from qgis.core import Qgis, QgsTask, QgsMessageLog, QgsProject
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtWidgets
 from . import config
 from ..gui import areaControllerDialog
 from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QMessageBox
@@ -16,6 +17,11 @@ from .AreaDataContainer import (
 )
 from ..modules.trees_accounting.src.trees_accounting import TaMainWindow
 from qgis.utils import iface
+from datetime import date
+from .CuttingAreaExport import CuttingAreaExport
+from ..modules.trees_accounting.src.services.waiting_spinner_widget import (
+    QtWaitingSpinner,
+)
 
 
 MESSAGE_CATEGORY = "Удаление лесосеки"
@@ -44,6 +50,10 @@ class AreaController(QtCore.QObject):
         self.setupValues()
         self.setupButtons()
         self.window = self.sd.show()
+        self.sd.ui.export_pushButton.clicked.connect(self.exportArea)
+        self.spinner = QtWaitingSpinner(
+            self.sd, True, True, QtCore.Qt.ApplicationModal
+        )
 
     @property
     def editMode(self):
@@ -92,7 +102,9 @@ class AreaController(QtCore.QObject):
             }
             return layoutData
 
-        iface.mapCanvas().zoomToFeatureExtent(self.feature.geometry().boundingBox())
+        iface.mapCanvas().zoomToFeatureExtent(
+            self.feature.geometry().boundingBox()
+        )
         self.dialog = AreaCoordinatesTypeDialog()
         if self.dialog.exec() == QDialog.Accepted:
             layoutData = dialogData(self.dialog)
@@ -276,6 +288,37 @@ class AreaController(QtCore.QObject):
             thread.start()
         else:
             return False
+
+    def exportArea(self):
+        export_file = QtWidgets.QFileDialog.getSaveFileName(
+            caption="Сохранение файла",
+            directory=os.path.expanduser("~")
+            + "/Documents/Экспорт_лесосек_"
+            + date.today().strftime("%Y-%m-%d")
+            + ".json",
+            filter="JSON (*.json)",
+        )
+
+        if export_file[0]:
+            self.cutting_area_export = CuttingAreaExport(
+                uuid_list=[
+                    self.feature["uid"],
+                ],
+                path_to_file=export_file[0],
+            )
+            self.cutting_area_export.started.connect(
+                lambda: self.spinner.start()
+            )
+            self.cutting_area_export.finished.connect(
+                lambda: self.spinner.stop()
+            )
+            self.cutting_area_export.start()
+            self.cutting_area_export.signal_message_result.connect(
+                lambda mes: QtWidgets.QMessageBox.information(
+                    None, "", str(mes)
+                ),
+                QtCore.Qt.QueuedConnection,
+            )
 
 
 class SettingsWindow(QDialog):
