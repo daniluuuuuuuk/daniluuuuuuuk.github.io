@@ -55,7 +55,7 @@ class AreaDataPrintContainer:
             self.projectInstance.removeMapLayers([layer[0].id()])
     
     def printLayout(self):
-        layout = LayoutManager(self.canvas, QgsProject.instance(), self.uid, int(self.areaData['scale']))
+        layout = LayoutManager(self.canvas, QgsProject.instance(), self.bindingPoint, uid=self.uid, scale=int(self.areaData['scale']))
         layout.generate([self.columnNames] + self.tableList)
 
     def prepareTableForLayout(self):
