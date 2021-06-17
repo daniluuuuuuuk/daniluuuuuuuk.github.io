@@ -10,14 +10,16 @@ from qgis.utils import iface
 import math
 from ...tools import config
 from ... import util
+from .tools import GeoOperations as geop
 
 A4_PAGE_HEIGHT = 3700
 
 class LayoutManager:
 
-    def __init__(self, canvas, project, uid=None, scale=None):
+    def __init__(self, canvas, project, bindingPoint, uid=None, scale=None):
         self.project = project
         self.canvas = canvas
+        self.bindingPoint = geop.convertToWgs(bindingPoint)
         if not uid:
             self.uid = self.getUid()
         else:
@@ -121,6 +123,7 @@ class LayoutManager:
 
         htmlHeader = parseHeader()
         htmlValues = parseValues()
+        
         return '<center><table>' + htmlHeader + htmlValues + '</table></center>'
 
     def prepareTableCss(self):
@@ -138,32 +141,20 @@ class LayoutManager:
             border: 1px solid black;\
             white-space: nowrap;\
             text-align: center;\
-            }'
-
-    # def cutSecondPointNumber(self, tableRows):
-    #     coordTable = False
-    #     for row in tableRows[0]:
-    #         if '°' in row:
-    #             coordTable = True
-
-    #     if coordTable:
-    #         for row in tableRows[1:]:
-    #             row[0] = row[0].split('-')[0]
-    #     return tableRows
+            }'  
 
     def composeHtmlLayout(self, layout, tableRows, topPosition):                   
-        # tableRows = self.cutSecondPointNumber(tableRows)
         rows = len(tableRows)
         layout_html = QgsLayoutItemHtml(layout)
         html_frame = QgsLayoutFrame(layout, layout_html)
-        html_frame.attemptSetSceneRect(QRectF(0, 0, 170, 5 + rows * 5))
+        html_frame.attemptSetSceneRect(QRectF(0, 0, 170, 5 + (rows + 1) * 5))
         html_frame.setFrameEnabled(True)
         layout_html.addFrame(html_frame)
         layout_html.setContentMode(QgsLayoutItemHtml.ManualHtml)
         layout_html.setHtml(self.generateTableHTML(tableRows))
         layout_html.loadHtml()
         layout_html.setUserStylesheet(self.prepareTableCss())
-        layout_html.setUserStylesheetEnabled(True)        
+        layout_html.setUserStylesheetEnabled(True)
         html_frame.setFrameStrokeWidth(QgsLayoutMeasurement(0.01, QgsUnitTypes.LayoutPixels))
         html_frame.attemptMove(QgsLayoutPoint(200, topPosition, QgsUnitTypes.LayoutPixels))
         return layout_html
@@ -325,8 +316,39 @@ class LayoutManager:
         fioLabel.adjustSizeToText()
         fioLabel.attemptMove(QgsLayoutPoint(200, heightPosition, QgsUnitTypes.LayoutPixels))
 
+    def checkIfCoordRow(self, tableRows):
+        for row in tableRows[0]:
+            if 'Y, °' in row:
+                return True
+        return False
+
+    def getFirstPointOfArea(self, tableRows):
+        for x, r in enumerate(tableRows):
+            if x == 1 and r[-1] == 'Лесосека':
+                return x - 1
+            elif x > 1 and tableRows[x-2][-1] == 'Привязка' and r[-1] == 'Лесосека':
+                return x - 1
+
+    def cutSecondPointNumber(self, tableRows):
+        if self.coordTable:
+            for row in tableRows[1:]:
+                row[0] = row[0].split('-')[1]
+        tableRows[-1][0] = str(len(tableRows ) - 1) + '(' +str(self.getFirstPointOfArea(tableRows)) + ')'
+        return tableRows
+
+    def addBindingPointToTableRows(self, tableRows):
+        if len(tableRows[0]) == 5:
+            tableRows.insert(1, ['0', str(self.bindingPoint.y()), str(self.bindingPoint.x()), ''])
+        elif len(tableRows[0]) == 8:
+            x = geop.convertToDMS(self.bindingPoint.x())
+            y = geop.convertToDMS(self.bindingPoint.y())
+            tableRows.insert(1, ['0', str(y[0]), str(y[1]), str(y[2]), str(x[0]), str(x[1]), str(x[2]), ''])
 
     def generate(self, tableRows):
+        self.coordTable = self.checkIfCoordRow(tableRows)
+        if self.coordTable:
+           self.cutSecondPointNumber(tableRows)
+           self.addBindingPointToTableRows(tableRows)
         pages = self.countPages(tableRows)
         layout = self.prepareLayout(pages)
         header = self.prepareHeader(layout)
