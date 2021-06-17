@@ -137,12 +137,12 @@ class QgsLes:
         self.filter = Filter.FilterWidget()
         self.filterAction = self.filter.getFilterWidget()
         self.qgsLesToolbar.addWidget(self.filterAction)
-        # self.filterButtonAction = QAction(
-        #     QIcon(util.resolvePath("res\\icon3.png")),
-        #     "Поиск",
-        #     self.iface.mainWindow(),
-        # )
-        # self.filterAction.setDefaultAction(self.filterButtonAction)
+        self.filterButtonAction = QAction(
+            QIcon(util.resolvePath("res\\icon3.png")),
+            "Поиск",
+            self.iface.mainWindow(),
+        )
+        self.filterAction.setDefaultAction(self.filterButtonAction)
         self.ctrl = Filter.FilterWidgetController(self.filter, self.iface)
 
     def initGui(self):
