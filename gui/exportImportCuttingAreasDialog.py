@@ -22,6 +22,11 @@ class ExportImportCuttingAreaWindow(
     def __init__(self, selected_cutting_areas, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
         self.setupUi(self)
+
+        self.spinner = QtWaitingSpinner(
+            self, True, True, QtCore.Qt.ApplicationModal
+        )
+
         self.cutting_area_scroll_list = CuttingAreaScrollList(
             selected_cutting_areas
         )
@@ -35,9 +40,10 @@ class ExportImportCuttingAreaWindow(
         self.pushButton_2.clicked.connect(self.export_cutting_areas)
         self.toolButton.clicked.connect(self.select_file_to_import)
 
-        self.spinner = QtWaitingSpinner(
-            self, True, True, QtCore.Qt.ApplicationModal
-        )
+        self.add_event_to_areas_cb()
+
+        if selected_cutting_areas:
+            self.checkBox.setChecked(False)
 
     def select_file_to_import(self):
         import_file = QtWidgets.QFileDialog.getOpenFileName(
@@ -150,6 +156,24 @@ class ExportImportCuttingAreaWindow(
             QtCore.Qt.QueuedConnection,
         )
 
+    def add_event_to_areas_cb(self):
+        self.cb_areas_clicked_event()
+        for cutting_area_cb in LayoutObjectsIterator(
+            layout=self.cutting_areas_container
+        ):
+            cutting_area_cb.clicked.connect(
+                lambda: self.cb_areas_clicked_event(
+                    status=cutting_area_cb.isChecked()
+                )
+            )
+
+    def cb_areas_clicked_event(self, status=None):
+        if status is False:
+            self.checkBox.setChecked(False)
+        self.pushButton_2.setText(
+            f"Экспорт ({len(self.cutting_area_scroll_list.selected_areas_uuid)})"
+        )
+
     def select_all_cutting_areas(self):
         """
         Выбрать все лесосеки
@@ -160,3 +184,5 @@ class ExportImportCuttingAreaWindow(
             layout=self.cutting_areas_container
         ):
             cutting_area_cb.setChecked(is_all_selected)
+
+        self.cb_areas_clicked_event()
