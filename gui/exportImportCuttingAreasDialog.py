@@ -37,7 +37,12 @@ class ExportImportCuttingAreaWindow(
 
         self.checkBox.clicked.connect(self.select_all_cutting_areas)
         self.pushButton.clicked.connect(self.import_cutting_areas)
-        self.pushButton_2.clicked.connect(self.export_cutting_areas)
+        self.pushButton_2.clicked.connect(
+            lambda: self.export_cutting_areas("json")
+        )
+        self.pushButton_3.clicked.connect(
+            lambda: self.export_cutting_areas("xlsx")
+        )
         self.toolButton.clicked.connect(self.select_file_to_import)
 
         self.add_event_to_areas_cb()
@@ -54,7 +59,7 @@ class ExportImportCuttingAreaWindow(
         if import_file:
             self.lineEdit.setText(import_file)
 
-    def export_cutting_areas(self):
+    def export_cutting_areas(self, file_extension):
         """
         Экспорт выбранных лесосек
         """
@@ -69,13 +74,14 @@ class ExportImportCuttingAreaWindow(
             directory=os.path.expanduser("~")
             + "/Documents/Экспорт_лесосек_"
             + date.today().strftime("%Y-%m-%d")
-            + ".json",
-            filter="JSON (*.json)",
+            + f".{file_extension}",
+            filter=f"{file_extension.upper()} (*.{file_extension})",
         )
         if export_file[0]:
             self.cutting_area_export = CuttingAreaExport(
                 uuid_list=self.cutting_area_scroll_list.selected_areas_uuid,
                 path_to_file=export_file[0],
+                file_extension=file_extension,
             )
             self.cutting_area_export.started.connect(
                 lambda: self.spinner.start()
@@ -170,7 +176,7 @@ class ExportImportCuttingAreaWindow(
     def cb_areas_clicked_event(self, status=None):
         if status is False:
             self.checkBox.setChecked(False)
-        self.pushButton_2.setText(
+        self.verticalGroupBox.setTitle(
             f"Экспорт ({len(self.cutting_area_scroll_list.selected_areas_uuid)})"
         )
 
