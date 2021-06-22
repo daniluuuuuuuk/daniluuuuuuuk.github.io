@@ -1,5 +1,5 @@
 from . import config
-from qgis.core import QgsProject
+from qgis.core import QgsProject, QgsRasterLayer
 from qgis.PyQt.QtWidgets import QMessageBox, QDialog
 from qgis.core import QgsApplication, QgsCoordinateReferenceSystem, QgsVectorLayer, QgsDataSourceUri, QgsTask, QgsMessageLog, Qgis
 from qgis.PyQt.QtXml import QDomDocument
@@ -15,11 +15,11 @@ class QgsProjectInitializer:
         self.iface = iface
         self.setCrs()
         self.settings = None
-        self.layerDbNames = {'hidroline': 'Гидрография линейная', 'hidropoly': 'Гидрография площадная', 'compartments': 'Кварталы',
-                             'area': 'Лесосеки', 'settlements': 'Населенные пункты', 'area_line': 'Линия привязки', 'roads': 'Дороги', 'subcompartments': 'Выдела',
+        self.layerDbNames = {'subcompartments': 'Выдела', 'hidroline': 'Гидрография линейная', 'hidropoly': 'Гидрография площадная', 'compartments': 'Кварталы',
+                             'area': 'Лесосеки', 'settlements': 'Населенные пункты', 'area_line': 'Линия привязки', 'roads': 'Дороги', 
                              'forestry_borders': 'Границы лесничеств'}
-        self.layerStyleNames = {'hidroline': 'Hidroline', 'hidropoly': 'Hidropoly', 'compartments': 'Kvartaly',
-                             'area': 'Lesoseki', 'settlements': 'Nas punkt', 'area_line': 'Privyazka', 'roads': 'Dorogi', 'subcompartments': 'Vydela',
+        self.layerStyleNames = {'subcompartments': 'Vydela', 'hidroline': 'Hidroline', 'hidropoly': 'Hidropoly', 'compartments': 'Kvartaly',
+                             'area': 'Lesoseki', 'settlements': 'Nas punkt', 'area_line': 'Privyazka', 'roads': 'Dorogi',
                              'forestry_borders': 'Granitsy lesnich'}
         try:
             self.cf = config.Configurer('dbconnection')
@@ -94,8 +94,15 @@ class LoadLayersFromDbTask(QgsTask):
         vlayer.importNamedStyle(styledoc)
         self.iface.layerTreeView().refreshLayerSymbology(vlayer.id())
 
+    def loadSatelliteImage(self):
+        urlWithParams = 'type=xyz&zmin=10&zmax=19&url=https://mt1.google.com/vt/lyrs%3Ds%26x%3D{x}%26y%3D{y}%26z%3D{z}'
+        rlayer = QgsRasterLayer(urlWithParams, 'Google Satellite', 'wms')
+        if rlayer.isValid():
+            QgsProject.instance().addMapLayer(rlayer)
+
     def finished(self, result):
         if result:
+            # self.loadSatelliteImage()
             for layer in self.layers:
                 QgsProject.instance().addMapLayer(layer)
                 tableName = [k for k,v in self.layerDbNames.items() if v == layer.name()]

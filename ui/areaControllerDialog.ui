@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>313</width>
+    <width>431</width>
     <height>466</height>
    </rect>
   </property>
@@ -37,6 +37,13 @@
       <widget class="QPushButton" name="print_pushButton">
        <property name="text">
         <string>Печать</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="export_pushButton">
+       <property name="text">
+        <string>Экспорт</string>
        </property>
       </widget>
      </item>

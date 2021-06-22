@@ -6,6 +6,7 @@ from . import util
 from .ForestObject import ForestObject, ForestEnterprise, Forestry, Quarter, Stratum
 from abc import ABCMeta, abstractmethod
 import re
+from qgis.utils import iface
 
 class FilterWidget(QWidget):
   def __init__(self, parent = None):
@@ -39,8 +40,6 @@ class FilterWidgetController:
 
 
     self.view = view
-    self.iface = iface
-    self.project = QgsProject.instance()
     
     self.fo = ForestObject()
 
@@ -93,15 +92,22 @@ class FilterWidgetController:
     self.stratum.number = self.view.ui.vd_combobox_3.currentText()
 
   def search(self):
+    self.tweakCurrentLayer()
     if self.forestry.number == "" :
       QMessageBox.information(None, 'Ошибка', "Введите значение лесничества")
     elif self.forestry.number != "" and self.quarter.number == "":
-      util.zoomToForestry(self.forestry.number, self.project, self.iface)
+      util.zoomToForestry(self.forestry.number)
     elif self.quarter.number != "" and self.stratum.number == "":
-      util.zoomToQuarter(self.forestry.number, self.quarter.number, self.project, self.iface)
+      util.zoomToQuarter(self.forestry.number, self.quarter.number)
     else:
-      util.zoomToStratum(self.forestry.number, self.quarter.number, self.stratum.number, self.project, self.iface)
+      util.zoomToStratum(self.forestry.number, self.quarter.number, self.stratum.number)
 
+    """Не приближает к лесничеству или кварталу после просмотра таксационки - фикс бага
+    """
+  def tweakCurrentLayer(self):
+    layer = QgsProject.instance().mapLayersByName("Выдела")[0]
+    iface.setActiveLayer(layer)
+    
   def comboboxClear(self, *args):
     for arg in args:
       arg.clear()

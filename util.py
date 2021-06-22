@@ -1,5 +1,7 @@
 import os
 from enum import Enum
+from qgis.utils import iface
+from qgis.core import QgsProject
 
 def resolvePath(name, basepath=None):
   if not basepath:
@@ -20,7 +22,7 @@ def setLayer(name, iface, QgsProject):
   iface.mapCanvas().setCurrentLayer(layer)
   iface.setActiveLayer(layer)
 
-def zoomToForestry(number, QgsProject, iface):
+def zoomToForestry(number):
   clearAllSelections(iface)
   layer = QgsProject.instance().mapLayersByName("Кварталы")[0]
   iface.setActiveLayer(layer)
@@ -28,7 +30,7 @@ def zoomToForestry(number, QgsProject, iface):
   layer.selectByExpression(expr)
   iface.mapCanvas().zoomToSelected()
 
-def zoomToQuarter(forestry, quarter, QgsProject, iface):
+def zoomToQuarter(forestry, quarter):
   clearAllSelections(iface)
   layer = QgsProject.instance().mapLayersByName("Кварталы")[0]
   iface.setActiveLayer(layer)
@@ -36,7 +38,7 @@ def zoomToQuarter(forestry, quarter, QgsProject, iface):
   layer.selectByExpression(expr)
   iface.mapCanvas().zoomToSelected()
 
-def zoomToStratum(forestry, quarter, stratum, QgsProject, iface):
+def zoomToStratum(forestry, quarter, stratum):
   clearAllSelections(iface)
   layer = QgsProject.instance().mapLayersByName("Выдела")[0]
   iface.setActiveLayer(layer)

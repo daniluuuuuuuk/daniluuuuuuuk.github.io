@@ -12,17 +12,24 @@ from . import Filter, util, Settings, PostgisDB
 from qgis.core import QgsProject
 from .modules.otvod.OtvodController import OtvodController
 from .modules.otvod.tools.mapTools.RectangleMapTool import RectangleMapTool
-from .tools import CuttingAreaPeeker as peeker
+from .modules.otvod.tools.mapTools import PeekStratumFromMap as peeker
+
+# from .tools import CuttingAreaPeeker as peeker
 from qgis.gui import QgsMapToolZoom
 from qgis.core import Qgis, QgsApplication
 from .modules.trees_accounting.src.trees_accounting import TaMainWindow
 from .tools.ProjectInitializer import QgsProjectInitializer
 from .tools.TaxationLoader import Worker as taxWorker
 from .tools import config, AreaController, AreaFilter
+from .tools.ThematicController import (
+    ThematicController,
+    ChooseThematicMapDialog,
+)
 
 from .gui.taxationDescription import (
     TaxationDescription as TaxationDescriptionDialog,
 )
+from .gui.exportImportCuttingAreasDialog import ExportImportCuttingAreaWindow
 from qgis.PyQt.QtCore import Qt
 
 
@@ -181,6 +188,13 @@ class QgsLes:
         )
         self.controlAreaAction.triggered.connect(self.controlAreaClicked)
 
+        self.thematicAction = QAction(
+            QIcon(util.resolvePath("res\\icon-7.png")),
+            "Тематические карты",
+            self.iface.mainWindow(),
+        )
+        self.thematicAction.triggered.connect(self.thematicClicked)
+
         self.taxationAction = QAction(
             QIcon(util.resolvePath("res\\info.png")),
             "Информация о выделе",
@@ -195,13 +209,13 @@ class QgsLes:
         )
         self.countAction.triggered.connect(self.countButtonClicked)
 
-        # self.filterAreaAction = QAction(
-        #     QIcon(util.resolvePath("res\\icon6.png")),
-        #     "Панель инструментов",
-        #     self.iface.mainWindow(),
-        # )
-        # self.filterAreaAction.setCheckable(True)
-        # self.filterAreaAction.triggered.connect(self.filterAreaButtonClicked)
+        self.filterAreaAction = QAction(
+            QIcon(util.resolvePath("res\\icon6.png")),
+            "Панель инструментов",
+            self.iface.mainWindow(),
+        )
+        self.filterAreaAction.setCheckable(True)
+        self.filterAreaAction.triggered.connect(self.filterAreaButtonClicked)
 
         self.settingsAction = QAction(
             QIcon(util.resolvePath("res\\settings.png")),
@@ -211,6 +225,16 @@ class QgsLes:
 
         self.settingsAction.triggered.connect(
             lambda: Settings.SettingsController()
+        )
+
+        self.exportImportAction = QAction(
+            QIcon(util.resolvePath("res\\export_import.png")),
+            "Экспорт/Импорт лесосек",
+            self.iface.mainWindow(),
+        )
+
+        self.exportImportAction.triggered.connect(
+            self.exportImportCuttingAreaClicked
         )
 
         self.initProjectAction = QAction(
@@ -224,9 +248,11 @@ class QgsLes:
         self.qgsLesToolbar.addAction(self.otvodAction)
         self.qgsLesToolbar.addAction(self.countAction)
         self.qgsLesToolbar.addAction(self.controlAreaAction)
-        # self.qgsLesToolbar.addAction(self.filterAreaAction)
+        self.qgsLesToolbar.addAction(self.thematicAction)
+        self.qgsLesToolbar.addAction(self.filterAreaAction)
         self.qgsLesToolbar.addAction(self.settingsAction)
         self.qgsLesToolbar.addAction(self.initProjectAction)
+        self.qgsLesToolbar.addAction(self.exportImportAction)
 
         if QgsProject.instance().mapLayersByName("Выдела"):
             self.initFilter()
@@ -240,26 +266,46 @@ class QgsLes:
         if not checked and self.dockWidget:
             self.iface.removeDockWidget(self.dockWidget)
         else:
-            self.dockWidget = AreaFilter.AreaFilterDockWidget()
+            self.dockWidget = AreaFilter.AreaFilterDockWidget(
+                self.filterAreaAction
+            )
             self.filgetAreaCtrlr = AreaFilter.AreaFilterController(
                 self.dockWidget
             )
             self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockWidget)
 
+    def thematicClicked(self):
+        def rerenderStyle():
+            thMap = self.dialog.thematicCombobox.currentText()
+            thMapCtrlr = ThematicController(self.dialog, thMap)
+
+        self.dialog = ChooseThematicMapDialog()
+        self.dialog.thematicCombobox.currentIndexChanged.connect(rerenderStyle)
+        self.dialog.exec()
+        # if self.dialog.exec() == QDialog.Applied:
+        #     thMap = self.dialog.thematicCombobox.currentText()
+        #     thMapCtrlr = ThematicController(thMap)
+
     def controlAreaClicked(self):
         def getResult(feature):
             if feature:
-                zoomTool = QgsMapToolZoom(self.canvas, False)
-                self.canvas.setMapTool(zoomTool)
+                # zoomTool = QgsMapToolZoom(self.canvas, False)
+                # self.canvas.setMapTool(zoomTool)
                 self.ctrlr = AreaController.AreaController(feature)
             else:
                 QtWidgets.QMessageBox.warning(
                     None, "Ошибка", "Не выбрана лесосека."
                 )
 
+        self.showInfoMessage("А теперь нажмите на лесосеку")
         self.pkr = peeker.PeekStratumFromMap(self.canvas, "Лесосеки")
         self.canvas.setMapTool(self.pkr)
         self.pkr.signal.connect(getResult)
+
+    def showInfoMessage(self, text):
+        self.iface.messageBar().pushMessage(
+            "", text, level=Qgis.Info, duration=3
+        )
 
     def initProjectClicked(self):
         self.initializer = QgsProjectInitializer(
@@ -281,9 +327,10 @@ class QgsLes:
                 txwrker.finished.connect(showTaxationDetails)
                 txwrker.run()
 
-            zoomTool = QgsMapToolZoom(self.canvas, False)
-            self.canvas.setMapTool(zoomTool)
+            # zoomTool = QgsMapToolZoom(self.canvas, False)
+            # self.canvas.setMapTool(zoomTool)
 
+        self.showInfoMessage("Укажите выдел")
         self.pkr = peeker.PeekStratumFromMap(self.canvas, "Выдела")
         self.canvas.setMapTool(self.pkr)
         self.pkr.signal.connect(getResult)
@@ -312,7 +359,7 @@ class QgsLes:
             currentMapTool = self.canvas.mapTool()
         except:
             pass
-
+        self.showInfoMessage("Выделите область на карте")
         self.rmt = RectangleMapTool(self.canvas)
         self.rmt.signal.connect(getMapRect)
         self.canvas.setMapTool(self.rmt)
@@ -331,6 +378,17 @@ class QgsLes:
             zoomTool = QgsMapToolZoom(self.canvas, False)
             self.canvas.setMapTool(zoomTool)
 
+        self.showInfoMessage("А теперь нажмите на лесосеку")
         self.pkr = peeker.PeekStratumFromMap(self.canvas, "Лесосеки")
         self.canvas.setMapTool(self.pkr)
         self.pkr.signal.connect(getResult)
+
+    def exportImportCuttingAreaClicked(self):
+        def getSelectedUids():
+            lr = QgsProject.instance().mapLayersByName("Лесосеки")[0]
+            return [feature["uid"] for feature in lr.selectedFeatures()]
+
+        export_import_cutting_area_window = ExportImportCuttingAreaWindow(
+            selected_cutting_areas=getSelectedUids()
+        )
+        export_import_cutting_area_window.exec()

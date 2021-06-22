@@ -6,10 +6,11 @@ from .ui.SwitchButton import Switch
 from .gui.LesosekaInfoDialog import LesosekaInfo
 from .tools import GeoOperations, ImageExporter
 from .tools.tempFeatures.BindingPointBuilder import BindingPointBuilder
-from . import Report, LayoutManager
+from . import LayoutManager
 from .DataTable import DataTableWrapper
 from .OtvodSettingsDialog import OtvodSettingsWindow
 from ...tools import config
+from .tools.mapTools.MovePointMapTool import MovePointTool
 from .CuttingAreaAttributesEditor import CuttingAreaAttributesEditor
 from PyQt5.QtGui import QIcon
 from qgis.core import QgsProject, QgsPointXY, QgsPrintLayout
@@ -21,14 +22,17 @@ from qgis.PyQt.QtWidgets import (
     QFileDialog,
     QTableWidgetItem,
 )
+from qgis.PyQt.QtWidgets import QAction
 from datetime import datetime
 from qgis.PyQt.QtCore import Qt
 from qgis.utils import iface
-from qgis.gui import QgsMapToolPan
+from qgis.gui import QgsMapToolPan, QgsMapToolAdvancedDigitizing
 from .LayerManager import LayerManager
 from .icons.initIcons import IconSet
 from qgis.core import Qgis, QgsSnappingConfig, QgsTolerance
 from . import geomag
+from .tools.Serializer import DbSerializer
+from qgis.core import edit
 
 
 class OtvodController:
@@ -37,6 +41,10 @@ class OtvodController:
         self.rct = rct
 
         self.omw = MainWindow(self)
+        # self.omw.tableWidget.setGeometry(QtCore.QRect(0, 0, 401, 341))
+
+        # print(self.omw.tableWidget)
+        # print(self.omw.verticalLayout_6)
 
         self.tableType = self.getConfigTableType()
         self.coordType = self.getConfigCoordType()
@@ -54,6 +62,8 @@ class OtvodController:
         self.omw.loadData_action.triggered.connect(
             lambda: self.loadDataFromFile()
         )
+
+        self.omw.csvExport_action.triggered.connect(lambda: self.exportToCsv())
 
         self.canvasWidget = CanvasWidget(
             self.omw, self.layers, self.rct, self.tableWrapper
@@ -144,6 +154,8 @@ class OtvodController:
         self.switch = self.initSwitchButton()
 
         self.omw.handTool_button.clicked.connect(self.initHandTool)
+        self.omw.movePoint_button.clicked.connect(self.enableMovePointTool)
+
         self.panTool = QgsMapToolPan(self.canvas)
 
         self.omw.manageLayers_button.clicked.connect(self.manageCanvasLayers)
@@ -161,6 +173,41 @@ class OtvodController:
             self.project, self.canvas
         )
         self.omw.exportAsImage_PushButton.clicked.connect(self.generateImage)
+
+    def enableMovePointTool(self):
+        layer = QgsProject.instance().mapLayersByName('Пикеты')
+        if layer:
+            self.mpt = MovePointTool(self.canvas, self.tableWrapper.tableModel)
+            self.canvas.setMapTool(self.mpt)
+        else:
+            QMessageBox.information(
+                None,
+                "Ошибка модуля QGISLes",
+                "Отсутствует слой пикетов",
+            )
+
+    def exportToCsv(self):
+        now = datetime.now()
+        dt_string = now.strftime("%d-%m-%Y %H.%M")
+        filename = QFileDialog.getSaveFileName(
+            None,
+            "Сохранить точки отвода",
+            "Данные отвода от " + dt_string,
+            "Точки отвода (*.csv)",
+        )[0]
+        if not filename:
+            return
+        else:
+            with open(filename, "w", encoding="utf8") as write_file:
+                data = self.tableWrapper.serializePointsToCsv()
+                for line in data:
+                    write_file.write(line + "\n")
+            self.omw.outputLabel.setText(
+                "<a href=file:///{}>Открыть папку</a>".format(
+                    os.path.dirname(filename)
+                )
+            )
+            self.omw.outputLabel.setOpenExternalLinks(True)
 
     def generateImage(self):
         path = self.imgExporter.doJob(self.tableWrapper.getJSONRows())
@@ -346,8 +393,10 @@ class OtvodController:
             self.omw.x_coord_LineEdit.setText(str(round(gpsCoords[1], 10)))
 
     def loadDataTable(self):
+        # print(self.omw.tableWidget.setLayout(self.omw.horizontalLayout))
+        # self.omw.verticalLayout_6.addWidget(self.omw.tableWidget)
         datatable = DataTableWrapper(
-            self.omw.tableWidget,
+            self.omw.verticalLayout_6,
             int(self.tableType),
             int(self.coordType),
             0,
@@ -437,6 +486,12 @@ class OtvodController:
                     ensure_ascii=False,
                     indent=4,
                 )
+            self.omw.outputLabel.setText(
+                "<a href=file:///{}>Открыть папку</a>".format(
+                    os.path.dirname(filename)
+                )
+            )
+            self.omw.outputLabel.setOpenExternalLinks(True)
 
     def loadDataFromFile(self):
         try:
@@ -519,24 +574,75 @@ class OtvodController:
             self.tableWrapper.tableModel.refreshData()
 
     def saveCuttingArea(self):
+        def getEditedUid():
+            layer = QgsProject.instance().mapLayersByName(
+                "Лесосека временный слой"
+            )
+            if layer:
+                feature = list(layer[0].getFeatures())[0]
+                return feature["uid"]
+            return None
+
+        def saveDataToDatabase():
+            tableData = self.tableWrapper.getSerializableData()
+            data = [uid] + tableData
+            DbSerializer(data).saveToDb()
+
+        def copyFromTempLayer(sourceLYRName, destLYRName):
+            sourceLYR = QgsProject.instance().mapLayersByName(sourceLYRName)[0]
+            destLYR = QgsProject.instance().mapLayersByName(destLYRName)[0]
+
+            features = destLYR.getFeatures("uid = '{}'".format(uid))
+
+            if destLYR.isEditable():
+                iface.setActiveLayer(destLYR)
+                iface.mainWindow().findChild(
+                    QAction, "mActionToggleEditing"
+                ).trigger()
+
+            with edit(destLYR):
+                for f in features:
+                    destLYR.deleteFeature(f.id())
+
+            features = []
+            for feature in sourceLYR.getFeatures():
+                features.append(feature)
+            destLYR.startEditing()
+            data_provider = destLYR.dataProvider()
+            data_provider.addFeatures(features)
+            destLYR.commitChanges()
+
+        uid = getEditedUid()
+
         layer = QgsProject.instance().mapLayersByName("Результат обрезки")
         if layer:
             QgsProject.instance().removeMapLayers([layer[0].id()])
 
         self.canvas.refreshAllLayers()
 
-        if self.cuttingArea == None:
-            self.cuttingArea = self.canvasWidget.cuttingArea
-        if self.cuttingArea == None:
+        layer = QgsProject.instance().mapLayersByName(
+            "Лесосека временный слой"
+        )
+        if not layer:
             QMessageBox.information(
                 None,
                 "Ошибка модуля QGISLes",
                 "Отсутствует лесосека. Постройте лесосеку, после чего будет возможность ее сохранить",
             )
+
+        layer = QgsProject.instance().mapLayersByName(
+            "Привязка временный слой"
+        )
+        if layer:
+            copyFromTempLayer("Привязка временный слой", "Линия привязки")
+            copyFromTempLayer("Лесосека временный слой", "Лесосеки")
         else:
-            self.cuttingArea.save(self.tableWrapper.getSerializableData())
-            self.canvasWidget.btnControl.unlockReportBotton()
-            self.omw.outputLabel.setText("Лесосека сохранена")
+            copyFromTempLayer("Лесосека временный слой", "Лесосеки")
+
+        saveDataToDatabase()
+
+        self.canvasWidget.btnControl.unlockReportBotton()
+        self.omw.outputLabel.setText("Лесосека сохранена")
 
     def deleteCuttingArea(self):
         layerNamesToDelete = [
@@ -565,7 +671,7 @@ class OtvodController:
 
     def generateLayout(self):
         layout = LayoutManager.LayoutManager(
-            self.canvas, QgsProject.instance()
+            self.canvas, QgsProject.instance(), self.bindingPoint
         )
         layout.generate(
             [self.tableWrapper.getColumnNames()]

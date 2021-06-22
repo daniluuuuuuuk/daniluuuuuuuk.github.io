@@ -18,6 +18,8 @@ from PyQt5.QtGui import QColor
 from qgis.gui import QgsMapCanvas, QgsMapToolZoom, QgsMapToolPan
 from qgis.PyQt.QtCore import QObject
 from .LayerManager import LayerManager
+from qgis.core import QgsGeometry, edit
+from qgis.core import QgsDistanceArea, QgsUnitTypes, QgsCoordinateTransformContext
 
 
 class CanvasWidget(QgsMapCanvas):
@@ -43,11 +45,11 @@ class CanvasWidget(QgsMapCanvas):
         self.canvas = self.setupDefaultCanvas()
         self.canvas.scaleChanged.connect(self.onScaleChanged)
         self.initScalesBox()
-        self.cuttingArea = None
+        # self.cuttingArea = None
         self.btnControl = ButtonController(self.getButtons())
         self.btnControl.lockLesosekaButtons()
         self.panTool = QgsMapToolPan(self.canvas)
-        self.editedUid = None
+        # self.editedUid = None
 
         """Возвращает кнопки управления лесосекой
         """
@@ -90,11 +92,11 @@ class CanvasWidget(QgsMapCanvas):
         """
 
     def setupDefaultCanvas(self):
-        canvas = QgsMapCanvas(self.omw.canvasWidget)
+        canvas = QgsMapCanvas()
         canvas.setCanvasColor(QColor(255, 255, 255, 255))
         canvas.enableAntiAliasing(True)
-        canvas.setFixedWidth(371)
-        canvas.setFixedHeight(341)
+
+        self.omw.verticalLayout_4.addWidget(canvas)
 
         canvas.setLayers(self.layers)
 
@@ -232,16 +234,18 @@ class CanvasWidget(QgsMapCanvas):
             )
             return
 
-        self.cuttingArea = CuttingArea.CuttingArea(
+        # self.editedUid = self.getEditedUid()
+
+        cuttingArea = CuttingArea.CuttingArea(
             self.canvas,
             bindingPoint,
             layer,
             None,
             self.btnControl,
-            self.editedUid,
+            # self.editedUid,
         )
         self.canvas.setMapTool(self.panTool)
-        cuttingArea = self.cuttingArea.build()
+        cuttingArea = cuttingArea.build()
         if not cuttingArea:
             return
 
@@ -253,8 +257,39 @@ class CanvasWidget(QgsMapCanvas):
         self.omw.coord_radio_button.setChecked(True)
         self.table.makeTableFromCuttingArea(bindingPoint, cuttingArea)
         # self.table.deleteLastTemperatePoint()
+        self.processOverlappingAnotherArea()
         self.showAreaByVydel()
         # self.omw.inclinationSlider.setValue(0)
+
+    def processOverlappingAnotherArea(self):
+
+        def calculateArea(geometry):
+            da = QgsDistanceArea()
+            da.setEllipsoid("WGS84")
+            trctxt = QgsCoordinateTransformContext()
+            da.setSourceCrs(QgsCoordinateReferenceSystem(32635), trctxt)
+            tempArea = da.measureArea(geometry)
+            calculatedArea = round(da.convertAreaMeasurement(
+                tempArea, QgsUnitTypes.AreaHectares), 1)
+            return calculatedArea
+
+        layerAreaTemp = QgsProject.instance().mapLayersByName('Лесосека временный слой')
+        layerArea = QgsProject.instance().mapLayersByName('Лесосеки')[0]
+        for feat in layerArea.getFeatures():
+            area = list(layerAreaTemp[0].getFeatures())[0]
+            if area.geometry().contains(feat.geometry()):
+                reply = QMessageBox.question(
+                    QDialog(),
+                    "Наложение лесосек",
+                    "Данная лесосека полностью перекрывает другую. Вырезать старую лесосеку из новой?",
+                    QMessageBox.Yes,
+                    QMessageBox.No,
+                )
+                if reply == QMessageBox.Yes:
+                    with edit(layerAreaTemp[0]):
+                        diffGeom = area.geometry().difference(feat.geometry())
+                        layerAreaTemp[0].changeGeometry(area.id(), diffGeom)
+                        layerAreaTemp[0].changeAttributeValue(area.id(), area.fieldNameIndex('area'), calculateArea(diffGeom))
 
     def showAreaByVydel(self):
         calc = VydelAreaCalculator()
@@ -287,7 +322,7 @@ class CanvasWidget(QgsMapCanvas):
     def peekVydelFromMap(self, btn, btnState):
         def getSelectedFeature(selectedFeature):
             def getAreaPoints(areaData, areaPoints):
-                self.editedUid = areaData[0]
+                # self.editedUid = areaData[0]
                 self.omw.coord_radio_button.setChecked(True)
                 switch = self.omw.switchLayout.itemAt(0).widget()
                 if switch.isChecked():

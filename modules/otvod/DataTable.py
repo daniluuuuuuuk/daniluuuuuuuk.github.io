@@ -46,20 +46,21 @@ class DataTable(QTableWidget):
 
     def __init__(
         self,
-        datatable,
+        layout,
         tableType,
         coordType,
         inclination,
         bindingPoint,
         inclinationSlider,
     ):
-        super().__init__(datatable)
+        super().__init__()
+        layout.addWidget(self)
         self.coordType = coordType
         self.tabletype = tableType
         self.bindingPoint = bindingPoint
         self.inclinationSlider = inclinationSlider
-        self.setGeometry(QtCore.QRect(0, 0, 401, 341))
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+        self.setMinimumWidth(450)
 
         self.cellClicked.connect(self.activeteEditing)
 
@@ -70,12 +71,18 @@ class DataTable(QTableWidget):
 
         self.builder = None
 
+        self.editedCell = None
+
         self.cellChanged.connect(self.cellChangedHandler)
+        self.cellPressed.connect(self.setEditedCell)
 
         self.magneticInclination = inclination
         self.inclinationDifference = None
 
         self.rerenderEnabled = True
+
+    def setEditedCell(self, row, column):
+        self.editedCell = [row, column]
 
     def activeteEditing(self, i, t):
         index = self.model().index(i, t)
@@ -193,7 +200,7 @@ class DataTable(QTableWidget):
             gpsButton.setIcon(
                 QIcon(self.resolve("icons\\pick_from_gps_icon.png"))
             )
-            gpsButton.setMaximumSize(QSize(70, 50))
+            # gpsButton.setMaximumSize(QSize(70, 50))
             self.setCellWidget(index, 3, gpsButton)
             gpsButton.clicked.connect(partial(self.setCoordinateRow, index))
 
@@ -506,6 +513,13 @@ class DataTable(QTableWidget):
             self.pointsDict[row] = [point, self.getPointType(row)]
 
             self.signal.emit(self.pointsDict)
+
+            if (
+                self.editedCell
+                and self.editedCell[0] == row
+                and self.editedCell[1] == column
+            ):
+                self.refreshDataFromPoint(row + 1)
             return row
 
     def getPointType(self, row):
@@ -577,6 +591,11 @@ class DataTable(QTableWidget):
                 return False
         return True
 
+    def refreshDataFromPoint(self, rowStart):
+        self.editedCell = None
+        for row in range(rowStart, self.rowCount()):
+            self.cellChangedHandler(row, 0)
+
     def refreshData(self):
         for row in range(0, self.rowCount()):
             self.cellChangedHandler(row, 0)
@@ -633,7 +652,7 @@ class DataTable(QTableWidget):
 class DataTableWrapper:
     def __init__(
         self,
-        datatable,
+        layout,
         coordType,
         tableType,
         inclination,
@@ -641,7 +660,7 @@ class DataTableWrapper:
         inclinationSlider,
     ):
         self.tableModel = DataTable(
-            datatable,
+            layout,
             coordType,
             tableType,
             inclination,
@@ -759,6 +778,36 @@ class DataTableWrapper:
         self.populateTable(azimuthTableList)
         self.tableModel.pointsDict = cuttingArea.copy()
         self.tableModel.refreshData()
+
+    def serializePointsToCsv(self):
+        pointsDict = self.tableModel.pointsDict
+        bp = self.tableModel.bindingPoint
+        rows = ["№;X;Y;Type"]
+        rows.append(
+            "0"
+            + ";"
+            + str(bp.x())
+            + ";"
+            + str(bp.y())
+            + ";"
+            + "Точка привязки"
+        )
+        for point in pointsDict:
+            qgsPoint = pointsDict[point][0]
+            pointType = pointsDict[point][1]
+            row = (
+                str(point + 1)
+                + ";"
+                + str(qgsPoint.x())
+                + ";"
+                + str(qgsPoint.y())
+                + ";"
+                + str(pointType)
+            )
+            rows.append(row)
+        return rows
+
+        # print(self.tableModel.bindingPoint)
 
     def convertCoordFormat(self, coordType):
         self.tableModel.setRerender(False)

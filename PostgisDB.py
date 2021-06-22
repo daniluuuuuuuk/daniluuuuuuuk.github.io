@@ -32,20 +32,25 @@ class PostGisDB:
         except Exception as e:
             return False
 
-    def getQueryResult(self, query, as_dict=False):
+    def getQueryResult(self, query, as_dict=False, no_result=False):
         connection = self.setConnection()
         if connection:
             curPGSQL = connection.cursor()
             curPGSQL.execute(query)
 
             if as_dict:
+                result_list = []
                 keys = [desc[0] for desc in curPGSQL.description]
-                values = curPGSQL.fetchone()
-                if values:  # Данные присутствуют в бд
-                    return dict(zip(keys, values))
-                return {}
+                values = curPGSQL.fetchall()
+                for value in values:
+                    result_list.append(dict(zip(keys, value)))
+                if not len(result_list):
+                    return [{}]
+                return result_list
 
-            return curPGSQL.fetchall()
+            connection.commit()
+            if not no_result:
+                return curPGSQL.fetchall()
         return []
 
     def testConnection(self, *args, **kwargs):

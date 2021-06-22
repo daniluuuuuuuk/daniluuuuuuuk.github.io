@@ -2,9 +2,9 @@ from qgis.PyQt.QtWidgets import QDialog, QMessageBox, QToolButton, QFileDialog
 from .gui import settingsDialog, changePortDialog
 from .tools import config
 from .tools.ImportDatabase import DataImport
+from .tools.SqlFileExecuter import SqlFileExecuter
 from .tools import module_errors as er
 from .PostgisDB import PostGisDB
-from .BluetoothAdapter import BTAdapter
 from PyQt5 import QtCore
 from .modules.otvod.tools.threading.ForestObjectWorker import (
     Worker as ForestObjWorker,
@@ -69,7 +69,6 @@ class SettingsController(QtCore.QObject):
         self.populateEnterprise()
 
         self.populateBDSettings()
-        self.populateBTSettings()
 
         self.tableUi.saveConfigButton.clicked.connect(self.saveBDConfig)
         self.tableUi.importDB_pushButton.clicked.connect(self.importDB)
@@ -78,14 +77,6 @@ class SettingsController(QtCore.QObject):
         )
         self.tableUi.saveEnterpriseSettingsButton.clicked.connect(
             self.saveEnterpriseConfig
-        )
-
-        self.tableUi.changeForkComButton.clicked.connect(self.changeComPort)
-        self.tableUi.changeRangeFinderComButton.clicked.connect(
-            self.changeComPort
-        )
-        self.tableUi.SaveBTConfigPushButton.clicked.connect(
-            self.saveComPortConfig
         )
 
         self.tableUi.gplho_comboBox.currentTextChanged.connect(
@@ -99,6 +90,7 @@ class SettingsController(QtCore.QObject):
         self.tableUi.saveOtvodSettingsButton.clicked.connect(
             self.saveOtvodSettings
         )
+        self.tableUi.run_sql_pushButton.clicked.connect(self.runSqlScript)
         self.sd.exec()
 
         self.lhTypesAndNames = None
@@ -301,48 +293,6 @@ class SettingsController(QtCore.QObject):
                 None, er.MODULE_ERROR, er.CONFIG_FILE_ERROR + str(e)
             )
 
-    def populateBTSettings(self):
-        cf = config.Configurer("bluetooth")
-        btsettings = cf.readConfigs()
-        self.tableUi.forkComPortlineEdit.setText(
-            btsettings.get("fork", "No data")
-        )
-        self.tableUi.rangeFinderLineEdit.setText(
-            btsettings.get("rangefinder", "No data")
-        )
-
-    def changeComPort(self, *args, **kwargs):
-        sender = self.sd.sender()
-
-        sd = comPortWindow()
-        ui = sd.ui
-
-        btAdapter = BTAdapter()
-        ui.comPortCombobox.addItems(
-            [x.device for x in btAdapter.getAvailablePorts()]
-        )
-        result = sd.exec()
-
-        if result == QDialog.Accepted:
-            port = ui.comPortCombobox.currentText()
-            if sender == self.tableUi.changeForkComButton:
-                self.tableUi.forkComPortlineEdit.setText(port)
-            elif sender == self.tableUi.changeRangeFinderComButton:
-                self.tableUi.rangeFinderLineEdit.setText(port)
-
-    def saveComPortConfig(self):
-        try:
-            settingsDict = {
-                "fork": self.tableUi.forkComPortlineEdit.text(),
-                "rangefinder": self.tableUi.rangeFinderLineEdit.text(),
-            }
-            cf = config.Configurer("bluetooth", settingsDict)
-            cf.writeConfigs()
-        except Exception as e:
-            QMessageBox.information(
-                None, er.MODULE_ERROR, er.CONFIG_FILE_ERROR + str(e)
-            )
-
     def saveBDConfig(self):
         try:
             settingsDict = {
@@ -433,3 +383,30 @@ class SettingsController(QtCore.QObject):
 
             else:
                 return False
+
+    def runSqlScript(self):
+        """
+        Выполнение выбранного SQL скрипта
+        """
+
+        sql_path_file = QFileDialog.getOpenFileName(None, "Выбор файла")[0]
+
+        if sql_path_file != "":
+
+            self.sql_file_executer = SqlFileExecuter(
+                sql_file_path=sql_path_file
+            )
+            self.sql_file_executer.started.connect(
+                lambda: self.spinner.start()
+            )
+            self.sql_file_executer.finished.connect(
+                lambda: self.spinner.stop()
+            )
+            self.sql_file_executer.start()
+            self.sql_file_executer.signal_message_result.connect(
+                lambda mes: QMessageBox.information(None, "", str(mes)),
+                QtCore.Qt.QueuedConnection,
+            )
+
+        else:
+            return False

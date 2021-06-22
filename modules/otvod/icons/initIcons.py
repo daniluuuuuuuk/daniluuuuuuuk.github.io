@@ -16,6 +16,9 @@ class IconSet:
         self.omw.azimuthTool_pushButton.setIcon(
             QIcon(self.resolve("azimuth_icon.png"))
         )
+        self.omw.movePoint_button.setIcon(
+            QIcon(self.resolve("move_tool.png"))
+        )        
         self.omw.buildLesoseka_Button.setIcon(QIcon(self.resolve("build.png")))
         self.omw.editAttributes_button.setIcon(
             QIcon(self.resolve("pencil.png"))
