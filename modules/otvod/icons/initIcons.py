@@ -11,8 +11,6 @@ class IconSet:
         self.omw.peekFromGPSPushButton.setIcon(
             QIcon(self.resolve("pick_from_gps_icon.png"))
         )
-        # self.omw.addRangeFinderNode_button.setIcon(
-        #     QIcon(self.resolve('range_finder_icon.png')))
         self.omw.azimuthTool_pushButton.setIcon(
             QIcon(self.resolve("azimuth_icon.png"))
         )
@@ -42,6 +40,9 @@ class IconSet:
         self.omw.exportAsImage_PushButton.setIcon(
             QIcon(self.resolve("image.png"))
         )
+        self.omw.gpsTablet_pushButton.setIcon(
+            QIcon(self.resolve("gps.png"))
+        )        
         self.omw.handTool_button.setIcon(QIcon(self.resolve("hand_tool.png")))
         self.omw.manageLayers_button.setIcon(QIcon(self.resolve("layers.png")))
         self.omw.saveData_pushButton.setIcon(QIcon(self.resolve("save.png")))

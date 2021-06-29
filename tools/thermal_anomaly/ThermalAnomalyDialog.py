@@ -72,8 +72,8 @@ class ThermalAnomalyDialog(QtWidgets.QDialog, FORM_CLASS):
     ]
     _validPeriodText = "*данные пользователя действительны до 31 декабря 2020г."
 
-    _clientId = "plugin_for_qgis"
-    _clientSecret = "5a963ce5-580a-3992-a905-8388c406d113"
+    _clientId = "belgosles_client"
+    _clientSecret = "1653e1f6-d4c1-bc6a-b9eb-7e0174951f80"
 
     def __init__(self, iface, parent=None):
         """Constructor."""

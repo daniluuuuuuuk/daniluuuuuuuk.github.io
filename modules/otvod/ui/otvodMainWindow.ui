@@ -235,6 +235,25 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="gpsTablet_pushButton">
+           <property name="minimumSize">
+            <size>
+             <width>25</width>
+             <height>25</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>25</width>
+             <height>25</height>
+            </size>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="peekVydelFromMap_pushButton">
            <property name="minimumSize">
             <size>
