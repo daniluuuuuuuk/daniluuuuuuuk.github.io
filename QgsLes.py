@@ -31,6 +31,7 @@ from .gui.taxationDescription import (
 )
 from .gui.exportImportCuttingAreasDialog import ExportImportCuttingAreaWindow
 from qgis.PyQt.QtCore import Qt
+from .tools.thermal_anomaly.ThermalAnomalyDialog import ThermalAnomalyDialog
 
 
 class DatabaseConnectionVerifier:
@@ -244,6 +245,13 @@ class QgsLes:
         )
         self.initProjectAction.triggered.connect(self.initProjectClicked)
 
+        self.thermalAnomalyAction = QAction(
+            QIcon(util.resolvePath("res\\fire.png")),
+            "Поиск тепловых аномалий",
+            self.iface.mainWindow(),
+        )
+        self.thermalAnomalyAction.triggered.connect(self.thermalAnomalyClicked)
+
         self.qgsLesToolbar.addAction(self.taxationAction)
         self.qgsLesToolbar.addAction(self.otvodAction)
         self.qgsLesToolbar.addAction(self.countAction)
@@ -253,9 +261,14 @@ class QgsLes:
         self.qgsLesToolbar.addAction(self.settingsAction)
         self.qgsLesToolbar.addAction(self.initProjectAction)
         self.qgsLesToolbar.addAction(self.exportImportAction)
+        self.qgsLesToolbar.addAction(self.thermalAnomalyAction)
 
         if QgsProject.instance().mapLayersByName("Выдела"):
             self.initFilter()
+    
+    def thermalAnomalyClicked(self):
+        self.dlg = ThermalAnomalyDialog(self.iface)
+        self.dlg.show()
 
     def filterAreaButtonClicked(self, checked):
         if not QgsProject.instance().mapLayersByName("Лесосеки"):
