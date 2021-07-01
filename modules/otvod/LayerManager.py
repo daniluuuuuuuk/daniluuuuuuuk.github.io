@@ -1,5 +1,5 @@
 from .gui.canvasLayerManagerWidget import Ui_Dialog as layerWidget
-from qgis.PyQt.QtWidgets import QDialog, QCheckBox, QSizePolicy, QButtonGroup, QRadioButton
+from qgis.PyQt.QtWidgets import QDialog, QCheckBox, QSizePolicy, QButtonGroup, QRadioButton, QVBoxLayout, QDialogButtonBox
 from qgis.core import QgsProject, QgsWkbTypes, QgsFeatureRequest
 from .tools import GeoOperations as geop
 
@@ -63,7 +63,9 @@ class GPSLayerManager(LayerManager):
 
     def __init__(self, canvas):
         super().__init__(canvas)
+        self.layerName = None
         self.layer = None
+        self.fieldName = None
 
     def getProjectLayerNames(self):
         return [
@@ -71,7 +73,11 @@ class GPSLayerManager(LayerManager):
             ]
 
     def radioClicked(self, btn):
-        self.layer = btn.name
+        self.layerName = btn.name
+        self.layer = QgsProject.instance().mapLayersByName(btn.name)[0]
+
+    def fieldNameRadioClicked(self, btn):
+        self.fieldName = btn.name
 
     def setupRadioButtons(self):
         self.radioGroup = QButtonGroup()
@@ -84,19 +90,47 @@ class GPSLayerManager(LayerManager):
         self.radioGroup.buttonClicked.connect(self.radioClicked)
 
     def getPointsOfLayerAsList(self):
-        lr = QgsProject.instance().mapLayersByName(self.layer)[0]
-        features = self.sortFeaturesByField(lr, 'name')
-        return self.getPointsList(features)
 
-    def getPointsList(self, features):
-        return [
-            [geop.convertToZone35(pt.geometry().asPoint()), 'Лесосека'] for pt in features
-        ]
+        espg = self.layer.crs().authid()
+
+        self.setFieldName()
+
+        if not self.fieldName:
+            return
+
+        features = self.sortFeaturesByField(self.layer, self.fieldName)
+        return self.getPointsList(features, espg)
+
+    def setFieldName(self):
+        self.fieldNameDialog = QDialog()
+        self.widget.setupUi(self.fieldNameDialog)
+        self.fieldNameGroup = QButtonGroup()
+
+        for name in self.layer.fields().names():
+            radiobutton = QRadioButton(name)
+            radiobutton.name = name
+            radiobutton.setChecked(False)
+            self.fieldNameGroup.addButton(radiobutton)
+            self.widget.verticalLayout.addWidget(radiobutton)
+
+        self.fieldNameGroup.buttonClicked.connect(self.fieldNameRadioClicked)
+        self.fieldNameDialog.setWindowTitle('Выберите поле с номерами точек')        
+        self.fieldNameDialog.exec()
+
+    def getPointsList(self, features, espg):
+        if espg == 'EPSG:32635':
+            return [
+                [pt.geometry().asPoint(), 'Лесосека'] for pt in features
+            ]
+        elif espg == 'EPSG:4326':
+            return [
+                [geop.convertToZone35(pt.geometry().asPoint()), 'Лесосека'] for pt in features
+            ]
 
     def sortFeaturesByField(self, layer, field):
         request = QgsFeatureRequest()
 
-        clause = QgsFeatureRequest.OrderByClause(field, ascending=False)
+        clause = QgsFeatureRequest.OrderByClause(field, ascending=True)
         orderby = QgsFeatureRequest.OrderBy([clause])
         request.setOrderBy(orderby)
 
@@ -107,6 +141,7 @@ class GPSLayerManager(LayerManager):
     def initWidget(self):
         self.widget.setupUi(self.dialog)
         self.setupRadioButtons()
+        self.dialog.setWindowTitle('Выберите слой с точками лесосеки')        
         if self.dialog.exec() == QDialog.Accepted:
             return True
         return False

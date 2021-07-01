@@ -20,7 +20,7 @@ from qgis.PyQt.QtCore import QObject
 from .LayerManager import LayerManager
 from qgis.core import QgsGeometry, edit
 from qgis.core import QgsDistanceArea, QgsUnitTypes, QgsCoordinateTransformContext
-
+from qgis.utils import iface
 
 class CanvasWidget(QgsMapCanvas):
     def __init__(self, otvodMainWindow, layers, rct, table):
@@ -214,6 +214,7 @@ class CanvasWidget(QgsMapCanvas):
             return
 
         layerVd = QgsProject.instance().mapLayersByName("Выдела")[0]
+        iface.setActiveLayer(layerVd)
         layerVd.removeSelection()
 
         try:

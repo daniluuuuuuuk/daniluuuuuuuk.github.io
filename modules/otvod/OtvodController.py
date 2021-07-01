@@ -176,16 +176,19 @@ class OtvodController:
         self.manager = GPSLayerManager(self.canvas)
         if self.manager.initWidget():
             
+            layerVd = QgsProject.instance().mapLayersByName("Выдела")[0]
+            iface.setActiveLayer(layerVd)
+
             self.omw.coord_radio_button.toggle()
             self.canvasWidget.table.deleteRows()   
 
             ptList = self.manager.getPointsOfLayerAsList()
+            if ptList:
+                bindingPoint = GeoOperations.convertToWgs(ptList[-1][0])
+                self.omw.y_coord_LineEdit.setText(str(bindingPoint.x()))
+                self.omw.x_coord_LineEdit.setText(str(bindingPoint.y()))
 
-            bindingPoint = GeoOperations.convertToWgs(ptList[-1][0])
-            self.omw.y_coord_LineEdit.setText(str(bindingPoint.x()))
-            self.omw.x_coord_LineEdit.setText(str(bindingPoint.y()))
-
-            self.canvasWidget.table.appendTableFromMap(ptList)
+                self.canvasWidget.table.appendTableFromMap(ptList)
         
     def enableMovePointTool(self):
         layer = QgsProject.instance().mapLayersByName('Пикеты')
