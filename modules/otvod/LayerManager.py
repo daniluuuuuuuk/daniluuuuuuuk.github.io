@@ -1,5 +1,6 @@
 from .gui.canvasLayerManagerWidget import Ui_Dialog as layerWidget
-from qgis.PyQt.QtWidgets import QDialog, QCheckBox, QSizePolicy, QButtonGroup, QRadioButton, QVBoxLayout, QDialogButtonBox
+from qgis.PyQt.QtWidgets import QDialog, QCheckBox, QSizePolicy, QButtonGroup
+from qgis.PyQt.QtWidgets import QRadioButton, QVBoxLayout, QDialogButtonBox, QMessageBox
 from qgis.core import QgsProject, QgsWkbTypes, QgsFeatureRequest
 from .tools import GeoOperations as geop
 
@@ -126,6 +127,11 @@ class GPSLayerManager(LayerManager):
             return [
                 [geop.convertToZone35(pt.geometry().asPoint()), 'Лесосека'] for pt in features
             ]
+        else:
+            QMessageBox.warning(
+                None, "Ошибка", "Импорт слоя в данной системе координат не поддерживается"
+            )
+            return []
 
     def sortFeaturesByField(self, layer, field):
         request = QgsFeatureRequest()
