@@ -207,6 +207,9 @@
              <height>25</height>
             </size>
            </property>
+           <property name="toolTip">
+            <string>Перемещение точки</string>
+           </property>
            <property name="text">
             <string/>
            </property>
@@ -247,6 +250,9 @@
              <width>25</width>
              <height>25</height>
             </size>
+           </property>
+           <property name="toolTip">
+            <string>Загрузить точки со слоя</string>
            </property>
            <property name="text">
             <string/>
