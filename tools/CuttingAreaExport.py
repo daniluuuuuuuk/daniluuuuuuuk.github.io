@@ -4,7 +4,7 @@ from openpyxl.styles import *
 from PyQt5.QtCore import QThread, pyqtSignal
 from .. import PostgisDB
 from .config import Configurer
-
+from qgis.core import QgsProject, QgsVectorFileWriter
 
 class CuttingAreaExport(QThread):
     """
@@ -33,6 +33,19 @@ class CuttingAreaExport(QThread):
             self.run = self.write_to_json
         elif file_extension == "xlsx":
             self.run = self.write_to_xlsx
+        elif file_extension == "shp":
+            self.run = self.write_to_shape
+
+    def write_to_shape(self):
+        layer = QgsProject.instance().mapLayersByName("Лесосеки")[0]
+        layer.removeSelection()
+        result = []
+        for ft in layer.getFeatures():
+            if ft['uid'] in self.uuid_list:
+                result.append(ft.id())
+            layer.select(result)
+        writer = QgsVectorFileWriter.writeAsVectorFormat(
+            layer=layer, fileName=self.path_to_file, fileEncoding="utf-8", destCRS=layer.crs(), driverName="ESRI Shapefile", onlySelected=True)
 
     def get_data_from_db(self):
         """
