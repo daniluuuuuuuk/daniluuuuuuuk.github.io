@@ -52,9 +52,9 @@ class FilterWidgetController:
 
     self.initWidgetData()
 
-    self.view.ui.lch_combobox_3.currentTextChanged.connect(self.changeForestry)
-    self.view.ui.kv_combobox_3.currentTextChanged.connect(self.changeQuarter)
-    self.view.ui.vd_combobox_3.currentTextChanged.connect(self.changeStratum)
+    self.view.ui.lch_combobox_3.currentIndexChanged.connect(self.changeForestry)
+    self.view.ui.kv_combobox_3.currentIndexChanged.connect(self.changeQuarter)
+    self.view.ui.vd_combobox_3.currentIndexChanged.connect(self.changeStratum)
 
     self.view.ui.zoomTo_PushButton_3.clicked.connect(self.search)
     self.view.ui.clearFilter_pushButton_3.clicked.connect(self.clear)
