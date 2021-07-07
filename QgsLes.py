@@ -327,7 +327,8 @@ class QgsLes:
 
     def unload(self):
         del self.qgsLesToolbar
-        # del self.dockWidget
+        if self.dockWidget:
+            del self.dockWidget
 
     def taxationButtonClicked(self):
         def getResult(feature):
