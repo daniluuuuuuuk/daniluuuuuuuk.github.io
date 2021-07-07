@@ -1,7 +1,7 @@
 from .gui.canvasLayerManagerWidget import Ui_Dialog as layerWidget
 from qgis.PyQt.QtWidgets import QDialog, QCheckBox, QSizePolicy, QButtonGroup
 from qgis.PyQt.QtWidgets import QRadioButton, QVBoxLayout, QDialogButtonBox, QMessageBox
-from qgis.core import QgsProject, QgsWkbTypes, QgsFeatureRequest
+from qgis.core import QgsProject, QgsWkbTypes, QgsFeatureRequest, QgsMapLayer
 from .tools import GeoOperations as geop
 
 class LayerManager:
@@ -70,7 +70,9 @@ class GPSLayerManager(LayerManager):
 
     def getProjectLayerNames(self):
         return [
-            x.name() for x in QgsProject.instance().mapLayers().values() if x.geometryType() == QgsWkbTypes.PointGeometry
+            x.name() for x in QgsProject.instance().mapLayers().values() 
+            if x.type() == QgsMapLayer.VectorLayer 
+            and x.geometryType() == QgsWkbTypes.PointGeometry
             ]
 
     def radioClicked(self, btn):

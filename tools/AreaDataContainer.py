@@ -53,9 +53,23 @@ class AreaDataPrintContainer:
                 layerName)
         if layer:
             self.projectInstance.removeMapLayers([layer[0].id()])
+
+    def getTableType(self):
+        tableDict = {
+            'Координаты': 0,
+            'Азимуты': 1,
+            'Румбы': 2,
+            'Левые углы': 3,
+            'Правые углы': 4,
+            'Углы, координаты, румбы': 5,
+        }
+        return tableDict.get(self.areaData['type'])        
+
+    def getCoordType(self):
+        return 0 if self.areaData['format'] == 'Десятичный' else 1
     
     def printLayout(self):
-        layout = LayoutManager(self.canvas, QgsProject.instance(), self.bindingPoint, uid=self.uid, scale=int(self.areaData['scale']))
+        layout = LayoutManager(self.canvas, self.bindingPoint, self.getTableType(), self.getCoordType(), uid=self.uid, scale=int(self.areaData['scale']))
         layout.generate([self.columnNames] + self.tableList)
 
     def prepareTableForLayout(self):

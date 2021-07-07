@@ -680,7 +680,7 @@ class OtvodController:
 
     def generateLayout(self):
         layout = LayoutManager.LayoutManager(
-            self.canvas, QgsProject.instance(), self.bindingPoint
+            self.canvas, self.bindingPoint, self.tableType, self.coordType
         )
         layout.generate(
             [self.tableWrapper.getColumnNames()]

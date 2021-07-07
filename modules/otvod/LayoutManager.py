@@ -2,7 +2,7 @@ import os
 from qgis.core import QgsPrintLayout, QgsProject, QgsPageSizeRegistry, QgsLayoutItemPage
 from qgis.core import QgsLayoutItemMap, QgsRectangle, QgsLayoutItemHtml, QgsLayoutMeasurement
 from qgis.core import QgsLayoutFrame, QgsUnitTypes, QgsLayoutPoint, QgsLayoutItemPicture
-from qgis.core import QgsLayoutSize, QgsLayoutItemLabel
+from qgis.core import QgsLayoutSize, QgsLayoutItemLabel, QgsProject
 from qgis.PyQt.QtCore import QSize, QRectF
 from qgis.PyQt.QtGui import QFont
 from qgis.PyQt.QtWidgets import QMessageBox
@@ -16,9 +16,11 @@ A4_PAGE_HEIGHT = 3700
 
 class LayoutManager:
 
-    def __init__(self, canvas, project, bindingPoint, uid=None, scale=None):
-        self.project = project
+    def __init__(self, canvas, bindingPoint, tableType, coordType, uid=None, scale=None):
+        self.project = QgsProject.instance()
         self.canvas = canvas
+        self.tableType = tableType
+        self.coordType = coordType
         self.bindingPoint = geop.convertToWgs(bindingPoint)
         if not uid:
             self.uid = self.getUid()
@@ -100,23 +102,43 @@ class LayoutManager:
         layout.addLayoutItem(mapItem)
         return mapItem
 
-    def generateTableHTML(self, rows):
-        
+    def generateTableHTML(self, rows, topPosition):
+        firstPoint = self.getFirstPointOfArea(rows)
         def parseHeader():
             th = ''
-            for key in rows[0]:
+            for i, key in enumerate(rows[0]):
                 if key == 'GPS':
                     continue
-                th += '<th>' + key + '</th>'
+                if '/' in key:
+                    th += '<th>' + '<span style="background-color:#ddd;">' + key.split('/')[0] + '</span>' + '/' + key.split('/')[1] + '</th>'
+                else:
+                    th += '<th>' + key + '</th>'
             return '<tr>' + th + '</tr>'
         
         def parseValues():
             values = ''
-            for row in rows[1:]:
+            for n, row in enumerate(rows[1:]):
                 tr = ''
                 td = ''
-                for data in row:
-                    td += '<td>' + data + '</td>'
+                for i, data in enumerate(row):
+                    if self.tableType == 5 and i == 1 and n <= firstPoint and topPosition == 2200:
+                        td += '<td bgcolor="#e5e5e5">' + data + '</td>'
+                    elif self.tableType == 4 and i in range(1, 4) and n <= firstPoint and topPosition == 2200:
+                        if self.coordType == 0 and i == 1:
+                            td += '<td bgcolor="#e5e5e5">' + data + '</td>'
+                        elif self.coordType == 1:
+                            td += '<td bgcolor="#e5e5e5">' + data + '</td>'
+                        else:
+                            td += '<td>' + data + '</td>'                            
+                    elif self.tableType == 3 and i in range(1, 4) and n <= firstPoint and topPosition == 2200:
+                        if self.coordType == 0 and i == 1:
+                            td += '<td bgcolor="#e5e5e5">' + data + '</td>'
+                        elif self.coordType == 1:
+                            td += '<td bgcolor="#e5e5e5">' + data + '</td>'
+                        else:
+                            td += '<td>' + data + '</td>'
+                    else:
+                        td += '<td>' + data + '</td>'
                 tr = '<tr>' + td + '</tr>'
                 values += tr
             return values
@@ -141,7 +163,7 @@ class LayoutManager:
             border: 1px solid black;\
             white-space: nowrap;\
             text-align: center;\
-            }'  
+            }' 
 
     def composeHtmlLayout(self, layout, tableRows, topPosition):                   
         rows = len(tableRows)
@@ -151,7 +173,7 @@ class LayoutManager:
         html_frame.setFrameEnabled(True)
         layout_html.addFrame(html_frame)
         layout_html.setContentMode(QgsLayoutItemHtml.ManualHtml)
-        layout_html.setHtml(self.generateTableHTML(tableRows))
+        layout_html.setHtml(self.generateTableHTML(tableRows, topPosition))
         layout_html.loadHtml()
         layout_html.setUserStylesheet(self.prepareTableCss())
         layout_html.setUserStylesheetEnabled(True)
@@ -316,39 +338,67 @@ class LayoutManager:
         fioLabel.adjustSizeToText()
         fioLabel.attemptMove(QgsLayoutPoint(200, heightPosition, QgsUnitTypes.LayoutPixels))
 
-    def checkIfCoordRow(self, tableRows):
-        for row in tableRows[0]:
-            if 'Y, °' in row:
-                return True
-        return False
-
     def getFirstPointOfArea(self, tableRows):
-        for x, r in enumerate(tableRows):
-            if x == 1 and r[-1] == 'Лесосека':
-                return x - 1
-            elif x > 1 and tableRows[x-2][-1] == 'Привязка' and r[-1] == 'Лесосека':
-                return x - 1
+        # for x, r in enumerate(tableRows):
+        #     if x == 1 and r[-1] == 'Лесосека':
+        #         return x - 1
+        #     elif x > 1 and tableRows[x-2][-1] == 'Привязка' and r[-1] == 'Лесосека':
+        #         return x - 1
+        for i, row in enumerate(tableRows):
+            if row[-1] == 'Лесосека':
+                return i - 1        
 
     def cutSecondPointNumber(self, tableRows):
-        if self.coordTable:
-            for row in tableRows[1:]:
-                row[0] = row[0].split('-')[1]
+        for row in tableRows[1:]:
+            row[0] = row[0].split('-')[1]
         tableRows[-1][0] = str(len(tableRows ) - 1) + '(' +str(self.getFirstPointOfArea(tableRows)) + ')'
         return tableRows
 
     def addBindingPointToTableRows(self, tableRows):
-        if len(tableRows[0]) == 5:
+        if self.tableType == 0 and self.coordType == 0:
             tableRows.insert(1, ['0', str(self.bindingPoint.y()), str(self.bindingPoint.x()), ''])
-        elif len(tableRows[0]) == 8:
+        elif self.tableType == 0 and self.coordType == 1:
             x = geop.convertToDMS(self.bindingPoint.x())
             y = geop.convertToDMS(self.bindingPoint.y())
             tableRows.insert(1, ['0', str(y[0]), str(y[1]), str(y[2]), str(x[0]), str(x[1]), str(x[2]), ''])
+        elif self.tableType == 5 and self.coordType == 0:
+            tableRows.insert(1, ['0', '', str(self.bindingPoint.y()) + '; ' + str(self.bindingPoint.x()), '', '', ''])
+        elif self.tableType == 5 and self.coordType == 1:
+            x = geop.convertToDMS(self.bindingPoint.x())
+            y = geop.convertToDMS(self.bindingPoint.y())
+            tableRows.insert(1, ['0', '', str(int(float(y[0]))) + '°' + str(int(float(y[1]))) + '′' + str(int(float(y[2]))) + '″; '
+            + str(int(float(x[0]))) + '°' + str(int(float(x[1]))) + '′' + str(int(float(x[2]))) + '″', '', '', ''])
 
-    def generate(self, tableRows):
-        self.coordTable = self.checkIfCoordRow(tableRows)
-        if self.coordTable:
+    def addFirstPointNumber(self, tableRows):
+        # def getFirstLesosekaPoint():
+        #     for i, row in enumerate(tableRows):
+        #         if row[-1] == 'Лесосека':
+        #             return i - 1
+        firstPointNumber = self.getFirstPointOfArea(tableRows)
+        lastPoint = tableRows[-1]
+        lastPoint[0] = lastPoint[0] + '(' + str(firstPointNumber) + ')'
+
+    def addAzimuthTextToHeader(self, tableRows):
+        tableRows[0][1] = 'Азимут/Угол, °'
+        if self.coordType == 1:
+            tableRows[0][1] = 'Азимут/Угол X, °'
+
+    def processTableRows(self, tableRows):
+        if self.tableType == 0:
+            #Удалить вторую точки из нумерации и добавить точку привязки в таблицу
            self.cutSecondPointNumber(tableRows)
            self.addBindingPointToTableRows(tableRows)
+        else:
+            #Для последней точки добавить номер первой в скобках
+            self.addFirstPointNumber(tableRows)
+        if self.tableType == 5:
+            self.addBindingPointToTableRows(tableRows)
+            self.addAzimuthTextToHeader(tableRows)
+        if self.tableType == 4 or self.tableType == 3:
+            self.addAzimuthTextToHeader(tableRows)
+
+    def generate(self, tableRows):
+        self.processTableRows(tableRows)
         pages = self.countPages(tableRows)
         layout = self.prepareLayout(pages)
         header = self.prepareHeader(layout)
