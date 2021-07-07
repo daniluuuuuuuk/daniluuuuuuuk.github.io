@@ -274,7 +274,7 @@ class LayoutManager:
         mainlabel.setFont(QFont('Times New Roman', 11))
         layout.addLayoutItem(mainlabel)
         mainlabel.adjustSizeToText()
-        mainlabel.attemptMove(QgsLayoutPoint(200, 1970, QgsUnitTypes.LayoutPixels))
+        mainlabel.attemptMove(QgsLayoutPoint(200, 2050, QgsUnitTypes.LayoutPixels))
 
         labels = ['Точка привязки', 'Узел хода', 'Линия привязки', 'Лесосека']
         i = 0
@@ -284,7 +284,7 @@ class LayoutManager:
             label.setFont(QFont('Times New Roman', 11))
             layout.addLayoutItem(label)
             label.adjustSizeToText()
-            label.attemptMove(QgsLayoutPoint(200 + (500 * i) + 120, 2050, QgsUnitTypes.LayoutPixels))
+            label.attemptMove(QgsLayoutPoint(200 + (500 * i) + 120, 2130, QgsUnitTypes.LayoutPixels))
             i+= 1
 
     def prepareLegendImages(self, layout):
@@ -298,7 +298,7 @@ class LayoutManager:
             layoutItemPicture.setPicturePath(img)
             layoutItemPicture.attemptResize(QgsLayoutSize(120, 100, QgsUnitTypes.LayoutPixels))
             layout.addLayoutItem(layoutItemPicture)
-            layoutItemPicture.attemptMove(QgsLayoutPoint(200 + (500 * i), 2010, QgsUnitTypes.LayoutPixels))
+            layoutItemPicture.attemptMove(QgsLayoutPoint(200 + (500 * i), 2090, QgsUnitTypes.LayoutPixels))
             i += 1
         return images
     
