@@ -27,7 +27,7 @@ from datetime import datetime
 from qgis.PyQt.QtCore import Qt
 from qgis.utils import iface
 from qgis.gui import QgsMapToolPan, QgsMapToolAdvancedDigitizing
-from .LayerManager import LayerManager
+from .LayerManager import LayerManager, GPSLayerManager
 from .icons.initIcons import IconSet
 from qgis.core import Qgis, QgsSnappingConfig, QgsTolerance
 from . import geomag
@@ -41,10 +41,6 @@ class OtvodController:
         self.rct = rct
 
         self.omw = MainWindow(self)
-        # self.omw.tableWidget.setGeometry(QtCore.QRect(0, 0, 401, 341))
-
-        # print(self.omw.tableWidget)
-        # print(self.omw.verticalLayout_6)
 
         self.tableType = self.getConfigTableType()
         self.coordType = self.getConfigCoordType()
@@ -174,6 +170,26 @@ class OtvodController:
         )
         self.omw.exportAsImage_PushButton.clicked.connect(self.generateImage)
 
+        self.omw.gpsTablet_pushButton.clicked.connect(self.loadPointsFromLayer)
+
+    def loadPointsFromLayer(self):
+        self.manager = GPSLayerManager(self.canvas)
+        if self.manager.initWidget():
+            
+            layerVd = QgsProject.instance().mapLayersByName("Выдела")[0]
+            iface.setActiveLayer(layerVd)
+
+            self.omw.coord_radio_button.toggle()
+            self.canvasWidget.table.deleteRows()   
+
+            ptList = self.manager.getPointsOfLayerAsList()
+            if ptList:
+                bindingPoint = GeoOperations.convertToWgs(ptList[-1][0])
+                self.omw.y_coord_LineEdit.setText(str(bindingPoint.x()))
+                self.omw.x_coord_LineEdit.setText(str(bindingPoint.y()))
+
+                self.canvasWidget.table.appendTableFromMap(ptList)
+        
     def enableMovePointTool(self):
         layer = QgsProject.instance().mapLayersByName('Пикеты')
         if layer:
@@ -393,8 +409,6 @@ class OtvodController:
             self.omw.x_coord_LineEdit.setText(str(round(gpsCoords[1], 10)))
 
     def loadDataTable(self):
-        # print(self.omw.tableWidget.setLayout(self.omw.horizontalLayout))
-        # self.omw.verticalLayout_6.addWidget(self.omw.tableWidget)
         datatable = DataTableWrapper(
             self.omw.verticalLayout_6,
             int(self.tableType),
@@ -409,10 +423,7 @@ class OtvodController:
         self.omw.clearNodes_button.clicked.connect(
             partial(self.clearNodes, datatable)
         )
-        # self.omw.move_node_up_button.clicked.connect(datatable.move_row_up)
-        # self.omw.move_node_down_button.clicked.connect(datatable.move_row_down)
-        # self.omw.add_line_node_button.clicked.connect(datatable.add_line_node)
-        # self.omw.add_lesoseka_node_button.clicked.connect(datatable.add_lesoseka_node)
+
         return datatable
 
     def clearNodes(self, datatable):
@@ -659,9 +670,7 @@ class OtvodController:
             if layer:
                 QgsProject.instance().removeMapLayers([layer[0].id()])
 
-        # self.omw.outputLabel.setText("Лесосека удалена")
         self.magneticInclination = 0.0
-        # self.omw.inclinationSlider.setValue(0)
         self.canvasWidget.btnControl.lockLesosekaButtons()
         self.tableWrapper.deleteRows()
         self.omw.y_coord_LineEdit.clear()
@@ -671,7 +680,7 @@ class OtvodController:
 
     def generateLayout(self):
         layout = LayoutManager.LayoutManager(
-            self.canvas, QgsProject.instance(), self.bindingPoint
+            self.canvas, self.bindingPoint, self.tableType, self.coordType
         )
         layout.generate(
             [self.tableWrapper.getColumnNames()]

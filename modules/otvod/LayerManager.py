@@ -1,7 +1,8 @@
 from .gui.canvasLayerManagerWidget import Ui_Dialog as layerWidget
-from qgis.PyQt.QtWidgets import QDialog, QCheckBox, QSizePolicy
-from qgis.core import QgsProject
-
+from qgis.PyQt.QtWidgets import QDialog, QCheckBox, QSizePolicy, QButtonGroup
+from qgis.PyQt.QtWidgets import QRadioButton, QVBoxLayout, QDialogButtonBox, QMessageBox
+from qgis.core import QgsProject, QgsWkbTypes, QgsFeatureRequest, QgsMapLayer
+from .tools import GeoOperations as geop
 
 class LayerManager:
     def __init__(self, canvas):
@@ -32,7 +33,7 @@ class LayerManager:
 
     def getProjectLayerNames(self):
         return [
-            x.name() for x in QgsProject.instance().layerTreeRoot().children()
+            x.name() for x in QgsProject.instance().mapLayers().values()
         ]
 
     def setupCanvasLayers(self, layerNames):
@@ -54,6 +55,101 @@ class LayerManager:
     def initWidget(self):
         self.widget.setupUi(self.dialog)
         self.setupCheckBoxes()
+        if self.dialog.exec() == QDialog.Accepted:
+            return True
+        return False
+
+
+class GPSLayerManager(LayerManager):
+
+    def __init__(self, canvas):
+        super().__init__(canvas)
+        self.layerName = None
+        self.layer = None
+        self.fieldName = None
+
+    def getProjectLayerNames(self):
+        return [
+            x.name() for x in QgsProject.instance().mapLayers().values() 
+            if x.type() == QgsMapLayer.VectorLayer 
+            and x.geometryType() == QgsWkbTypes.PointGeometry
+            ]
+
+    def radioClicked(self, btn):
+        self.layerName = btn.name
+        self.layer = QgsProject.instance().mapLayersByName(btn.name)[0]
+
+    def fieldNameRadioClicked(self, btn):
+        self.fieldName = btn.name
+
+    def setupRadioButtons(self):
+        self.radioGroup = QButtonGroup()
+        for lr in self.getProjectLayerNames():
+            radiobutton = QRadioButton(lr)
+            radiobutton.name = lr
+            radiobutton.setChecked(False)
+            self.radioGroup.addButton(radiobutton)
+            self.widget.verticalLayout.addWidget(radiobutton)
+        self.radioGroup.buttonClicked.connect(self.radioClicked)
+
+    def getPointsOfLayerAsList(self):
+
+        espg = self.layer.crs().authid()
+
+        self.setFieldName()
+
+        if not self.fieldName:
+            return
+
+        features = self.sortFeaturesByField(self.layer, self.fieldName)
+        return self.getPointsList(features, espg)
+
+    def setFieldName(self):
+        self.fieldNameDialog = QDialog()
+        self.widget.setupUi(self.fieldNameDialog)
+        self.fieldNameGroup = QButtonGroup()
+
+        for name in self.layer.fields().names():
+            radiobutton = QRadioButton(name)
+            radiobutton.name = name
+            radiobutton.setChecked(False)
+            self.fieldNameGroup.addButton(radiobutton)
+            self.widget.verticalLayout.addWidget(radiobutton)
+
+        self.fieldNameGroup.buttonClicked.connect(self.fieldNameRadioClicked)
+        self.fieldNameDialog.setWindowTitle('Выберите поле с номерами точек')        
+        self.fieldNameDialog.exec()
+
+    def getPointsList(self, features, espg):
+        if espg == 'EPSG:32635':
+            return [
+                [pt.geometry().asPoint(), 'Лесосека'] for pt in features
+            ]
+        elif espg == 'EPSG:4326':
+            return [
+                [geop.convertToZone35(pt.geometry().asPoint()), 'Лесосека'] for pt in features
+            ]
+        else:
+            QMessageBox.warning(
+                None, "Ошибка", "Импорт слоя в данной системе координат не поддерживается"
+            )
+            return []
+
+    def sortFeaturesByField(self, layer, field):
+        request = QgsFeatureRequest()
+
+        clause = QgsFeatureRequest.OrderByClause(field, ascending=True)
+        orderby = QgsFeatureRequest.OrderBy([clause])
+        request.setOrderBy(orderby)
+
+        features = layer.getFeatures(request)
+
+        return features
+
+    def initWidget(self):
+        self.widget.setupUi(self.dialog)
+        self.setupRadioButtons()
+        self.dialog.setWindowTitle('Выберите слой с точками лесосеки')        
         if self.dialog.exec() == QDialog.Accepted:
             return True
         return False

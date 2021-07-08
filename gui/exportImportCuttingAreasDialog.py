@@ -43,6 +43,9 @@ class ExportImportCuttingAreaWindow(
         self.pushButton_3.clicked.connect(
             lambda: self.export_cutting_areas("xlsx")
         )
+        self.pushButton_4.clicked.connect(
+            lambda: self.export_cutting_areas("shp")
+        )
         self.toolButton.clicked.connect(self.select_file_to_import)
 
         self.add_event_to_areas_cb()

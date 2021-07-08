@@ -38,7 +38,6 @@ def convertDMSAngle(degrees, minutes, seconds):
 
 
 def convertToZone35(point):
-    # print("Convert to zone 35", point)
     transf = QgsCoordinateTransform(QgsCoordinateReferenceSystem(
         4326), QgsCoordinateReferenceSystem(32635), QgsProject.instance())
     wgsPoint = transf.transform(point)

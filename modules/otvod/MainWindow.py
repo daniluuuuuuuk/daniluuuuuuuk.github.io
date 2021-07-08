@@ -15,6 +15,12 @@ class MainWindow(QMainWindow, otvodMainWindow):
         self.initHotKeys()
 
     def initHotKeys(self):
+        self.loadPointsFromLayer = QShortcut(self)
+        self.loadPointsFromLayer.setKey(QKeySequence("Ctrl+G"))
+        self.loadPointsFromLayer.activated.connect(
+            lambda: self.controller.loadPointsFromLayer()
+        )
+
         self.loadDataFromFile = QShortcut(self)
         self.loadDataFromFile.setKey(QKeySequence("Ctrl+O"))
         self.loadDataFromFile.activated.connect(

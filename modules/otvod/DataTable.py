@@ -232,47 +232,6 @@ class DataTable(QTableWidget):
         self.setup_cell_widgets(self.getRowCount() - 1)
         self.update_row_numbers()
 
-    def pop_rows(self, index):
-        for row in range(index, self.rowCount()):
-            self.pointsDict.pop(row)
-        self.pointsDict.pop(index)
-        cell = QTableWidgetItem()
-        self.setItem(index, 1, cell)
-        cell2 = QTableWidgetItem()
-        self.setItem(index, 2, cell2)
-        self.item(index, 1).setText("0")
-        self.item(index, 2).setText("1")
-        self.pointsDict[index] = self.pointsDict[index - 1]
-        self.refreshData()
-        self.signal.emit(self.pointsDict)
-
-    def add_line_node_row(self):
-        index = 0
-        for row in range(0, self.rowCount()):
-            cellWidget = self.cellWidget(row, self.columnCount() - 1)
-            if cellWidget.currentText() == "Привязка":
-                index = row + 1
-        self.insertRow(index)
-        self.setup_cell_widgets(index)
-        self.update_row_numbers()
-        # print("index", index, row)
-        self.pop_rows(index)
-
-    def add_lesoseka_node_row(self):
-        index = 0
-        for row in range(0, self.rowCount()):
-            cellWidget = self.cellWidget(row, self.columnCount() - 1)
-            if cellWidget.currentText() == "Лесосека":
-                index = row + 1
-        if index == 0:
-            index = self.getRowCount()
-        self.insertRow(index)
-        self.setup_cell_widgets(index)
-        cellWidget = self.cellWidget(index, self.columnCount() - 1)
-        cellWidget.setCurrentIndex(1)
-        self.update_row_numbers()
-        self.refreshData()
-
     def deleteRow(self):
         try:
             self.pointsDict.pop(self.getRowCount() - 1)
@@ -708,12 +667,6 @@ class DataTableWrapper:
 
     def getRowsCollection(self):
         self.i = self.i + 1
-
-    def add_line_node(self):
-        self.tableModel.add_line_node_row()
-
-    def add_lesoseka_node(self):
-        self.tableModel.add_lesoseka_node_row()
 
     def getJSONRows(self):
         return self.tableModel.getJSONRows()
