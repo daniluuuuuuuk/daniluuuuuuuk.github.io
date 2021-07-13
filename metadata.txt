@@ -1,28 +1,15 @@
-; the next section is mandatory
-
 [general]
 name=ГисЛес для QGIS
-email=info@belgosles.by
+email=support@belgosles.by
 author=РУП "Белгослес"
 qgisMinimumVersion=3.0
-description=Отвод лесосек и перечет
-about=Отвод лесосек и перечет
-version=0.3
-tracker=http://belgosles.by/
-repository=http://rep.belgosles.by/ais_lesoseka
-; end of mandatory metadata
-
-tags=belarus,belgosles,lesoseka
-
-; these metadata can be empty, they will eventually become mandatory.
-homepage=http://belgosles.by/
+description=Отвод лесосек и перечет.
+about=Программное обеспечение для отвода и таксации участков лесного фонда ГисЛес для QGIS предназначается для автоматизации процессов определения границ участков лесного фонда и перечета деревьев. Выполняет функции сбора, ввода, преобразования и хранения данных.
+version=1.0
+tags=лесосека,участок,лесной фонд, картография, GPS
+homepage=https://belgosles.by/?page_id=1355
+tracker=https://support.belgosles.by/
 icon=icon.png
-
-; experimental flag (applies to the single version)
 experimental=True
-
-; deprecated flag (applies to the whole plugin and not only to the uploaded version)
 deprecated=False
-
-; if empty, it will be automatically set to major version + .99
 qgisMaximumVersion=3.99
