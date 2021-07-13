@@ -683,14 +683,16 @@ class DataTableWrapper:
     def loadData(self, data):
         self.tableModel.importJSONData(data)
 
-    def deleteLastTemperatePoint(self):
-        layer = QgsProject.instance().mapLayersByName("Пикеты")[0]
-        idx = layer.fields().indexFromName("id")
-        lastPointIdValue = layer.maximumValue(idx)
-        features = layer.getFeatures("id = {}".format(lastPointIdValue))
-        with edit(layer):
-            for f in features:
-                layer.deleteFeature(f.id())
+    def hideLastPointNumber(self):
+        layer = QgsProject.instance().mapLayersByName("Пикеты")
+        if layer:
+            idx = layer[0].fields().indexFromName("id")
+            lastPointIdValue = layer[0].maximumValue(idx)
+            features = layer[0].getFeatures("id = {}".format(lastPointIdValue))
+            with edit(layer[0]):
+                for feat in features:
+                    feat.setAttribute(idx, None)
+                    layer[0].updateFeature(feat)
 
     def makeTableFromCuttingArea(self, bindingPoint, cuttingArea):
         currentTableType = self.tableModel.tabletype
@@ -779,6 +781,7 @@ class DataTableWrapper:
         elif coordType == 1:
             convertedTableList = cvt.convertToDMS()
         self.populateTable(convertedTableList)
+        self.hideLastPointNumber()
         self.tableModel.setRerender(True)
 
     def populateTable(self, tableList):
@@ -1009,6 +1012,7 @@ class DataTableWrapper:
                 convertedValues = cvt.convertAngle2Angle(pointsDict, coordType)
             if convertedValues:
                 self.populateTable(convertedValues)
+                self.hideLastPointNumber()
         elif coordType == 0:
             if currentTableType == type:
                 pass
@@ -1096,6 +1100,7 @@ class DataTableWrapper:
                     )
                 if convertedValues:
                     self.populateTable(convertedValues)
+                    self.hideLastPointNumber()
         self.tableModel.setRerender(True)
 
     def copyTableData(self):

@@ -276,7 +276,7 @@ class LayoutManager:
         mainlabel.adjustSizeToText()
         mainlabel.attemptMove(QgsLayoutPoint(200, 2050, QgsUnitTypes.LayoutPixels))
 
-        labels = ['Точка привязки', 'Узел хода', 'Линия привязки', 'Лесосека']
+        labels = ['Узел хода', 'Линия привязки', 'Лесосека']
         i = 0
         for labelText in labels:
             label = QgsLayoutItemLabel(layout)
@@ -288,8 +288,7 @@ class LayoutManager:
             i+= 1
 
     def prepareLegendImages(self, layout):
-        images = [util.resolvePath("res\\binding_point.png"),
-        util.resolvePath("res\\anchor_point.png"),
+        images = [util.resolvePath("res\\anchor_point.png"),
         util.resolvePath("res\\anchor_line.png"),
         util.resolvePath("res\\area.png")]
         i = 0
@@ -351,7 +350,7 @@ class LayoutManager:
     def cutSecondPointNumber(self, tableRows):
         for row in tableRows[1:]:
             row[0] = row[0].split('-')[1]
-        tableRows[-1][0] = str(len(tableRows ) - 1) + '(' +str(self.getFirstPointOfArea(tableRows)) + ')'
+        tableRows[-1][0] = str(self.getFirstPointOfArea(tableRows))
         return tableRows
 
     def addBindingPointToTableRows(self, tableRows):
@@ -376,7 +375,8 @@ class LayoutManager:
         #             return i - 1
         firstPointNumber = self.getFirstPointOfArea(tableRows)
         lastPoint = tableRows[-1]
-        lastPoint[0] = lastPoint[0] + '(' + str(firstPointNumber) + ')'
+        prevPoint = lastPoint[0].split('-')[0]
+        lastPoint[0] = prevPoint + '-' + str(firstPointNumber)
 
     def addAzimuthTextToHeader(self, tableRows):
         tableRows[0][1] = 'Азимут/Угол, °'
