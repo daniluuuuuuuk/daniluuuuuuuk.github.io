@@ -1,8 +1,12 @@
 from .gui.canvasLayerManagerWidget import Ui_Dialog as layerWidget
 from qgis.PyQt.QtWidgets import QDialog, QCheckBox, QSizePolicy, QButtonGroup
 from qgis.PyQt.QtWidgets import QRadioButton, QVBoxLayout, QDialogButtonBox, QMessageBox
-from qgis.core import QgsProject, QgsWkbTypes, QgsFeatureRequest, QgsMapLayer
+from qgis.core import QgsProject, QgsWkbTypes, QgsFeatureRequest, QgsMapLayer, QgsField
+from qgis.core import edit
 from .tools import GeoOperations as geop
+from PyQt5.QtCore import QVariant
+
+INT_FIELD_NAME = 'pnum'
 
 class LayerManager:
     def __init__(self, canvas):
@@ -37,9 +41,9 @@ class LayerManager:
         ]
 
     def setupCanvasLayers(self, layerNames):
-        layer_list = QgsProject.instance().layerTreeRoot().children()
+        layer_list = QgsProject.instance().mapLayers().values()
         layers = [
-            lyr.layer() for lyr in layer_list if lyr.name() in layerNames
+            lyr for lyr in layer_list if lyr.name() in layerNames
         ]
         self.canvas.setLayers(layers)
 
@@ -61,7 +65,7 @@ class LayerManager:
 
 
 class GPSLayerManager(LayerManager):
-
+    
     def __init__(self, canvas):
         super().__init__(canvas)
         self.layerName = None
@@ -101,8 +105,38 @@ class GPSLayerManager(LayerManager):
         if not self.fieldName:
             return
 
-        features = self.sortFeaturesByField(self.layer, self.fieldName)
+        self.createIntegerField(self.layer, self.fieldName)
+        self.copyStringToIntegerData(self.layer, self.fieldName)
+
+        features = self.sortFeaturesByField(self.layer)
         return self.getPointsList(features, espg)
+
+    def copyStringToIntegerData(self, layer, fieldName):
+        features = layer.getFeatures()
+        layer.updateFields()
+        idx = layer.fields().indexFromName(INT_FIELD_NAME)
+        with edit(layer):
+            for feat in features:
+                try:
+                    feat.setAttribute(idx, int(feat[fieldName]))
+                    layer.updateFeature(feat)
+                except:
+                    QMessageBox.warning(
+                        None, "Ошибка", "Некорректное значение номера точки"
+                    )
+                    return
+
+    def createIntegerField(self, layer, fieldName):
+        idx = layer.fields().indexFromName(INT_FIELD_NAME)
+        if idx != -1:
+            with edit(layer):        
+                provider = layer.dataProvider()
+                provider.deleteAttributes([idx])
+                layer.updateFields()
+        with edit(layer):        
+            provider = layer.dataProvider()
+            provider.addAttributes([QgsField(INT_FIELD_NAME,  QVariant.Int)])
+            layer.updateFields()
 
     def setFieldName(self):
         self.fieldNameDialog = QDialog()
@@ -135,10 +169,10 @@ class GPSLayerManager(LayerManager):
             )
             return []
 
-    def sortFeaturesByField(self, layer, field):
+    def sortFeaturesByField(self, layer):
         request = QgsFeatureRequest()
 
-        clause = QgsFeatureRequest.OrderByClause(field, ascending=True)
+        clause = QgsFeatureRequest.OrderByClause(INT_FIELD_NAME, ascending=True)
         orderby = QgsFeatureRequest.OrderBy([clause])
         request.setOrderBy(orderby)
 

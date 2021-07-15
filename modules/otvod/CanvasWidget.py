@@ -227,6 +227,10 @@ class CanvasWidget(QgsMapCanvas):
             )
             return
 
+        layerVd = QgsProject.instance().mapLayersByName("Выдела")[0]
+        iface.setActiveLayer(layerVd)
+        layerVd.removeSelection()
+
         if not self.isAreaValid(layer):
             QMessageBox.information(
                 None,

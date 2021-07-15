@@ -184,11 +184,10 @@ class OtvodController:
 
             ptList = self.manager.getPointsOfLayerAsList()
             if ptList:
-                bindingPoint = GeoOperations.convertToWgs(ptList[-1][0])
+                bindingPoint = GeoOperations.convertToWgs(ptList[0][0])
                 self.omw.y_coord_LineEdit.setText(str(bindingPoint.x()))
                 self.omw.x_coord_LineEdit.setText(str(bindingPoint.y()))
-
-                self.canvasWidget.table.appendTableFromMap(ptList)
+                self.canvasWidget.table.appendTableFromMap(ptList[1:] + [ptList[0]])
         
     def enableMovePointTool(self):
         layer = QgsProject.instance().mapLayersByName('Пикеты')
