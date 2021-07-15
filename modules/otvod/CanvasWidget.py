@@ -227,6 +227,10 @@ class CanvasWidget(QgsMapCanvas):
             )
             return
 
+        layerVd = QgsProject.instance().mapLayersByName("Выдела")[0]
+        iface.setActiveLayer(layerVd)
+        layerVd.removeSelection()
+
         if not self.isAreaValid(layer):
             QMessageBox.information(
                 None,
@@ -257,7 +261,7 @@ class CanvasWidget(QgsMapCanvas):
         # self.tableWrapper.convertCoordFormat(self.coordType)
         self.omw.coord_radio_button.setChecked(True)
         self.table.makeTableFromCuttingArea(bindingPoint, cuttingArea)
-        # self.table.deleteLastTemperatePoint()
+        self.table.hideLastPointNumber()
         self.processOverlappingAnotherArea()
         self.showAreaByVydel()
         # self.omw.inclinationSlider.setValue(0)

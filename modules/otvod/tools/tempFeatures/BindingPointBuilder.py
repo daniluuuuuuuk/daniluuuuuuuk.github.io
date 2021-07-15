@@ -1,5 +1,7 @@
-from qgis.core import QgsPointXY, QgsProject
+from qgis.core import QgsPointXY, QgsProject, edit
 from qgis.core import QgsCoordinateReferenceSystem, QgsMarkerSymbol, QgsVectorLayer, QgsFeature, QgsGeometry
+from qgis.core import QgsPalLayerSettings, QgsTextFormat, QgsTextBufferSettings, QgsVectorLayerSimpleLabeling
+from PyQt5.QtGui import QFont, QColor
 
 class BindingPointBuilder(QgsPointXY):
 
@@ -14,8 +16,33 @@ class BindingPointBuilder(QgsPointXY):
 
     def setLayerSymbol(self):
         symbol = QgsMarkerSymbol.createSimple(
-            {'name': 'circle', 'color': '255,0,0,255', 'outline_color': 'red'})
+            {'name': 'circle', 'color': '0,0,0,0', 'outline_color': 'red'})
         return symbol
+
+    def setLayerLabelling(self, layer):
+        layer_settings = QgsPalLayerSettings()
+        text_format = QgsTextFormat()
+
+        text_format.setFont(QFont("Arial", 12))
+        text_format.setSize(10)
+
+        buffer_settings = QgsTextBufferSettings()
+        buffer_settings.setEnabled(True)
+        buffer_settings.setSize(0.10)
+        buffer_settings.setColor(QColor("black"))
+
+        text_format.setBuffer(buffer_settings)
+        layer_settings.setFormat(text_format)
+
+        layer_settings.fieldName = "id"
+        layer_settings.placement = 4
+
+        layer_settings.enabled = True
+
+        layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
+        layer.setLabelsEnabled(True)
+        layer.setLabeling(layer_settings)
+        layer.triggerRepaint()
 
     def makeFeature(self):
 
@@ -33,6 +60,7 @@ class BindingPointBuilder(QgsPointXY):
         fet = QgsFeature()
         fet.initAttributes(2)
         fet.setGeometry(QgsGeometry.fromPointXY(self))
+        fet.setAttribute(0, 0)
 
         vl.commitChanges()
 
@@ -41,6 +69,9 @@ class BindingPointBuilder(QgsPointXY):
 
         layers = self.canvas.layers()
         layers.insert(0, vl)
+
+        self.setLayerLabelling(vl)
+
         self.canvas.setLayers(layers)
         self.canvas.refresh()
 

@@ -47,6 +47,17 @@ class AreaDataPrintContainer:
     def buildAreaLayer(self):
         self.buildTempLayer('Привязка', 'Линия привязки')
         self.buildTempLayer('Лесосека', 'Лесосеки')
+        self.hideLastPointNumber()
+
+    def hideLastPointNumber(self):
+        layer = QgsProject.instance().mapLayersByName("Пикеты")[0]
+        idx = layer.fields().indexFromName("id")
+        lastPointIdValue = layer.maximumValue(idx)
+        features = layer.getFeatures("id = {}".format(lastPointIdValue))
+        with edit(layer):
+            for feat in features:
+                feat.setAttribute(idx, None)
+                layer.updateFeature(feat)
 
     def deleteTempLayerIfExists(self, layerName):
         layer = self.projectInstance.mapLayersByName(

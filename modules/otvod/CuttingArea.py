@@ -89,11 +89,11 @@ class CuttingArea:
         """
 
     def build(self):
-        def getId(f):
-            return f["id"]
 
         self.tiedUpPointList = []
-        features = sorted(self.layer.getFeatures(), key=getId)
+
+        features = sorted(self.layer.getFeatures(), key=lambda x: (not x['id'], x['id']))
+
         for x in features:
             if x.attributes()[1] == "Привязка":
                 self.anchorLinePoints.append(x.geometry().asPoint())
