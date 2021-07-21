@@ -121,8 +121,10 @@ class LayoutManager:
                 tr = ''
                 td = ''
                 for i, data in enumerate(row):
-                    if self.tableType == 5 and i == 1 and n <= firstPoint and topPosition == 2200:
+                    if self.tableType == 5 and i == 1 and n == 1 and firstPoint == 0 and topPosition == 2200:
                         td += '<td bgcolor="#e5e5e5">' + data + '</td>'
+                    elif self.tableType == 5 and i == 1 and n <= firstPoint and topPosition == 2200:
+                        td += '<td bgcolor="#e5e5e5">' + data + '</td>'                        
                     elif self.tableType == 4 and i in range(1, 4) and n <= firstPoint and topPosition == 2200:
                         if self.coordType == 0 and i == 1:
                             td += '<td bgcolor="#e5e5e5">' + data + '</td>'
@@ -354,19 +356,20 @@ class LayoutManager:
         return tableRows
 
     def addBindingPointToTableRows(self, tableRows):
+        pointType = "Лесосека" if self.getFirstPointOfArea(tableRows) == 0 else "Привязка"
         if self.tableType == 0 and self.coordType == 0:
-            tableRows.insert(1, ['0', str(self.bindingPoint.y()), str(self.bindingPoint.x()), ''])
+            tableRows.insert(1, ['0', str(self.bindingPoint.y()), str(self.bindingPoint.x()), pointType])
         elif self.tableType == 0 and self.coordType == 1:
             x = geop.convertToDMS(self.bindingPoint.x())
             y = geop.convertToDMS(self.bindingPoint.y())
-            tableRows.insert(1, ['0', str(y[0]), str(y[1]), str(y[2]), str(x[0]), str(x[1]), str(x[2]), ''])
+            tableRows.insert(1, ['0', str(y[0]), str(y[1]), str(y[2]), str(x[0]), str(x[1]), str(x[2]), pointType])
         elif self.tableType == 5 and self.coordType == 0:
-            tableRows.insert(1, ['0', '', str(self.bindingPoint.y()) + '; ' + str(self.bindingPoint.x()), '', '', ''])
+            tableRows.insert(1, ['0', '', str(self.bindingPoint.y()) + '; ' + str(self.bindingPoint.x()), '', '', pointType])
         elif self.tableType == 5 and self.coordType == 1:
             x = geop.convertToDMS(self.bindingPoint.x())
             y = geop.convertToDMS(self.bindingPoint.y())
             tableRows.insert(1, ['0', '', str(int(float(y[0]))) + '°' + str(int(float(y[1]))) + '′' + str(int(float(y[2]))) + '″; '
-            + str(int(float(x[0]))) + '°' + str(int(float(x[1]))) + '′' + str(int(float(x[2]))) + '″', '', '', ''])
+            + str(int(float(x[0]))) + '°' + str(int(float(x[1]))) + '′' + str(int(float(x[2]))) + '″', '', '', pointType])
 
     def addFirstPointNumber(self, tableRows):
         # def getFirstLesosekaPoint():
