@@ -9,7 +9,8 @@ from PyQt5 import QtCore
 #         QMenu, QPushButton, QRadioButton, QVBoxLayout,
 
 class PeekStratumFromMap(QgsMapToolEmitPoint, QObject):
-
+    """Инструмента определения лесосеки с области карты
+    """
     signal = pyqtSignal(object)
 
     def __init__(self, canvas, layerName):

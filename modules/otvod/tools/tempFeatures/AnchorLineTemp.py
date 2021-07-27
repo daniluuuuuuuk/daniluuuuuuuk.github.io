@@ -4,7 +4,8 @@ from PyQt5.QtCore import QVariant
 
 
 class AnchorLineTemp():
-
+    """Реализует построение временного слоя линии привязки
+    """
     def __init__(self, canvas, point, features, uid):
 
         self.uid = uid

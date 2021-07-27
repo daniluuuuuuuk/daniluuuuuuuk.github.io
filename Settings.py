@@ -1,3 +1,17 @@
+"""
+Настройки модуля хранятся в файле config.ini
+
+
+Настройки: 
+- Доступ к базе данных
+- Подключение к видке и дальномеру (устарело) по Bluetooth
+- Предпочитаемый формат отвода (автоматически устанавливается в окно отвода)
+- Данные об учреждении (нужны для формирования отчета):
+    - Местоположение, тип, ведомство и тп
+    - Номер лесхоза и код лесхоза - нужны для сохранения и загрузки данных из БД
+- Путь к отчету Word (устарело)
+"""
+
 from qgis.PyQt.QtWidgets import QDialog, QMessageBox, QToolButton, QFileDialog
 from .gui import settingsDialog, changePortDialog
 from .tools import config
@@ -34,6 +48,8 @@ class comPortWindow(QDialog):
 
 
 class SettingsController(QtCore.QObject):
+    """Контроллер окна настроек
+    """
     def __init__(self, *args, **kwargs):
         QtCore.QObject.__init__(self)
         self.sd = SettingsWindow()

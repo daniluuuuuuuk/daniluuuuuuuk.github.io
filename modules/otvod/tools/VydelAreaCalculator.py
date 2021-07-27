@@ -8,7 +8,8 @@ from qgis.core import QgsTextBufferSettings, QgsUnitTypes, QgsField, QgsPalLayer
 from qgis.PyQt.QtWidgets import QToolButton, QMenu, QWidgetAction, QWidget, QMessageBox
 
 class VydelAreaCalculator:
-
+    """Используется для расчета площади участков лесосеки на выдела
+    """
     def __init__(self):
         self.project = QgsProject.instance()
         self.inpath = self.project.mapLayersByName("Выдела")[0]

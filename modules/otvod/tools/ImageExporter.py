@@ -8,7 +8,12 @@ from datetime import datetime
 from qgis.PyQt.QtWidgets import QMessageBox
 
 class ImageExporter:
-
+    """Инициализируется при вызове инструмента "Сохранить как изображение"
+    модуля отвода
+    Сохраняется картинка и данные отвода
+    Данные отвода для вывода формируются в html-разметку
+    Если данных отвода в таблице нет - в картинке будет только карта-схема
+    """
     def __init__(self, project, canvas):
         super().__init__()
         self.project = project

@@ -4,7 +4,8 @@ from . import module_errors as er
 from qgis.PyQt.QtWidgets import QMessageBox
 
 class Configurer:
-
+  """Класс используется для чтения и записи данных в файл конфигурации модуля config.ini
+  """
   def __init__(self, section, *args):
     self.config = configparser.ConfigParser()
     self.configFilePath = self.resolve('config.ini')

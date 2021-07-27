@@ -1,3 +1,8 @@
+"""Класс окна модуля отвода, настраивает сочетания клавиш быстрого вызова,
+управление слайдером магнитного склонения, переключателем формата координат
+"""
+
+
 from qgis.PyQt.QtWidgets import QMainWindow, QShortcut
 from .gui.otvodMainWindow import Ui_MainWindow as otvodMainWindow
 from qgis.core import QgsProject

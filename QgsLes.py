@@ -66,6 +66,10 @@ class DatabaseConnectionVerifier:
 
 
 class QgsLes:
+    """Класс добавляет кнопки модуля на панели инструментов. 
+    Содержит обработчики кликов, инициализирует фильтр (поиск)
+    по лесничеству, кварталу, выделу.
+    """
     def __init__(self, iface, runnable):
         self.iface = iface
         self.runnable = runnable

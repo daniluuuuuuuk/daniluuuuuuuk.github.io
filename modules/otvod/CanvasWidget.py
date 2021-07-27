@@ -23,6 +23,11 @@ from qgis.core import QgsDistanceArea, QgsUnitTypes, QgsCoordinateTransformConte
 from qgis.utils import iface
 
 class CanvasWidget(QgsMapCanvas):
+    """Область карты (канвас) отображает набор слоев, который можно задать
+    инструментом "Настроить видимость слоев" LayerManager.py
+    Можно менять масштаб в соответствии с допустимыми значениями
+    На канвасе отображаются точки лесосеки
+    """
     def __init__(self, otvodMainWindow, layers, rct, table):
 
         self.predefinedScales = [

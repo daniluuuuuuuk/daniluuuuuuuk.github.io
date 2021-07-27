@@ -7,7 +7,8 @@ from decimal import *
 
 
 class AzimuthMapTool(QgsMapToolEmitPoint, QObject):
-
+    """Инструмент для измерения азимута и расстояния на канвасе
+    """
     signal = pyqtSignal(object)
 
     def __init__(self, canvas, inclination):

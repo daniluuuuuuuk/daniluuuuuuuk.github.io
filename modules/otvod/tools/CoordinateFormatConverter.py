@@ -1,7 +1,10 @@
 import decimal
 
 class CoordinateFormatConverter:
-
+    """Используется для конвертации данных
+    в другой формат координат - из десятичных в градусы-минуты-секунды
+    и наоборот
+    """
     def __init__(self, tableList, tableType, coordType):
         super().__init__()
         self.tableList = tableList

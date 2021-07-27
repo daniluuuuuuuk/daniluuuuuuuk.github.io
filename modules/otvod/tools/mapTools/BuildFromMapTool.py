@@ -10,7 +10,8 @@ from decimal import *
 
 
 class BuildFromMapTool(QgsMapToolEmitPoint, QWidget):
-
+    """Инструмент "Вынос лесосеки по границам выдела"
+    """
     signal = pyqtSignal(object)
 
     def __init__(self, canvas, inclination):

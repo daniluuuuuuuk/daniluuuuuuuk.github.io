@@ -1,3 +1,8 @@
+"""Классы инструмента "Управление лесосекой"
+Содержит методы для редактирования параметров лесосеки, перечета,
+печати удаления и экспорта лесосеки
+"""
+
 import os
 from .. import PostgisDB
 from qgis.core import Qgis, QgsTask, QgsMessageLog, QgsProject

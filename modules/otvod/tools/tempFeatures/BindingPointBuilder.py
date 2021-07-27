@@ -4,7 +4,8 @@ from qgis.core import QgsPalLayerSettings, QgsTextFormat, QgsTextBufferSettings,
 from PyQt5.QtGui import QFont, QColor
 
 class BindingPointBuilder(QgsPointXY):
-
+    """Реализует нанесение точки привязки
+    """
     def __init__(self, point, canvas):
         QgsPointXY.__init__(self, point)
         self.canvas = canvas

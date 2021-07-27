@@ -4,11 +4,9 @@ from .GeoOperations import calculateAzimuthWithPrecision
 from .GeoOperations import calculateDistanceWithPrecision
 from qgis.core import QgsPointXY
 
-"""Калькулятор невязки"""
-
 
 class DiscrepancyCalculator:
-
+    """Используется для расчета невязок"""
     """Структура словаря self.pointsDict: {номер ночки: [точка, дирекционный угол, длина линии, горизонтальный угол]}"""
 
     def __init__(self, points):

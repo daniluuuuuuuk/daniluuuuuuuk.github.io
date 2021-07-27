@@ -6,7 +6,8 @@ from ...tools import GeoOperations
 
 
 class PeekPointFromMap(QgsMapToolEmitPoint, QObject):
-
+    """Инструмент для установки точки привязки
+    """
     signal = pyqtSignal(object)
 
     def __init__(self, canvas):

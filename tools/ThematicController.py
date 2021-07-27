@@ -1,3 +1,12 @@
+"""Классы для формирования тематических карт
+Для формирования тематических карта со слоем выделов по уникальному полю identity 
+добавляются в проект и связываются таблицы БД: subcompartments_taxation и subcompartments_taxation_m10
+После связывания к слою выделов применяется соответствующий стиль из таблицы public.layer_styles
+Доступны стили (тематические карты) раскрашенные по: породе и группе возраста, полноте, бонитету,
+ТУМ, запасу, проектируемым хозмероприятиям. 
+Слой лесосек раскрашивается по типу пользования.
+"""
+
 from qgis.core import QgsDataSourceUri, QgsVectorLayer, QgsProject, QgsVectorLayerJoinInfo
 from qgis.core import QgsTask
 from qgis.PyQt.QtWidgets import QMessageBox, QDialog, QComboBox, QVBoxLayout, QGroupBox

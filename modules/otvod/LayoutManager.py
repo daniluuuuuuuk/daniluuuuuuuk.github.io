@@ -1,3 +1,8 @@
+"""Класс используется для формирования печатного макета 
+Формирование макета - в методе generate
+для формирования элементов текстового наполнения используется html-разметка
+"""
+
 import os
 from qgis.core import QgsPrintLayout, QgsProject, QgsPageSizeRegistry, QgsLayoutItemPage
 from qgis.core import QgsLayoutItemMap, QgsRectangle, QgsLayoutItemHtml, QgsLayoutMeasurement

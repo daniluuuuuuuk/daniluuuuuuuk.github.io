@@ -3,7 +3,8 @@ from qgis.core import QgsCoordinateReferenceSystem, QgsMarkerSymbol, QgsCoordina
 from PyQt5.QtCore import QVariant
 
 class CuttingAreaTemp():
-
+    """Реализует построение временного слоя лесосеки
+    """
     def __init__(self, canvas, point, features, feature, uid, dictAttr):
         self.uid = uid
         self.canvas = canvas

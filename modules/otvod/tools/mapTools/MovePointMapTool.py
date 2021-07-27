@@ -8,7 +8,8 @@ from qgis.PyQt.QtWidgets import QTableWidgetItem
 from decimal import Decimal
 
 class MovePointTool(QgsMapTool, QObject):
-
+    """Инструмент для переноса узлов лесосеки
+    """
     pointMoved = pyqtSignal(object)
 
     def __init__(self, mapCanvas, table):
