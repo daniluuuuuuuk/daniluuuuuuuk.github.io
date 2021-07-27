@@ -1,3 +1,10 @@
+"""Классы используются для формирования данных лесосеки при вызове функции "Печать"
+инструмента "Управление лесосекой"
+Работает с данными лесосеки, загруженнными в БД
+Производит пересчет данных в нужный формат (координаты/рембы/азимуты...)
+По ним строится временный слой лесосек, таблица с данными формируется для вывода на печать
+"""
+
 from ..modules.otvod.tools.tempFeatures.PointBuilder import PointBuilder
 from ..modules.otvod.tools.tempFeatures.BindingPointBuilder import BindingPointBuilder
 from ..modules.otvod.tools.CoordinateConverter import CoordinateConverter as Converter

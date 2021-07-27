@@ -6,7 +6,8 @@ from PyQt5.QtGui import QColor
 
 
 class RectangleMapTool(QgsMapToolEmitPoint, QObject):
-
+    """Инструмент выделения рабочей области перед запуском окна отвода
+    """
     signal = pyqtSignal(object)
 
     def __init__(self, canvas):

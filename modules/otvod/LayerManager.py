@@ -9,6 +9,10 @@ from PyQt5.QtCore import QVariant
 INT_FIELD_NAME = 'pnum'
 
 class LayerManager:
+    """Класс используется для настройки видимости слоев
+    вызывается при нажатии кнопки "Настроить видимость слоев"
+    окна модуля отвода
+    """
     def __init__(self, canvas):
         super().__init__()
         self.canvas = canvas
@@ -65,7 +69,10 @@ class LayerManager:
 
 
 class GPSLayerManager(LayerManager):
-    
+    """Класс используется при инициализации инструмента
+    "Загрузить точки со слоя" модуля отвода для выбора слоя,
+    с которого следует загрузить точки лесосеки
+    """
     def __init__(self, canvas):
         super().__init__(canvas)
         self.layerName = None

@@ -16,6 +16,9 @@ from qgis.PyQt.QtWidgets import QAction
 
 
 class CuttingArea:
+    """Класс используется для построения лесосеки
+    Перед построением происходит увязка, замыкание лесосеки
+    """
     def __init__(
         self, canvas, bindingPoint, layer, feature, btnControl
     ):

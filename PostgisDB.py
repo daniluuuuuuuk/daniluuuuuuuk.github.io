@@ -5,6 +5,9 @@ from qgis.PyQt.QtWidgets import QMessageBox
 
 
 class PostGisDB:
+    """Класс используется для подключения к БД 
+    и получения результатов запроса, а также тестирования доступности БД
+    """
     def __init__(self):
         self.cf = config.Configurer("dbconnection")
         self.connection = self.setConnection()

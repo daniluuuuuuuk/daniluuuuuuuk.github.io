@@ -2,7 +2,8 @@ from qgis.core import QgsPointXY, QgsProject
 from qgis.core import QgsCoordinateReferenceSystem, QgsMarkerSymbol, QgsFeature, QgsVectorLayer, QgsGeometry
 
 class AnchorPointBuilder():
-
+    """Реализует построение опорных точек (узлов) лесосеки
+    """
     def __init__(self, canvas, feature):
         self.canvas = canvas
         self.feature = feature

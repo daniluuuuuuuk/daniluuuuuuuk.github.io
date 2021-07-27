@@ -6,7 +6,10 @@ from qgis.PyQt.QtXml import QDomDocument
 
 
 class QgsProjectInitializer:
-
+    """Класс используется для загрузки и добавления картографический слоев из БД в проект QGIS.
+    К слоям применяются соответстующие стили из таблицы public.layer_styles
+    Инициализируется при нажатии на кноку "Инициализировать проект"
+    """
     def __init__(self, iface, qgsLesToolbar):
         super().__init__()
         if self.clearCurrentProject() == False:

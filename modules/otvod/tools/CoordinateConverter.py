@@ -3,7 +3,8 @@ from qgis.core import QgsPointXY
 import decimal
 
 class CoordinateConverter:
-
+    """Используется для конвертации между форматами данных отвода в обе стороны
+    """
     def __init__(self, tableList, tableType, coordType, inclination):
         super().__init__()
         self.tableList = tableList

@@ -1,3 +1,6 @@
+"""Набор методов географических расчетов, используемых в модуле
+"""
+
 from qgis.core import QgsCoordinateTransform, QgsCoordinateReferenceSystem, QgsProject, QgsApplication, QgsDistanceArea, QgsCoordinateTransformContext
 from qgis.PyQt.QtWidgets import QMessageBox
 from qgis.core import QgsPointXY

@@ -1,3 +1,6 @@
+"""Классы используются для изменения атрибутов временной лесосеки
+"""
+
 from qgis.core import QgsProject
 from qgis.PyQt.QtWidgets import QMessageBox, QDialog
 from .gui.LesosekaInfoDialog import LesosekaInfo

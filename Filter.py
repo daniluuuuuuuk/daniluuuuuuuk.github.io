@@ -1,3 +1,9 @@
+"""Фильтр используется для поиска и приближения к объекту.
+Контроллер загружает название лесхоза из БД и обрабатывает изменение
+значений лесничеств, кварталов, выделов (классы содержатся в ForestObject.py)
+Для поиска и приближения к объекту используются методы в util.py
+"""
+
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QToolButton, QMenu, QWidgetAction, QWidget, QMessageBox
 from .gui import filterActionWidget

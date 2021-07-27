@@ -1,3 +1,6 @@
+"""Классы используются для расчета невязок и увязки полигона
+"""
+
 from qgis.core import QgsPointXY, QgsGeometry, QgsFeatureRequest
 from qgis.core import QgsProject, QgsFeature
 from .tools import GeoOperations
@@ -8,8 +11,6 @@ class Polygon():
 
     def __init__(self, pointList):
         self.pointList = pointList
-        # self.pointList = self.convertListToWGS(pointList)
-        # print(self.pointList, '<====')
         self.coordPoints = self.prepareCoordPoints()
         self.perimeter = self.getPerimeter()
         rsX = self.residualX()
@@ -46,12 +47,9 @@ class Polygon():
         sumY = 0
         summarize = sumX + sumY
         for point in self.coordPoints:
-            # print('X', point.correctedIncrementsX())
-            # print('Y', point.correctedIncrementsY())
             sumX += round(point.correctedIncrementsX(), 3)
             sumY += round(point.correctedIncrementsY(), 3)
-        # print(sumX)
-        # print(sumY)
+
 
         """Сумма исправленных приращений координат X
         """
@@ -82,11 +80,7 @@ class Polygon():
             point.setPerimeter(i)
         return i
 
-    # def convertListToWGS(self, pointList):
-    #     ptList = []
-    #     for pt in pointList:
-    #         ptList.append(GeoOperations.convertToWgs(pt))
-    #     return ptList
+
 
         """Сделать из списка точек объект CoordPoint для последущих операций невязки 
         """
@@ -147,59 +141,28 @@ class CoordPoint():
         self.nextPoint = nextPoint
         self.x = point.x()
         self.y = point.y()
-        # self.directAzimuth = self.directAzimuth()
         self.directDistance = self.directDistance()
-        # self.quarterSignX = self.quarterSignX()
-        # self.quarterSignY = self.quarterSignY()
+
         self.coordIncrementX = self.coordIncrementX()
         self.coordIncrementY = self.coordIncrementY()
         self.residualX = None
         self.residualY = None
-        # self.coordIncrementCorrectionX = self.coordIncrementCorrectionX()
-        # self.coordIncrementCorrectionY = self.coordIncrementCorrectionY()
+
         self.perimeter = None
 
-    # def directAzimuth(self):
-    #     return float(GeoOperations.calculateAzimuth(self.point, self.nextPoint))
 
         """Расстояние между точками
         """
 
     def directDistance(self):
-        # print(self.point, self.nextPoint)
         return float(GeoOperations.calculateDistance(self.point, self.nextPoint))
 
-        # """Определение знака для координаты X
-        # """
-    # def quarterSignX(self):
-    #     if self.directAzimuth >= 0 and self.directAzimuth < 90:
-    #         return 1
-    #     elif self.directAzimuth >= 90 and self.directAzimuth < 180:
-    #         return -1
-    #     elif self.directAzimuth >= 180 and self.directAzimuth < 270:
-    #         return -1
-    #     elif self.directAzimuth >= 270 and self.directAzimuth < 360:
-    #         return 1
-
-    #     """Определение знака для координаты Y
-    #     """
-    # def quarterSignY(self):
-    #     if self.directAzimuth >= 0 and self.directAzimuth < 90:
-    #         return 1
-    #     elif self.directAzimuth >= 90 and self.directAzimuth < 180:
-    #         return 1
-    #     elif self.directAzimuth >= 180 and self.directAzimuth < 270:
-    #         return -1
-    #     elif self.directAzimuth >= 270 and self.directAzimuth < 360:
-    #         return -1
 
         """Приращение координат X
         """
 
     def coordIncrementX(self):
         ciX = self.nextPoint.x() - self.point.x()
-        # ciX = float(self.directDistance) * cos(self.directAzimuth) * float(self.quarterSignX)
-        # print(self.directDistance, self.directAzimuth, cos(self.directAzimuth), self.quarterSignX)
         return float(ciX)
 
         """Приращение координат Y
@@ -207,8 +170,6 @@ class CoordPoint():
 
     def coordIncrementY(self):
         ciY = self.nextPoint.y() - self.point.y()
-        # ciY = float(self.directDistance) * sin(self.directAzimuth) * float(self.quarterSignY)
-        # print(self.directDistance, self.directAzimuth, cos(self.directAzimuth), self.quarterSignY)
         return float(ciY)
 
         """Поправки в приращения координат X

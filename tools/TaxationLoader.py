@@ -1,3 +1,8 @@
+"""Классы для загрузки таксационных показателей из базы данных.
+Основные таблицы таксационного описания: subcompartments_taxation,
+subcompartments_taxation_m10
+"""
+
 from .. import PostgisDB
 from qgis.core import *
 from PyQt5 import QtCore
