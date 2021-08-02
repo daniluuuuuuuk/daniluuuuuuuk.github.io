@@ -155,7 +155,7 @@ class Loader(QgsTask):
 
         try:
             self.area = postgisConnection.getQueryResult(
-                """select area from "public".subcompartments where identity = '{}'""".format(
+                """select areadoc from "public".subcompartments where identity = '{}'""".format(
                     int(identity)
                 )
             )[0][0]
