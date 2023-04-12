@@ -13,7 +13,7 @@ from .LayoutObjectsIterator import LayoutObjectsIterator
 
 
 class CuttingAreaScrollList(QScrollArea):
-    def __init__(self, selected_cutting_areas=[], parent=None):
+    def __init__(self, selected_cutting_areas=[], forestry_number=0, quarter_number=0, stratum_number=0, cutting_area_number=0, parent=None):
         super().__init__(parent)
 
         self.setWidgetResizable(True)
@@ -27,6 +27,11 @@ class CuttingAreaScrollList(QScrollArea):
 
         self.selected_cutting_areas = selected_cutting_areas
 
+        self.forestry_number = forestry_number
+        self.quarter_number = quarter_number
+        self.stratum_number = stratum_number
+        self.cutting_area_number = cutting_area_number
+
         self.fill_list()
 
     def get_current_cutting_areas(self) -> list:
@@ -34,10 +39,61 @@ class CuttingAreaScrollList(QScrollArea):
         Получение текущих лесосек
         """
         area_table = PostGisDB().getQueryResult(
-            """select lesnich_text as "Лесничество", num_kv as "Квартал", num_vds as "Выдел", num as "Номер лесосеки", usetype as "Вид пользования", cuttingtyp as "Вид рубки", uid as "UUID" from area;""",
+            self.form_result_query(self.forestry_number, self.quarter_number, self.stratum_number, self.cutting_area_number),
             as_dict=True,
         )
         return area_table
+
+    @staticmethod
+    def form_result_query(forestry_number, quarter_number, stratum_number, cutting_area_number):
+        if not forestry_number or forestry_number == '0':
+            query = """select lesnich_text as "Лесничество", num_kv as "Квартал", num_vds as "Выдел", num as "Номер лесосеки", usetype as "Вид пользования", cuttingtyp as "Вид рубки", uid as "UUID" from area;"""
+        elif forestry_number and not quarter_number:
+
+            query = """select 
+                            lesnich_text as "Лесничество",
+                            num_kv as "Квартал",
+                            num_vds as "Выдел",
+                            num as "Номер лесосеки", 
+                            usetype as "Вид пользования", 
+                            cuttingtyp as "Вид рубки", 
+                            uid as "UUID" 
+                        from area
+                        where num_lch = '{}';""".format(forestry_number)
+        elif forestry_number and not stratum_number:
+            query = """select 
+                            lesnich_text as "Лесничество",
+                            num_kv as "Квартал",
+                            num_vds as "Выдел",
+                            num as "Номер лесосеки", 
+                            usetype as "Вид пользования", 
+                            cuttingtyp as "Вид рубки", 
+                            uid as "UUID" 
+                        from area
+                        where num_lch = '{}' and num_kv = '{}';""".format(forestry_number, quarter_number)
+        elif forestry_number and not cutting_area_number:
+            query = """select 
+                            lesnich_text as "Лесничество",
+                            num_kv as "Квартал",
+                            num_vds as "Выдел",
+                            num as "Номер лесосеки", 
+                            usetype as "Вид пользования", 
+                            cuttingtyp as "Вид рубки",
+                            uid as "UUID" 
+                        from area
+                        where num_lch = '{}' and num_kv = '{}' and num_vds = '{}';""".format(forestry_number, quarter_number, stratum_number)
+        else:
+            query = """select 
+                            lesnich_text as "Лесничество",
+                            num_kv as "Квартал",
+                            num_vds as "Выдел",
+                            num as "Номер лесосеки", 
+                            usetype as "Вид пользования", 
+                            cuttingtyp as "Вид рубки",
+                            uid as "UUID" 
+                        from area
+                        where num_lch = '{}' and num_kv = '{}' and num_vds = '{}' and num = '{}';""".format(forestry_number, quarter_number, stratum_number, cutting_area_number)
+        return query
 
     def set_checked_selected_cutting_areas(self):
         for cutting_area_cb in LayoutObjectsIterator(

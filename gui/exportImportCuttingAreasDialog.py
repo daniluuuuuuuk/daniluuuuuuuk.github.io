@@ -1,7 +1,9 @@
 import os
 from datetime import date
 from PyQt5 import QtWidgets, uic, QtCore
+from qgis.PyQt.QtWidgets import QAction
 
+from .filterCuttingArea import FilterWidget, FilterWidgetController
 from ..tools.CuttingAreaList import CuttingAreaScrollList
 from ..tools.CuttingAreaExport import CuttingAreaExport
 from ..tools.CuttingAreaImport import CuttingAreaImport, SearchDuplicates
@@ -19,16 +21,20 @@ UI_EXPORT_IMPORT_CUTTING_AREAS = uic.loadUiType(
 class ExportImportCuttingAreaWindow(
     QtWidgets.QDialog, UI_EXPORT_IMPORT_CUTTING_AREAS
 ):
-    def __init__(self, selected_cutting_areas, parent=None):
+    def __init__(self, selected_cutting_areas, forestry_number=0, quarter_number=0, stratum_number=0, cutting_area_number=0, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
         self.setupUi(self)
 
         self.spinner = QtWaitingSpinner(
             self, True, True, QtCore.Qt.ApplicationModal
         )
-
+        self.init_filter()
         self.cutting_area_scroll_list = CuttingAreaScrollList(
-            selected_cutting_areas
+            selected_cutting_areas=selected_cutting_areas,
+            forestry_number=forestry_number,
+            quarter_number=quarter_number,
+            stratum_number=stratum_number,
+            cutting_area_number=cutting_area_number,
         )
         self.cutting_areas_container = (
             self.cutting_area_scroll_list.cutting_areas_container
@@ -195,3 +201,11 @@ class ExportImportCuttingAreaWindow(
             cutting_area_cb.setChecked(is_all_selected)
 
         self.cb_areas_clicked_event()
+
+    def init_filter(self):
+        self.filter = FilterWidget()
+        self.filterAction = self.filter.getFilterWidget()
+        self.verticalLayout_4.addWidget(self.filterAction)
+        self.filterButtonAction = QAction('Фильтр')
+        self.filterAction.setDefaultAction(self.filterButtonAction)
+        self.ctrl = FilterWidgetController(self.filter, self, new_export_window=ExportImportCuttingAreaWindow)
