@@ -31,8 +31,7 @@ class ThematicController:
         )
         self.spinner.start()
 
-        self.tableNames = ['subcompartment_taxation',
-                        'subcompartment_taxation_m10']
+        self.tableNames = ['subcompartment_characteristics', 'taxation_characteristics']
 
         self.layer = self.getStyledLayer()
 
@@ -61,7 +60,7 @@ class ThematicController:
             thread.deleteLater()
 
         thread = QtCore.QThread()
-        worker = TaxTablesWorker(self.tableNames, self.settings, self.layer)
+        worker = TaxTablesWorker(self.tableNames, self.settings, self.layer, self.thematic)
         worker.moveToThread(thread) 
         worker.finished.connect(workerFinished)
         thread.started.connect(worker.run)
@@ -80,13 +79,14 @@ class ThematicController:
     def getStyleName(self, thematic):
         stylesDbMapping = {
             '': 'Vydela',
-            "Породы": "Porody_map",
+            "Породы": "Species_map",
             "Бонитет": "Bonitet_map",
-            "ТУМ": "Tum_map",
-            "Запас": "Zapas_map",
-            "Полнота": "Polnota_map",
-            "Проектируемые хозмероприятия": "Xmer_map",
+            "ТУМ": "Forest_growing_cond_types_map",
+            "Запас": "Layer_stocks",
+            "Полнота": "Fullness_map",
+            "Проектируемые хозмероприятия": "Economic_events_map",
             "Лесосеки: виды пользования": "UseType_map",
+            "Категории защитности": "Protection_categories_map",
         }
         return stylesDbMapping.get(thematic)
 
@@ -129,13 +129,14 @@ class TaxTablesWorker(QtCore.QObject):
 
     finished = QtCore.pyqtSignal(list)
 
-    def __init__(self, names, settings, layer):
+    def __init__(self, names, settings, layer, thematic):
         QtCore.QObject.__init__(self)
         self.killed = False
         self.names = names
         self.settings = settings
         self.layer = layer
-        self.loader = TaxTableLoader(self.names, self.settings, self.layer)
+        self.thematic = thematic
+        self.loader = TaxTableLoader(self.names, self.settings, self.layer, self.thematic)
 
     def run(self):
         ret = None
@@ -154,12 +155,13 @@ class TaxTablesWorker(QtCore.QObject):
 
 class TaxTableLoader(QgsTask):
 
-    def __init__(self, tableNames, settings, layer):
+    def __init__(self, tableNames, settings, layer, thematic):
         super().__init__('Load tax tables', QgsTask.CanCancel)
         self.tableNames = tableNames
         self.settings = settings
         self.tables = []
         self.layer = layer
+        self.thematic = thematic
 
     def run(self):
         self.loadTables()
@@ -168,10 +170,16 @@ class TaxTableLoader(QgsTask):
     def joinTables(self):
 
         def join(table):
-            identityField = 'identity'
+            # print(f'type: {table}')
+            # print(f'type: {table.name()}')
+            if table.name() == 'taxation_characteristics':
+                joinFieldName = 'subcompartment_characteristics_id'
+            else:
+                joinFieldName = 'id'
+            targetFieldName = 'id'
             joinObject = QgsVectorLayerJoinInfo()
-            joinObject.setJoinFieldName(identityField)
-            joinObject.setTargetFieldName(identityField)
+            joinObject.setJoinFieldName(joinFieldName)
+            joinObject.setTargetFieldName(targetFieldName)
             joinObject.setJoinLayerId(table.id())
             joinObject.setUsingMemoryCache(True)
             joinObject.setJoinLayer(table)
@@ -236,7 +244,7 @@ class ChooseThematicMapDialog(QDialog):
         combo.addItems([
             '', 'Породы', 'Бонитет','ТУМ',
             'Запас', 'Полнота', 'Проектируемые хозмероприятия',
-            'Лесосеки: виды пользования',
+            'Лесосеки: виды пользования', 'Категории защитности'
             ])
         combo.setCurrentIndex(0)
         vbox.addWidget(combo)
@@ -246,7 +254,7 @@ class ChooseThematicMapDialog(QDialog):
         return groupBox
 
     def closeEvent(self, event):
-        tableNames = ['subcompartment_taxation', 'subcompartment_taxation_m10']
+        tableNames = ['subcompartment_characteristics', 'taxation_characteristics']
 
         for name in tableNames:
             layer = QgsProject.instance().mapLayersByName(name)
