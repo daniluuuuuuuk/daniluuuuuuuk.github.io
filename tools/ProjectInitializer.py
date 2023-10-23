@@ -19,10 +19,10 @@ class QgsProjectInitializer:
         self.setCrs()
         self.settings = None
         self.layerDbNames = {'subcompartments': 'Выдела', 'hidroline': 'Гидрография линейная', 'hidropoly': 'Гидрография площадная', 'compartments': 'Кварталы',
-                             'area': 'Лесосеки', 'settlements': 'Населенные пункты', 'area_line': 'Линия привязки', 'roads': 'Дороги', 
+                             'area': 'Лесосеки', 'forest_cultures_area': 'Лесные культуры', 'settlements': 'Населенные пункты', 'area_line': 'Линия привязки', 'roads': 'Дороги', 
                              'forestry_borders': 'Границы лесничеств'}
         self.layerStyleNames = {'subcompartments': 'Vydela', 'hidroline': 'Hidroline', 'hidropoly': 'Hidropoly', 'compartments': 'Kvartaly',
-                             'area': 'Lesoseki', 'settlements': 'Nas punkt', 'area_line': 'Privyazka', 'roads': 'Roads',
+                             'area': 'Lesoseki', 'forest_cultures_area': 'Forest_cultures_areas', 'settlements': 'Nas punkt', 'area_line': 'Privyazka', 'roads': 'Roads',
                              'forestry_borders': 'Granitsy lesnich'}
         try:
             self.cf = config.Configurer('dbconnection')

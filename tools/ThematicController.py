@@ -86,7 +86,7 @@ class ThematicController:
             "Полнота": "Fullness_map",
             "Проектируемые хозмероприятия": "Economic_events_map",
             "Лесосеки: виды пользования": "UseType_map",
-            "Категории защитности": "Protection_categories_map",
+            "Категории лесов": "Protection_categories_map",
         }
         return stylesDbMapping.get(thematic)
 
@@ -244,7 +244,7 @@ class ChooseThematicMapDialog(QDialog):
         combo.addItems([
             '', 'Породы', 'Бонитет','ТУМ',
             'Запас', 'Полнота', 'Проектируемые хозмероприятия',
-            'Лесосеки: виды пользования', 'Категории защитности'
+            'Лесосеки: виды пользования', 'Категории лесов'
             ])
         combo.setCurrentIndex(0)
         vbox.addWidget(combo)
