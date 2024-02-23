@@ -1,4 +1,4 @@
-MODULE_ERROR = 'Ошибка модуля QgisLes'
+MODULE_ERROR = 'Ошибка ГИСлесхоз'
 CONFIG_FILE_ERROR = "Не удается корректно прочитать файл настроек.\n"
 DATABASE_CONNECTION_ERROR = "Невозможно установить подключение к базе данных.\n "
 DBMS_CONNECTION_ERROR = "Невозможно установить подключение к СУБД.\n "

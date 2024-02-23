@@ -203,7 +203,7 @@ class OtvodController:
         else:
             QMessageBox.information(
                 None,
-                "Ошибка модуля QGISLes",
+                "Ошибка модуля ГИСлесхоз",
                 "Отсутствует слой пикетов",
             )
 
@@ -642,7 +642,7 @@ class OtvodController:
         if not layer:
             QMessageBox.information(
                 None,
-                "Ошибка модуля QGISLes",
+                "Ошибка модуля ГИСлесхоз",
                 "Отсутствует лесосека. Постройте лесосеку, после чего будет возможность ее сохранить",
             )
 

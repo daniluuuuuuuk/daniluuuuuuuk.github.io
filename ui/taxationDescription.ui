@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>920</width>
-    <height>350</height>
+    <width>1461</width>
+    <height>810</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,143 +15,312 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QSplitter" name="splitter">
-     <property name="minimumSize">
-      <size>
-       <width>902</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="styleSheet">
-      <string notr="true"/>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="opaqueResize">
-      <bool>true</bool>
-     </property>
-     <widget class="QTableWidget" name="tableWidget">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="sizeIncrement">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="baseSize">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="gridStyle">
-       <enum>Qt::SolidLine</enum>
-      </property>
-      <attribute name="horizontalHeaderVisible">
-       <bool>true</bool>
-      </attribute>
-      <attribute name="horizontalHeaderDefaultSectionSize">
-       <number>100</number>
-      </attribute>
-      <attribute name="verticalHeaderVisible">
-       <bool>false</bool>
-      </attribute>
-      <attribute name="verticalHeaderDefaultSectionSize">
-       <number>30</number>
-      </attribute>
-      <attribute name="verticalHeaderMinimumSectionSize">
-       <number>23</number>
-      </attribute>
-      <column>
-       <property name="text">
-        <string>Параметр</string>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="11" column="1">
+      <widget class="QTableWidget" name="tableWidget_9">
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
+       <column>
+        <property name="text">
+         <string>Наименование</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+     <item row="11" column="2">
+      <widget class="QTableWidget" name="tableWidget_6">
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
+       <column>
+        <property name="text">
+         <string>Мероприятие</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Год</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+     <item row="9" column="1">
+      <widget class="QTableWidget" name="tableWidget_7">
+       <property name="enabled">
+        <bool>true</bool>
        </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Значение</string>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-      </column>
-     </widget>
-     <widget class="QTableWidget" name="tableWidget_2">
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="gridStyle">
-       <enum>Qt::SolidLine</enum>
-      </property>
-      <attribute name="verticalHeaderVisible">
-       <bool>false</bool>
-      </attribute>
-      <column>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
+       <column>
+        <property name="text">
+         <string>Год создания</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Расст. между рядами/в ряду</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Количество, тыс.шт/га</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Состояние</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="QLabel" name="label_5">
        <property name="text">
-        <string>  Ярус  </string>
+        <string>Подсочка</string>
        </property>
-      </column>
-      <column>
+      </widget>
+     </item>
+     <item row="10" column="2">
+      <widget class="QLabel" name="label_7">
        <property name="text">
-        <string>  Диаметр  </string>
+        <string>Выполненные ХМ</string>
        </property>
-      </column>
-      <column>
+      </widget>
+     </item>
+     <item row="4" column="1" colspan="2">
+      <widget class="QTableWidget" name="tableWidget">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
+       <column>
+        <property name="text">
+         <string>Состав</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Возраст</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Высота</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Кол-во шт./га</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Оценка</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+     <item row="6" column="2">
+      <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>  Происхождение  </string>
+        <string>Подлесок</string>
        </property>
-      </column>
-      <column>
+      </widget>
+     </item>
+     <item row="9" column="2">
+      <widget class="QTableWidget" name="tableWidget_8">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
+       <column>
+        <property name="text">
+         <string>Наименование</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+     <item row="7" column="1">
+      <widget class="QTableWidget" name="tableWidget_2">
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
+       <column>
+        <property name="text">
+         <string>Год начала</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Год окончания</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Состояние</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+     <item row="7" column="2">
+      <widget class="QTableWidget" name="tableWidget_5">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
+       <column>
+        <property name="text">
+         <string>Густота</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Породы</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+     <item row="10" column="1">
+      <widget class="QLabel" name="label_6">
        <property name="text">
-        <string>  Полнота  </string>
+        <string>Особенности выдела</string>
        </property>
-      </column>
-      <column>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="1" column="1" colspan="2">
+      <widget class="QTableWidget" name="tableWidget_4">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
+       <column>
+        <property name="text">
+         <string>Ярус</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Коэффициент</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Порода</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Возраст</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Высота</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Диаметр</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Полнота</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Запас</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLabel" name="label">
        <property name="text">
-        <string>  Высота  </string>
+        <string>Подрост</string>
        </property>
-      </column>
-      <column>
+      </widget>
+     </item>
+     <item row="1" column="0" rowspan="13">
+      <widget class="QTableWidget" name="tableWidget_3">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
+       <column>
+        <property name="text">
+         <string>Параметр</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Значение</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+     <item row="8" column="1">
+      <widget class="QLabel" name="label_3">
        <property name="text">
-        <string>  Возраст  </string>
+        <string>Лесные культуры</string>
        </property>
-      </column>
-      <column>
+      </widget>
+     </item>
+     <item row="8" column="2">
+      <widget class="QLabel" name="label_4">
        <property name="text">
-        <string>  Запас  </string>
+        <string>Растения и животные:</string>
        </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>  Формула состава  </string>
-       </property>
-      </column>
-     </widget>
-    </widget>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item alignment="Qt::AlignRight">
     <widget class="QPushButton" name="pushButton">
@@ -171,8 +340,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>679</x>
-     <y>356</y>
+     <x>1039</x>
+     <y>651</y>
     </hint>
     <hint type="destinationlabel">
      <x>362</x>

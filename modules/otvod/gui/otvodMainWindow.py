@@ -348,7 +348,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "ГисЛес для QGIS"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "ГИСлесхоз"))
         self.bindingPoint_Label.setText(_translate("MainWindow", "Точка привязки:"))
         self.x_Label.setText(_translate("MainWindow", "N:"))
         self.y_Label.setText(_translate("MainWindow", "E:"))

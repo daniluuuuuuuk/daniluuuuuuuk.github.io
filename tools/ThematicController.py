@@ -80,11 +80,12 @@ class ThematicController:
         stylesDbMapping = {
             '': 'Vydela',
             "Породы": "Species_map",
-            "Бонитет": "Bonitet_map",
+            "Бонитет": "New_bonitet_map",
             "ТУМ": "Forest_growing_cond_types_map",
             "Запас": "Layer_stocks",
             "Полнота": "Fullness_map",
-            "Проектируемые хозмероприятия": "Economic_events_map",
+            "Проектируемые хозяйственные мероприятия 1": "First_economic_events_map",
+            "Проектируемые хозяйственные мероприятия 2": "Second_economic_events_map",
             "Лесосеки: виды пользования": "UseType_map",
             "Категории лесов": "Protection_categories_map",
         }
@@ -243,7 +244,7 @@ class ChooseThematicMapDialog(QDialog):
         combo = QComboBox()
         combo.addItems([
             '', 'Породы', 'Бонитет','ТУМ',
-            'Запас', 'Полнота', 'Проектируемые хозмероприятия',
+            'Запас', 'Полнота', 'Проектируемые хозяйственные мероприятия 1', 'Проектируемые хозяйственные мероприятия 2',
             'Лесосеки: виды пользования', 'Категории лесов'
             ])
         combo.setCurrentIndex(0)

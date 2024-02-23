@@ -46,7 +46,7 @@ class LayoutManager:
                 features.append(feature)
             return features[0]['uid']
         except Exception as e:
-            QMessageBox.information(None, "Ошибка модуля QGis", str(e))
+            QMessageBox.information(None, "Ошибка модуля ГИСлесхоз", str(e))
 
     def getFeatureByUid(self):
         try:
@@ -56,7 +56,7 @@ class LayoutManager:
                     return feature
         except:
             QMessageBox.information(
-                None, "Ошибка модуля QGis", "Лесосека с таким идентификатором не найдена " + str(self.uid))
+                None, "Ошибка модуля ГИСлесхоз", "Лесосека с таким идентификатором не найдена " + str(self.uid))
 
     def removeLayoutIfExists(self, manager):
         layouts_list = manager.printLayouts()
@@ -273,7 +273,7 @@ class LayoutManager:
             return attrDict
         except Exception as e:
             QMessageBox.information(
-                None, "Ошибка модуля QGis", "Сначала сохраните лесосеку " + str(e))
+                None, "Ошибка модуля ГИСлесхоз", "Сначала сохраните лесосеку " + str(e))
 
     def prepareLegend(self, layout):
         mainlabel = QgsLayoutItemLabel(layout)

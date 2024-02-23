@@ -153,12 +153,12 @@ class QgsLes:
     def initGui(self):
 
         self.qgsLesToolbar = self.iface.mainWindow().findChild(
-            QToolBar, "QGIS Отвод лесосек"
+            QToolBar, "ГИСлесхоз"
         )
 
         if not self.qgsLesToolbar:
-            self.qgsLesToolbar = self.iface.addToolBar("QGIS Отвод лесосек")
-            self.qgsLesToolbar.setObjectName("QGIS Отвод лесосек")
+            self.qgsLesToolbar = self.iface.addToolBar("ГИСлесхоз")
+            self.qgsLesToolbar.setObjectName("ГИСлесхоз")
 
         if not self.runnable:
             # mes = self.iface.messageBar().createMessage(
@@ -271,8 +271,20 @@ class QgsLes:
             self.initFilter()
     
     def thermalAnomalyClicked(self):
+        if not PostgisDB.PostGisDB().IsDataBaseActual():
+            self.showOldVersionWarningBox()
+            return False
         self.dlg = ThermalAnomalyDialog(self.iface)
         self.dlg.show()
+
+    def showOldVersionWarningBox(self):
+        msgBox = QtWidgets.QMessageBox()
+        msgBox.setIcon(QtWidgets.QMessageBox.Information)
+        msgBox.setText("<b>Ваша база данных устарела</b> и не подходит для текущей версии модуля.\nДля текущей базы данных остается возможность <b>экспорта/импорта</b> лесосек.\nДля получения <b>акутальной базы данных</b> обратитесь в техническую поддержку.")
+        msgBox.setWindowTitle("Предупреждение")
+        msgBox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+        msgBox.exec()
+        
 
     def filterAreaButtonClicked(self, checked):
         if not QgsProject.instance().mapLayersByName("Лесосеки"):
@@ -280,6 +292,9 @@ class QgsLes:
                 None, "Ошибка", "Отсутствует слой лесосек."
             )
             return
+        if not PostgisDB.PostGisDB().IsDataBaseActual():
+            self.showOldVersionWarningBox()
+            return False
         if not checked and self.dockWidget:
             self.iface.removeDockWidget(self.dockWidget)
         else:
@@ -292,6 +307,9 @@ class QgsLes:
             self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockWidget)
 
     def thematicClicked(self):
+        if not PostgisDB.PostGisDB().IsDataBaseActual():
+            self.showOldVersionWarningBox()
+            return False
         def rerenderStyle():
             thMap = self.dialog.thematicCombobox.currentText()
             thMapCtrlr = ThematicController(self.dialog, thMap)
@@ -304,6 +322,9 @@ class QgsLes:
         #     thMapCtrlr = ThematicController(thMap)
 
     def controlAreaClicked(self):
+        if not PostgisDB.PostGisDB().IsDataBaseActual():
+            self.showOldVersionWarningBox()
+            return False
         def getResult(feature):
             if feature:
                 # zoomTool = QgsMapToolZoom(self.canvas, False)
@@ -335,6 +356,9 @@ class QgsLes:
             del self.dockWidget
 
     def taxationButtonClicked(self):
+        if not PostgisDB.PostGisDB().IsDataBaseActual():
+            self.showOldVersionWarningBox()
+            return False
         def getResult(feature):
             def showTaxationDetails(details):
                 tdd = TaxationDescriptionDialog(tax_data=details)
@@ -354,6 +378,9 @@ class QgsLes:
         self.pkr.signal.connect(getResult)
 
     def otvodButtonClicked(self):
+        if not PostgisDB.PostGisDB().IsDataBaseActual():
+            self.showOldVersionWarningBox()
+            return False
         def getMapRect(rct):
             layer_list = QgsProject.instance().layerTreeRoot().children()
             layers = [

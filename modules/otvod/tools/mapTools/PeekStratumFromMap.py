@@ -3,7 +3,7 @@ from PyQt5.QtCore import pyqtSignal, QObject
 from qgis.core import QgsProject
 from ...tools import GeoOperations
 from qgis.core import QgsRectangle
-from qgis.PyQt.QtWidgets import QDialog, QVBoxLayout, QGroupBox, QRadioButton, QDialogButtonBox, QDialog, QButtonGroup
+from qgis.PyQt.QtWidgets import QDialog, QVBoxLayout, QGroupBox, QRadioButton, QDialogButtonBox, QDialog, QButtonGroup, QMessageBox
 from PyQt5 import QtCore
 # from PyQt5.QtWidgets import (QApplication, QCheckBox, QGridLayout, QGroupBox, QComboBox,
 #         QMenu, QPushButton, QRadioButton, QVBoxLayout,
@@ -32,18 +32,22 @@ class PeekStratumFromMap(QgsMapToolEmitPoint, QObject):
         self.canvas.setCurrentLayer(layer)
         # self.canvas.zoomToSelected()
         features = list(layer.getSelectedFeatures())
-        if len(features) > 1:
-
-            self.dialog = MultipleAreaChoiceDialog(features)
-            if self.dialog.exec() == QDialog.Accepted:
-                self.signal.emit(self.dialog.feature)
-            
-        elif len(features) == 1:
-            self.signal.emit(list(layer.getSelectedFeatures())[0])
-        else:
-            self.signal.emit(None)
-        layer.removeSelection()
-
+        try:
+            if len(features) > 1:
+                
+                self.dialog = MultipleAreaChoiceDialog(features)
+                if self.dialog.exec() == QDialog.Accepted:
+                    self.signal.emit(self.dialog.feature)
+                
+            elif len(features) == 1:
+                self.signal.emit(list(layer.getSelectedFeatures())[0])
+            else:
+                self.signal.emit(None)
+            layer.removeSelection()
+        except KeyError:
+            QMessageBox.warning(
+                    None, "Ошибка", "Не выбрана лесосека."
+                )
     def deactivate(self):
         pass
 

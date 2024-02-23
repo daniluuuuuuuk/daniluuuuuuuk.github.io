@@ -214,7 +214,7 @@ class CanvasWidget(QgsMapCanvas):
             layer = QgsProject.instance().mapLayersByName("Пикеты")[0]
         except Exception as e:
             QMessageBox.information(
-                None, "Ошибка модуля QGISLes", "Отсутствуют угловые точки"
+                None, "Ошибка модуля ГИСлесхоз", "Отсутствуют угловые точки"
             )
             return
 
@@ -228,7 +228,7 @@ class CanvasWidget(QgsMapCanvas):
             bindingPoint = GeoOperations.convertToZone35(QgsPointXY(e, n))
         except Exception as e:
             QMessageBox.information(
-                None, "Ошибка модуля QGISLes", "Некорректная точка привязки"
+                None, "Ошибка модуля ГИСлесхоз", "Некорректная точка привязки"
             )
             return
 
@@ -239,7 +239,7 @@ class CanvasWidget(QgsMapCanvas):
         if not self.isAreaValid(layer):
             QMessageBox.information(
                 None,
-                "Ошибка модуля QGISLes",
+                "Ошибка модуля ГИСлесхоз",
                 "Для построения лесосеки необходимо минимум 3 узла",
             )
             return

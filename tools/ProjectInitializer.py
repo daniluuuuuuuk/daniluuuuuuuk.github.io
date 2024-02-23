@@ -19,10 +19,10 @@ class QgsProjectInitializer:
         self.setCrs()
         self.settings = None
         self.layerDbNames = {'subcompartments': 'Выдела', 'hidroline': 'Гидрография линейная', 'hidropoly': 'Гидрография площадная', 'compartments': 'Кварталы',
-                             'area': 'Лесосеки', 'forest_cultures_area': 'Лесные культуры', 'settlements': 'Населенные пункты', 'area_line': 'Линия привязки', 'roads': 'Дороги', 
+                             'area': 'Лесосеки', 'settlements': 'Населенные пункты', 'area_line': 'Линия привязки', 'roads': 'Дороги', 
                              'forestry_borders': 'Границы лесничеств'}
         self.layerStyleNames = {'subcompartments': 'Vydela', 'hidroline': 'Hidroline', 'hidropoly': 'Hidropoly', 'compartments': 'Kvartaly',
-                             'area': 'Lesoseki', 'forest_cultures_area': 'Forest_cultures_areas', 'settlements': 'Nas punkt', 'area_line': 'Privyazka', 'roads': 'Roads',
+                             'area': 'Lesoseki', 'settlements': 'Nas punkt', 'area_line': 'Privyazka', 'roads': 'Roads',
                              'forestry_borders': 'Granitsy lesnich'}
         try:
             self.cf = config.Configurer('dbconnection')
@@ -37,6 +37,7 @@ class QgsProjectInitializer:
         for action in qgsLesToolbar.actions():
             if not action.text():
                 qgsLesToolbar.removeAction(action)
+
 
     def taskFinished(self):
         pass
@@ -96,6 +97,11 @@ class LoadLayersFromDbTask(QgsTask):
         styledoc.setContent(styleqml)
         vlayer.importNamedStyle(styledoc)
         self.iface.layerTreeView().refreshLayerSymbology(vlayer.id())
+
+    def checkIfDatabaseIsActual(self):
+        for tablename in self.layerDbNames:
+            if tablename == 'agricultural_lands':
+                return True
 
     def loadSatelliteImage(self):
         urlWithParams = 'type=xyz&zmin=10&zmax=19&url=https://mt1.google.com/vt/lyrs%3Ds%26x%3D{x}%26y%3D{y}%26z%3D{z}'

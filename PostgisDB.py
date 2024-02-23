@@ -69,6 +69,14 @@ class PostGisDB:
         except:
             return False
 
+    def IsDataBaseActual(self):
+        try:
+            cur = self.setConnection().cursor()
+            cur.execute("SELECT EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename  = 'damaged_plants')")
+            return cur.fetchone()[0]
+        except:
+            return False
+
     def __del__(self):
         if self.connection:
             self.connection.close()
