@@ -73,7 +73,8 @@ class PostGisDB:
         try:
             cur = self.setConnection().cursor()
             cur.execute("SELECT EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename  = 'damaged_plants')")
-            return cur.fetchone()[0]
+            if cur.fetchone()[0]:
+                return True
         except:
             return False
 

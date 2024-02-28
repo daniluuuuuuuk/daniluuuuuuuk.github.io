@@ -71,7 +71,7 @@ class ForestEnterprise(QtCore.QObject):
             cf = config.Configurer("enterprise")
             settings = cf.readConfigs()
             self._number = settings.get("num_lhz")
-            self.lhCode = str(int(float(settings.get("code_lh"))))
+            # self.lhCode = str(int(float(settings.get("code_lh"))))
         except Exception as e:
             self._number = -1
             self._name = ""
@@ -105,14 +105,11 @@ class ForestEnterprise(QtCore.QObject):
             [
                 """select name_organization 
                 from "dictionary".organization
-                where code_organization = '{}'""".format(
-                    str(self.lhCode)
-                ),
+                where code_organization = (select distinct cast(code_lh as int) from "public".subcompartments)""",
+            
                 """select name_organization from (select id_organization from "dictionary".organization
-                where code_organization = '{}') typed
-                join "dictionary".organization org on org.parent_id_organization = typed.id_organization ORDER BY code_organization ASC""".format(
-                    self.lhCode
-                ),
+                where code_organization = (select distinct cast(code_lh as int) from "public".subcompartments)) typed
+                join "dictionary".organization org on org.parent_id_organization = typed.id_organization ORDER BY code_organization ASC"""
             ]
         )
         self.worker.moveToThread(self.thread)

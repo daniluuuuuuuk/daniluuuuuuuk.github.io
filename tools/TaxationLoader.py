@@ -19,7 +19,7 @@ class Worker(QtCore.QObject):
         self.feature = feature
         self.identity = int(self.generateIdentity(feature))
         self.forestcode = int(feature["forestcode"])
-        self.lhCode = self.getLhCode()
+        self.lhCode = str(int(float(feature["code_lh"])))
         self.loader = Loader("Load Taxation Info")
 
     def getLhCode(self):
