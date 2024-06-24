@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <plugins> 
    <pyqgis_plugin name="gisleshoz" version="1.3.0">
          <qgis_minimum_version>3.0.0</qgis_minimum_version>
