@@ -1,7 +1,7 @@
 <plugins> 
    <pyqgis_plugin name="ГИСлесхоз" version="1.3.0">
          <qgis_minimum_version>3.0.0</qgis_minimum_version>
-<!--          <file_name>gisleshoz.1.3.0</file_name> -->
+         <file_name>gisleshoz.1.3.0</file_name>
          <download_url>https:/daniluuuuuuuk.github.io/gisleshoz.1.3.0.zip</download_url>
    </pyqgis_plugin>
 </plugins>
